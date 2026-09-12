@@ -1,0 +1,216 @@
+\chapter{ชุดพรอมพต์วิศวกรรม 5 ระดับสำหรับการพัฒนา}
+\label{chap:ch04}
+
+\section*{แผนบริหารการสอนประจำบทที่ 4}
+\addcontentsline{toc}{section}{แผนบริหารการสอนประจำบทที่ 4}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={1. หัวข้อเนื้อหาประจำบท},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item กรอบการออกแบบชุดคำสั่งตามหลักการ CLEAR Prompting Framework
+    \item การออกแบบสถาปัตยกรรมระดับระบบและโครงสร้างโปรเจกต์ (System Prompting)
+    \item การสร้างตัวถอดรหัสโปรโตคอลสื่อสารอุตสาหกรรมและตรวจสอบ CRC-16
+    \item การเปลี่ยนแบบจำลองคณิตศาสตร์ฟิสิกส์สู่โค้ดโครงข่ายประสาทเทียม
+    \item เทคนิค Prompt Chaining และการแก้ไขข้อผิดพลาดในการพัฒนาแอปพลิเคชัน
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={2. วัตถุประสงค์เชิงพฤติกรรม},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+เมื่อศึกษาบทเรียนนี้จบแล้ว ผู้เรียนสามารถ
+\begin{enumerate}
+    \item อธิบายองค์ประกอบ 5 ประการของ CLEAR Prompting ได้อย่างถูกต้อง
+    \item ออกแบบชุดคำสั่งสำหรับสั่งการโมเดลปัญญาประดิษฐ์เพื่อสร้างโค้ด Flutter ได้อย่างแม่นยำ
+    \item ประยุกต์ใช้เทคนิค Few-Shot Prompting ในการเขียนชุดทดสอบ Unit Test ได้อย่างสมบูรณ์
+    \item วินิจฉัยและแก้ไขข้อผิดพลาดในการรันแอปพลิเคชันผ่านกระบวนการ Prompt Chaining ได้อย่างเป็นระบบ
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={3. วิธีสอนและกิจกรรมการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การสาธิตการป้อนพรอมพต์วิศวกรรมและการวิเคราะห์ผลตอบกลับของโมเดล AI
+    \item กิจกรรมฝึกเขียนพรอมพต์เพื่อแก้ปัญหาโจทย์การตรวจวัดเซนเซอร์จริงแบบรายบุคคล
+    \item การทดลองรันโค้ดที่สร้างขึ้นบนโปรแกรมจำลองและแก้ไขข้อผิดพลาดร่วมกันในชั้นเรียน
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={4. สื่อการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item เอกสารคู่มือชุดคำสั่งพรอมพต์วิศวกรรมและเทมเพลตมาตรฐาน
+    \item ระบบผู้ช่วยปัญญาประดิษฐ์สำหรับการเขียนโปรแกรม (AI Coding Assistant)
+    \item สภาพแวดล้อมการพัฒนา Flutter SDK และ Visual Studio Code
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={5. การวัดและประเมินผล},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การประเมินโครงสร้างและความสมบูรณ์ของชุดคำสั่งพรอมพต์ที่ผู้เรียนออกแบบ
+    \item การประเมินผลการทำงานจริงของโค้ดโปรแกรมที่สร้างจากชุดคำสั่ง
+    \item การทดสอบความเข้าใจเกี่ยวกับกลวิธี CLEAR Prompting
+\end{enumerate}
+\end{tcolorbox}
+
+\clearpage
+
+% ==============================================================================
+% ภาพประกอบเกริ่นนำประจำบทที่ 4 (Introductory Infographic)
+% ==============================================================================
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    box/.style={rectangle, rounded corners=2mm, draw=rbruNavy, line width=1.0pt, fill=white, drop shadow={shadow xshift=1pt, shadow yshift=-1.5pt, opacity=0.15}, align=center, inner sep=5pt},
+    header/.style={rectangle, rounded corners=1.5mm, draw=rbruNavy, fill=rbruNavy, text=white, font=\bfseries\scriptsize, align=center, inner sep=3.5pt},
+    arrow/.style={-{Stealth[scale=1.0]}, line width=1.1pt, draw=rbruBlue}
+]
+    % วงจร CLEAR 5 ขั้นตอน
+    \node[box, fill=cyan!12, minimum width=2.4cm] (c) {\textbf{C - Context}\\[2pt]\scriptsize กำหนดบทบาท\\และบริบทระบบ};
+    \node[box, fill=rbruGold!15, minimum width=2.4cm, right=0.5cm of c] (l) {\textbf{L - Logic}\\[2pt]\scriptsize ฝังกฎฟิสิกส์\\และสมการหลัก};
+    \node[box, fill=green!12, minimum width=2.4cm, right=0.5cm of l] (e) {\textbf{E - Example}\\[2pt]\scriptsize ตัวอย่างเฟรม\\และข้อมูลเข้าออก};
+    \node[box, fill=orange!15, minimum width=2.4cm, right=0.5cm of e] (a) {\textbf{A - Action}\\[2pt]\scriptsize สั่งการสร้างโค้ด\\ตามลำดับขั้น};
+    \node[box, fill=purple!12, minimum width=2.4cm, right=0.5cm of a] (r) {\textbf{R - Result}\\[2pt]\scriptsize โค้ด Dart/Flutter\\พร้อมชุดทดสอบ};
+
+    \draw[arrow] (c) -- (l);
+    \draw[arrow] (l) -- (e);
+    \draw[arrow] (e) -- (a);
+    \draw[arrow] (a) -- (r);
+
+    % ลำดับขั้น 5 ระดับด้านล่าง
+    \node[rectangle, rounded corners=2mm, draw=rbruNavy!70, fill=rbruNavy!6, line width=0.8pt, minimum width=14.5cm, minimum height=1.0cm, below=0.8cm of e, align=center] (ladder) {
+        \small\textbf{ลำดับขั้นการพัฒนา 5 ระดับ (5-Level Progressive Engineering Pipeline):}\\
+        \footnotesize
+        1. สถาปัตยกรรมระบบ $\rightarrow$ 2. เฟรม Modbus \& CRC-16 $\rightarrow$ 3. โมเดล PINN สองขั้นตอน $\rightarrow$ 4. หน้าจอแดชบอร์ด $\rightarrow$ 5. ไดรเวอร์ USB-OTG
+    };
+    \draw[arrow, dashed] (e.south) -- (ladder.north);
+\end{tikzpicture}
+\caption{ผังกรอบแนวคิดวิศวกรรมพรอมพต์แบบ CLEAR และบันไดการพัฒนา 5 ระดับสำหรับการสร้างแอปพลิเคชันวิเคราะห์ดิน}
+\label{fig:ch04_prompt_pipeline}
+\end{figure}
+
+\section{กรอบการออกแบบชุดคำสั่งตามหลักการ CLEAR Prompting}
+
+การใช้ปัญญาประดิษฐ์เชิงกำเนิดในการพัฒนาซอฟต์แวร์ระดับระบบและการเชื่อมต่อฮาร์ดแวร์จริง จำเป็นต้องอาศัยชุดคำสั่งที่มีความรัดกุม แม่นยำ และมีบริบทที่ชัดเจน กรอบการทำงาน \textbf{CLEAR Prompting Framework} ประกอบด้วย 5 มิติหลัก ได้แก่
+\begin{enumerate}
+    \item \textbf{Context (บริบท)} ระบุบทบาท หน้าที่ และสภาพแวดล้อมทางเทคโนโลยี เช่น บทบาทวิศวกรสมองกลฝังตัว
+    \item \textbf{Logic (ตรรกะและหลักการ)} กำหนดสมการ กฎทางฟิสิกส์ หรือมาตรฐานที่ต้องปฏิบัติตาม
+    \item \textbf{Example (ตัวอย่างประกอบ)} ให้ตัวอย่างรูปแบบข้อมูลเข้า (Input) และข้อมูลออก (Output) ที่ต้องการ
+    \item \textbf{Action (การกระทำที่ชัดเจน)} สั่งการสิ่งที่ต้องการให้ทำเป็นข้อๆ อย่างชัดเจน
+    \item \textbf{Result (รูปแบบผลลัพธ์)} กำหนดโครงสร้างผลลัพธ์ เช่น ซอร์สโค้ดภาษา Dart พร้อมชุดทดสอบ
+\end{enumerate}
+
+\section{พรอมพต์ระดับที่ 1 การออกแบบสถาปัตยกรรมและโครงสร้างโฟลเดอร์}
+
+\begin{promptbox}
+\begin{lstlisting}
+คุณคือสถาปนิกซอฟต์แวร์ระบบสมองกลฝังตัวและการเกษตรแม่นยำ (AgriTech Software Architect)
+จงออกแบบโครงสร้างโปรเจกต์แอปพลิเคชันมือถือ Flutter สำหรับอ่านค่าเซนเซอร์ดิน 8-in-1 ผ่านพอร์ต USB Type-C OTG
+โดยมีข้อกำหนดดังต่อไปนี้
+1. จัดโครงสร้างแบบ Clean Architecture แบ่งเป็น core, data, domain, ui (MVVM)
+2. กำหนดเนื้อหาไฟล์ pubspec.yaml พร้อม dependencies ที่จำเป็น
+3. กำหนดเนื้อหาไฟล์ AndroidManifest.xml พร้อมสิทธิ์ android.hardware.usb.host และการเข้าถึง Storage
+4. กำหนดไฟล์ device_filter.xml รองรับ Vendor ID ของชิปแปลง USB ยอดนิยม ได้แก่ CH340, CP2102, FTDI, PL2303
+5. ออกแบบให้มีโหมดจำลองข้อมูล (Demo Simulator) เมื่อยังไม่ได้เสียบอุปกรณ์จริง
+\end{lstlisting}
+\end{promptbox}
+
+\section{พรอมพต์ระดับที่ 2 การเขียนคลาสถอดรหัส Modbus RTU}
+
+\begin{promptbox}
+\begin{lstlisting}
+คุณคือวิศวกรระบบสื่อสารอุตสาหกรรม (Industrial Protocols Engineer)
+จงเขียนคลาสภาษา Dart ชื่อ ModbusParser สำหรับถอดรหัสข้อมูลจากหัววัดดิน 8-in-1 มีข้อกำหนดดังนี้
+1. ฟังก์ชัน calculateCRC16 คำนวณแบบบิตต่อบิตตามมาตรฐาน Modbus RTU (Polynomial 0xA001, ค่าเริ่มต้น 0xFFFF)
+2. ฟังก์ชัน buildReadCommand สร้างชุดคำสั่ง 8 ไบต์ ร้องขออ่าน Holding Register 8 ตัวแรก
+3. ฟังก์ชัน parse8In1Response ตรวจสอบความยาวเฟรม 21 ไบต์ ตรวจสอบ CRC-16 และแปลงข้อมูล 16-bit Big-Endian เป็นตัวเลขทศนิยมจริง
+4. เขียน Unit Test ตรวจสอบความถูกต้องของฟังก์ชันคำนวณ CRC-16
+\end{lstlisting}
+\end{promptbox}
+
+\section{พรอมพต์ระดับที่ 3 การพัฒนาโมเดล Deep Learning PINN}
+
+\begin{promptbox}
+\begin{lstlisting}
+คุณคือนักวิทยาศาสตร์ข้อมูลฟิสิกส์เกษตรดิจิทัล (Agriphysics AI Data Scientist)
+จงพัฒนาคลาสภาษา Dart ชื่อ DeepLearningCalibrator สำหรับรันโมเดล Physics-Informed Neural Network ชดเชยเซนเซอร์ดินบนสมาร์ตโฟน
+โดยมีเงื่อนไขสำคัญดังนี้
+1. ไม่พึ่งพาไลบรารีภายนอก (Pure Dart Forward-Pass Inference) เพื่อให้ทำงานได้เร็วกว่า 60 FPS
+2. นำทฤษฎีฟิสิกส์มาใช้ชดเชย ได้แก่ Dielectric Permittivity Drift, Arrhenius EC Normalization, Nernstian Slope Drift
+3. คืนค่าเป็น Map ประกอบด้วยค่าดิบ (Raw), ค่าที่ชดเชยแล้ว (Calibrated) และค่าผลต่าง (Delta)
+\end{lstlisting}
+\end{promptbox}
+
+\section{พรอมพต์ระดับที่ 4 การพัฒนา UI แดชบอร์ดแบบ Responsive}
+
+\begin{promptbox}
+\begin{lstlisting}
+คุณคือนักออกแบบ Flutter UI/UX ขั้นสูง (Senior Flutter UI Engineer)
+จงออกแบบหน้าจอแดชบอร์ดหลักของแอปพลิเคชัน JC AI Detector มีข้อกำหนดดังนี้
+1. จัดวางการ์ด 8 พารามิเตอร์แบบ Grid 2 คอลัมน์บนมือถือ และปรับเป็น 4 คอลัมน์อัตโนมัติบนแท็บเล็ตหรือจอแนวนอน
+2. รหัสสีของการ์ด 8 ตัวตรงตามต้นแบบอุตสาหกรรม
+3. ป้องกันปัญหา Layout Overflow อย่างเด็ดขาดด้วย FittedBox, Expanded และ ConstrainedBox
+4. มีปุ่มกดบันทึกผลการวัดเป็นไฟล์ Excel (*.xls) และ CSV พร้อมปุ่มแชร์ไฟล์ออกทันที
+5. เมื่อแตะที่การ์ดใดๆ ให้เปิด Bottom Sheet แสดงผลการวินิจฉัยดินและคำแนะนำการปรับปรุงดิน
+\end{lstlisting}
+\end{promptbox}
+
+\section{พรอมพต์ระดับที่ 5 การเชื่อมต่อพอร์ต USB Serial บนแอนดรอยด์}
+
+\begin{promptbox}
+\begin{lstlisting}
+คุณคือนักพัฒนาระบบฝังตัวบนแอนดรอยด์ (Android Low-Level Embedded Developer)
+จงเขียนคลาส UsbSensorService ภาษา Dart เพื่อจัดการการเชื่อมต่อ USB OTG Serial กับหัววัดดิน 8-in-1
+1. ตรวจจับการเสียบและถอดสาย USB OTG อัตโนมัติ
+2. ขออนุญาตสิทธิ์การเข้าถึงอุปกรณ์ผ่านระบบ Android USB Manager
+3. ตั้งค่าพอร์ตสื่อสาร Baud rate 4800, 8 Data bits, 1 Stop bit, No parity
+4. ตั้ง Background Timer ส่งคำสั่งสอบถามเฟรม Modbus ทุก 1.5 วินาที
+5. สลับเข้าสู่โหมดจำลอง (Simulator Mode) อัตโนมัติเมื่อเกิดข้อผิดพลาดในการเชื่อมต่อ
+\end{lstlisting}
+\end{promptbox}
+
+\section{สรุปสาระสำคัญประจำบทที่ 4}
+
+วิศวกรรมพรอมพต์ (Prompt Engineering) มิใช่เพียงการพิมพ์คำถามทั่วไป แต่คือการกำหนดกรอบความคิดทางวิศวกรรมซอฟต์แวร์ให้แก่แบบจำลองภาษาขนาดใหญ่ โดยสรุปสาระสำคัญได้ดังนี้
+\begin{enumerate}
+    \item \textbf{กรอบการทำงาน CLEAR:} การระบุ Context, Logic, Example, Action และ Result อย่างครบถ้วน ช่วยตัดปัญหาการสร้างโค้ดที่ผิดพลาด (Hallucination) และทำให้ AI สร้างโค้ดที่ถูกต้องตามหลักฟิสิกส์และมาตรฐานความปลอดภัย
+    \item \textbf{การพัฒนาแบบก้าวหน้า 5 ระดับ:} การแบ่งการสั่งการออกเป็น 5 ชั้นโมดูลาร์ (สถาปัตยกรรม $\rightarrow$ การสื่อสารข้อมูล $\rightarrow$ โมเดลคณิตศาสตร์ $\rightarrow$ ส่วนต่อประสานกราฟิก $\rightarrow$ ไดรเวอร์ฮาร์ดแวร์) ช่วยให้ควบคุมคุณภาพของซอฟต์แวร์ได้อย่างรัดกุม
+    \item \textbf{การทดสอบกำกับในทุกขั้นตอน:} ทุกพรอมพต์ต้องระบุให้ AI สร้างชุดทดสอบหน่วย (Unit Tests) ประกอบมาด้วยเสมอ เพื่อให้สามารถตรวจสอบความถูกต้องของฟังก์ชันได้ทันที
+\end{enumerate}
+
+ในบทถัดไป (บทที่ 5) จะนำเสนอซอร์สโค้ดฉบับสมบูรณ์ที่สร้างขึ้นจากชุดพรอมพต์ทั้ง 5 ระดับ พร้อมคำอธิบายการทำงานในแต่ละโมดูลอย่างละเอียด
+
+\section*{คำถามทบทวนท้ายบทที่ 4}
+\addcontentsline{toc}{section}{คำถามทบทวนท้ายบทที่ 4}
+
+\begin{enumerate}
+    \item จงอธิบายบทบาทของขั้นตอน Context และ Logic ในกรอบการทำงาน CLEAR Prompting
+    \item หากต้องการให้ปัญญาประดิษฐ์สร้างฟังก์ชันการถอดรหัสสัญญาณที่มีโครงสร้างข้อมูลซับซ้อน ควรใช้เทคนิค Few-Shot Prompting อย่างไร
+    \item จงวิเคราะห์สาเหตุที่การสั่งการโมเดล AI โดยไม่มีการระบุกรอบสถาปัตยกรรม (Architecture Constraints) มักนำไปสู่ปัญหาโค้ดที่มีความซ้ำซ้อนและบำรุงรักษายาก
+    \item จงออกแบบชุดคำสั่งสำหรับสั่งการโมเดล AI เพื่อให้ช่วยสร้างฟังก์ชันคำนวณการปรับปรุงความเป็นกรด-ด่างของดินด้วยปูนโดโลไมต์
+\end{enumerate}

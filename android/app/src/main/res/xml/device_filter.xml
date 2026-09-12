@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- CH340 / CH341 (Qinheng) - Widely used in Chinese Soil RS485 to USB-C probes -->
+    <usb-device vendor-id="6790" /> <!-- 0x1A86 -->
+    <!-- CP2101 / CP2102 / CP2104 (Silicon Labs) -->
+    <usb-device vendor-id="4292" /> <!-- 0x10C4 -->
+    <!-- FTDI FT232R / FT232H / FT2232 -->
+    <usb-device vendor-id="1027" /> <!-- 0x0403 -->
+    <!-- Prolific PL2303 -->
+    <usb-device vendor-id="1659" /> <!-- 0x067B -->
+    <!-- CDC ACM Virtual COM Port -->
+    <usb-device vendor-id="9025" /> <!-- 0x2341 (Arduino) -->
+    <usb-device vendor-id="1204" /> <!-- 0x04B4 (Cypress) -->
+    <usb-device vendor-id="1155" /> <!-- 0x0483 (STMicroelectronics) -->
+    <usb-device vendor-id="12346" /> <!-- 0x303A (Espressif ESP32-S2/S3 USB OTG) -->
+</resources>

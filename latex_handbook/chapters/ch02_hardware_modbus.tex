@@ -1,0 +1,262 @@
+\chapter{การเชื่อมต่อฮาร์ดแวร์และโปรโตคอล Modbus RTU}
+\label{chap:ch02}
+
+\section*{แผนบริหารการสอนประจำบทที่ 2}
+\addcontentsline{toc}{section}{แผนบริหารการสอนประจำบทที่ 2}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={1. หัวข้อเนื้อหาประจำบท},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item ฟิสิกส์ของการส่งสัญญาณเชิงผลต่างและคุณลักษณะของสายส่ง RS485
+    \item สถาปัตยกรรมหัววัดดิน 8-in-1 อุตสาหกรรม และการจ่ายพลังงานผ่าน USB OTG
+    \item โครงสร้างเฟรมและการกำหนดจังหวะเวลาของโปรโตคอล Modbus RTU
+    \item ทฤษฎีการตรวจสอบความสมบูรณ์ของข้อมูลด้วยผลรวมวงรอบ 16 บิต (CRC-16 Checksum)
+    \item การเข้าสายสัญญาณและผังรีจิสเตอร์ข้อมูลมาตรฐาน
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={2. วัตถุประสงค์เชิงพฤติกรรม},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+เมื่อศึกษาบทเรียนนี้จบแล้ว ผู้เรียนสามารถ
+\begin{enumerate}
+    \item อธิบายหลักการหักล้างสัญญาณรบกวนร่วม (Common-Mode Noise Rejection) ของสายส่ง RS485 ได้อย่างถูกต้อง
+    \item ต่อวงจรสายสัญญาณระหว่างหัววัดดิน 8-in-1 กับสายแปลง USB-RS485 Type-C ได้อย่างแม่นยำ
+    \item ถอดรหัสโครงสร้างเฟรมคำสั่งและเฟรมข้อมูลตอบกลับของ Modbus RTU ได้อย่างสมบูรณ์
+    \item เขียนและอธิบายอัลกอริทึมการคำนวณรหัสตรวจสอบความถูกต้อง CRC-16 ได้อย่างถูกต้อง
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={3. วิธีสอนและกิจกรรมการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การบรรยายเชิงทฤษฎีควบคู่กับการใช้เครื่องออสซิลโลสโคปแสดงรูปคลื่นสัญญาณเชิงผลต่าง
+    \item การสาธิตการส่งเฟรมคำสั่ง Modbus ผ่านโปรแกรม Serial Monitor
+    \item กิจกรรมฝึกปฏิบัติการต่อสายฮาร์ดแวร์จริงและทดสอบการสื่อสารบนสมาร์ตโฟน
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={4. สื่อการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item เอกสารคำสอนวิชาการเชื่อมต่อระบบสมองกลฝังตัวทางการเกษตร
+    \item ชุดหัววัดดิน 8-in-1 RS485 และสายแปลง USB Type-C OTG
+    \item เครื่องออสซิลโลสโคปดิจิทัล 2 ช่องสัญญาณสำหรับการตรวจวัดรูปคลื่น RS485
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={5. การวัดและประเมินผล},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การประเมินผลการคำนวณบิต CRC-16 ในแบบฝึกหัด
+    \item การประเมินทักษะการต่อสายสัญญาณและการแก้ปัญหาข้อผิดพลาดการเชื่อมต่อ
+    \item การสังเกตความละเอียดรอบคอบและมาตรฐานความปลอดภัยทางไฟฟ้า
+\end{enumerate}
+\end{tcolorbox}
+
+\clearpage
+
+% ==============================================================================
+% ภาพประกอบเกริ่นนำประจำบทที่ 2 (Introductory Infographic)
+% ==============================================================================
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    box/.style={rectangle, rounded corners=2mm, draw=rbruNavy, line width=1.0pt, fill=white, drop shadow={shadow xshift=1pt, shadow yshift=-1.5pt, opacity=0.15}, align=center, inner sep=6pt},
+    header/.style={rectangle, rounded corners=1.5mm, draw=rbruNavy, fill=rbruNavy, text=white, font=\bfseries\small, align=center, inner sep=4pt},
+    wire/.style={line width=1.4pt},
+    arrow/.style={-{Stealth[scale=1.1]}, line width=1.2pt, draw=rbruBlue}
+]
+    % โหนดที่ 1: สมาร์ตโฟน
+    \node[box, fill=cyan!10, minimum width=3.2cm] (phone) {
+        \textbf{สมาร์ตโฟนแอนดรอยด์}\\[2pt]
+        \footnotesize
+        $\bullet$ USB Host Mode\\
+        $\bullet$ USB OTG Power\\
+        $\bullet$ JC AI Detector App
+    };
+    \node[header, above=2pt of phone] {1. ฝั่งควบคุมหลัก};
+
+    % โหนดที่ 2: ชิปแปลงสัญญาณ USB-RS485
+    \node[box, fill=rbruGold!10, minimum width=3.4cm, right=1.0cm of phone] (adapter) {
+        \textbf{สายแปลง USB-RS485}\\[2pt]
+        \footnotesize
+        $\bullet$ CH340 / FTDI Bridge\\
+        $\bullet$ MAX485 Transceiver\\
+        $\bullet$ DE/RE Auto Direction
+    };
+    \node[header, fill=rbruGold!90!black, above=2pt of adapter] {2. การแปลงสัญญาณ};
+
+    % โหนดที่ 3: สายส่งเชิงผลต่าง
+    \node[box, fill=rbruNavy!10, minimum width=3.2cm, right=1.0cm of adapter] (bus) {
+        \textbf{สายส่งคู่ตีเกลียว}\\[2pt]
+        \footnotesize
+        $\bullet$ สาย A+ (Non-inverting)\\
+        $\bullet$ สาย B- (Inverting)\\
+        $\bullet$ $Z_0 = 120\,\Omega$
+    };
+    \node[header, fill=rbruNavy, above=2pt of bus] {3. สายส่งเชิงผลต่าง};
+
+    % โหนดที่ 4: หัววัดดินจริง
+    \node[box, fill=green!10, minimum width=3.2cm, right=1.0cm of bus] (probe) {
+        \textbf{หัววัดดินจริง 8-in-1}\\[2pt]
+        \footnotesize
+        $\bullet$ Modbus RTU Slave\\
+        $\bullet$ ปลายเข็มสแตนเลส 316\\
+        $\bullet$ บอร์ด MCU ภายใน
+    };
+    \node[header, fill=green!60!black, above=2pt of probe] {4. เซนเซอร์ภาคสนาม};
+
+    % สายเชื่อมต่อ
+    \draw[arrow] (phone) -- node[above, font=\scriptsize\bfseries] {USB-C} (adapter);
+    \draw[arrow] (adapter) -- node[above, font=\scriptsize\bfseries] {TTL/UART} (bus);
+    \draw[arrow] (bus) -- node[above, font=\scriptsize\bfseries] {RS485} (probe);
+
+    % กรอบสรุปด้านล่าง
+    \node[rectangle, rounded corners=2mm, draw=rbruGold!80, fill=rbruGold!8, line width=0.8pt, minimum width=14.5cm, minimum height=0.85cm, below=0.7cm of adapter, xshift=1.5cm, align=center] (proto) {
+        \small\textbf{โปรโตคอล Modbus RTU:} 4,800 bps, 8 Data Bits, No Parity, 1 Stop Bit, CRC-16 Modbus Verification
+    };
+    \draw[arrow, dashed] (adapter.south) -- ++(0,-0.4) -| (proto.north);
+\end{tikzpicture}
+\caption{ผังการเชื่อมโยงทางกายภาพและการไหลของสัญญาณดิจิทัลผ่านพอร์ต USB Type-C OTG สู่หัววัดดินจริง}
+\label{fig:ch02_hardware_interconnect}
+\end{figure}
+
+\section{ฟิสิกส์ของการส่งสัญญาณเชิงผลต่าง RS485}
+
+การส่งสัญญาณดิจิทัลในแปลงเกษตรกรรมต้องเผชิญกับสัญญาณรบกวนแม่เหล็กไฟฟ้า (Electromagnetic Interference หรือ EMI) จากมอเตอร์ปั๊มน้ำ เครื่องยนต์กลเกษตร และฟ้าแลบ มาตรฐานสายส่งเชิงผลต่าง \textbf{RS485 (TIA/EIA-485-A)} จึงถูกเลือกใช้ด้วยคุณสมบัติการหักล้างสัญญาณรบกวนร่วมที่ยอดเยี่ยม
+
+\subsection{หลักการส่งสัญญาณเชิงผลต่าง (Differential Signaling)}
+สัญญาณดิจิทัลบนสายส่ง RS485 ไม่ได้วัดเทียบกับกราวด์ แต่วัดจากความต่างศักย์ระหว่างสายนำสัญญาณสองเส้น ได้แก่ เส้น A (Non-inverting) และเส้น B (Inverting) ดังสมการ
+
+\begin{equation}
+V_{AB} = V_A - V_B
+\end{equation}
+
+ตามมาตรฐาน สถานะลอจิกถูกนิยามดังนี้
+\begin{itemize}
+    \item \textbf{ลอจิก 1 (Mark / Off)} เมื่อ $V_A - V_B < -200 \text{ mV}$ (โดยทั่วไป $V_B > V_A$)
+    \item \textbf{ลอจิก 0 (Space / On)} เมื่อ $V_A - V_B > +200 \text{ mV}$ (โดยทั่วไป $V_A > V_B$)
+\end{itemize}
+
+เมื่อมีสัญญาณรบกวนจากภายนอกเหนี่ยวนำเข้ามาในสายคู่เกลียว (Twisted Pair) สัญญาณรบกวนจะปรากฏบนสายทั้งสองเส้นในปริมาณที่เท่ากัน ($V_{\text{noise}}$) วงจรรับสัญญาณเชิงผลต่างจะทำการลบสัญญาณออกจากกัน ส่งผลให้สัญญาณรบกวนถูกหักล้างหมดไป ดังนี้
+
+\begin{equation}
+(V_A + V_{\text{noise}}) - (V_B + V_{\text{noise}}) = V_A - V_B = V_{AB}
+\end{equation}
+
+\section{สถาปัตยกรรมหัววัด 8-in-1 และการจ่ายพลังงานผ่าน USB OTG}
+
+หัววัดดิน 8-in-1 ผลิตจากสแตนเลสสตีลเกรด 316L ทนทานต่อการกัดกร่อนจากกรดและเกลือในดิน การเชื่อมต่อผ่านสายแปลง USB-RS485 Type-C ช่วยให้สมาร์ตโฟนสามารถจ่ายไฟเลี้ยง +5V DC จากพอร์ต USB ไปเลี้ยงหัววัดและวงจรประมวลผลได้โดยตรง
+
+\begin{table}[H]
+\centering
+\caption{การกำหนดรหัสสีสายสัญญาณและหน้าที่ของหัววัดดิน 8-in-1}
+\label{tab:wire_pinout}
+\begin{tabularx}{\textwidth}{p{2.5cm}p{3.5cm}Y}
+    \toprule
+    \textbf{สีของสาย} & \textbf{ชื่อสัญญาณ} & \textbf{หน้าที่และการต่อใช้งาน} \\
+    \midrule
+    สีน้ำตาล & VCC (+5V ถึง +12V DC) & ต่อเข้ากับขั้วบวกแหล่งจ่ายไฟจากสายแปลง USB OTG \\
+    สีดำ & GND (0V) & ต่อเข้ากับขั้วลบหรือกราวด์ร่วมของระบบ \\
+    สีเหลือง & RS485 Data A+ & ขั้วสัญญาณข้อมูลแบบไม่กลับเฟส (Non-inverting) \\
+    สีน้ำเงิน & RS485 Data B- & ขั้วสัญญาณข้อมูลแบบกลับเฟส (Inverting) \\
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+\section{โครงสร้างเฟรมและการกำหนดจังหวะเวลาของโปรโตคอล Modbus RTU}
+
+การสื่อสารระหว่างสมาร์ตโฟนกับหัววัดดินทำงานที่อัตราความเร็ว 4,800 บิตต่อวินาที (Baud Rate 4800, 8 Data Bits, No Parity, 1 Stop Bit) โดยมีช่วงเวลาของ 1 ตัวอักษร ($t_{\text{char}}$) เท่ากับ
+
+\begin{equation}
+t_{\text{char}} = \frac{10 \text{ บิต}}{4,800 \text{ บิต/วินาที}} \approx 2.083 \text{ มิลลิวินาที}
+\end{equation}
+
+ตามมาตรฐาน Modbus RTU การเริ่มต้นและสิ้นสุดเฟรมข้อมูลจะต้องมีช่วงเวลาเงียบว่าง (Inter-frame Silent Interval) ไม่น้อยกว่า 3.5 ตัวอักษร ($t_{3.5} \ge 7.29 \text{ มิลลิวินาที}$) เพื่อให้ตัวรับสัญญาณสามารถตรวจจับจุดเริ่มต้นของเฟรมใหม่ได้อย่างถูกต้อง
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm,
+    byte/.style={rectangle, draw=rbruNavy, fill=rbruCodeBg, thick, minimum width=1.5cm, minimum height=0.8cm, align=center, font=\small},
+    timing/.style={dashed, draw=gray, thick}
+]
+    \node[byte, fill=orange!20] (silent1) {Silent\\$\ge 3.5t$};
+    \node[byte, fill=cyan!20, right=0pt of silent1] (addr) {Slave ID\\(1 Byte)};
+    \node[byte, fill=cyan!30, right=0pt of addr] (func) {Function\\(1 Byte)};
+    \node[byte, fill=cyan!40, right=0pt of func] (data) {Data Bytes\\(N Bytes)};
+    \node[byte, fill=rbruGold!30, right=0pt of data] (crc) {CRC-16\\(2 Bytes)};
+    \node[byte, fill=orange!20, right=0pt of crc] (silent2) {Silent\\$\ge 3.5t$};
+
+    \draw[timing] ($(silent1.north west) + (0, 0.4)$) -- ($(silent1.south west) + (0, -0.4)$);
+    \draw[timing] ($(silent2.north east) + (0, 0.4)$) -- ($(silent2.south east) + (0, -0.4)$);
+\end{tikzpicture}
+\caption{โครงสร้างจังหวะเวลาของเฟรมข้อมูลในโปรโตคอล Modbus RTU}
+\label{fig:modbus_timing}
+\end{figure}
+
+\section{ทฤษฎีการตรวจสอบความสมบูรณ์ด้วยผลรวมวงรอบ 16 บิต (CRC-16)}
+
+เพื่อป้องกันความผิดพลาดจากการรบกวนสัญญาณในสายส่ง โปรโตคอล Modbus RTU กำหนดให้ใช้รหัสตรวจสอบความถูกต้องแบบผลรวมวงรอบ 16 บิต (Cyclic Redundancy Check หรือ CRC-16) โดยใช้พหุนามกำเนิดมาตรฐาน
+
+\begin{equation}
+G(x) = x^{16} + x^{15} + x^2 + 1 \quad \implies \quad \mathtt{0xA001} \text{ (Bit-reversed)}
+\end{equation}
+
+\subsection{ขั้นตอนวิธีคำนวณ CRC-16 เชิงตัวเลข}
+1. กำหนดค่าเริ่มต้นของรีจิสเตอร์ CRC ขนาด 16 บิต เท่ากับ $\mathtt{0xFFFF}$
+2. นำไบต์ข้อมูลไบต์แรกมาทำการ Exclusive-OR (XOR) กับไบต์ต่ำของรีจิสเตอร์ CRC
+3. เลื่อนบิตรีจิสเตอร์ CRC ไปทางขวา 1 บิต (Shift Right)
+4. ตรวจสอบบิตที่หลุดออกมา (Least Significant Bit หรือ LSB)
+   - หากบิตที่หลุดออกมาเป็น 1 ให้ทำการ XOR รีจิสเตอร์ CRC กับพหุนาม $\mathtt{0xA001}$
+   - หากบิตที่หลุดออกมาเป็น 0 ไม่ต้องทำการ XOR
+5. ทำซ้ำขั้นตอนที่ 3 และ 4 จนครบ 8 ครั้ง (ครบ 1 ไบต์ข้อมูล)
+6. ทำซ้ำขั้นตอนที่ 2 ถึง 5 สำหรับไบต์ข้อมูลถัดไปจนครบทุกไบต์ในเฟรม
+7. ผลลัพธ์สุดท้ายคือค่า CRC-16 โดยต้องส่งไบต์ต่ำออกไปก่อนไบต์สูงตามมาตรฐาน Little-Endian
+
+\section{สรุปสาระสำคัญประจำบทที่ 2}
+
+การเชื่อมต่อสมาร์ตโฟนเข้ากับเซนเซอร์ฮาร์ดแวร์จริงภาคสนาม จำเป็นต้องเข้าใจทั้งชั้นกายภาพ (Physical Layer) และชั้นโปรโตคอล (Data Link Layer) โดยสรุปสาระสำคัญได้ดังนี้
+\begin{enumerate}
+    \item \textbf{สายส่งเชิงผลต่าง RS485:} ใช้สายสัญญาณคู่ตีเกลียววัดผลต่างศักย์ $V_{AB} = V_A - V_B$ ช่วยหักล้างสัญญาณรบกวนร่วม (Common-Mode Rejection) จากอุปกรณ์ไฟฟ้าในแปลงได้อย่างมีประสิทธิภาพ
+    \item \textbf{โปรโตคอล Modbus RTU:} สื่อสารแบบ Master-Slave ผ่านอัตราเร็ว 4,800 หรือ 9,600 bps โดยมีช่วงเวลาเงียบว่าง $\ge 3.5$ ตัวอักษร ($t_{3.5}$) เป็นตัวแบ่งเฟรมข้อมูล
+    \item \textbf{การตรวจสอบความถูกต้องด้วย CRC-16:} ทุกเฟรมข้อมูลต้องผ่านการคำนวณและตรวจสอบรหัสตรวจสอบข้อผิดพลาดขนาด 16 บิต เพื่อป้องกันข้อมูลเพี้ยนจากสัญญาณรบกวนก่อนส่งต่อไปยังชั้นประมวลผล
+    \item \textbf{การควบคุมทิศทาง Half-Duplex (RTS):} ในการรับส่งข้อมูลแบบสลับทิศทาง จะต้องปลดสาย RTS ให้เป็น Low เพื่อให้ตัวรับสัญญาณ (Receiver) เปิดรับข้อมูลจากหัววัดเข้าสู่สมาร์ตโฟน
+\end{enumerate}
+
+ในบทถัดไป (บทที่ 3) จะนำข้อมูลดิบที่รับมาจากหัววัดผ่านโปรโตคอล Modbus RTU ไปประมวลผลและชดเชยค่าความคลาดเคลื่อนด้วยโครงข่ายประสาทเทียมอิงฟิสิกส์ (PINN)
+
+\section*{คำถามทบทวนท้ายบทที่ 2}
+\addcontentsline{toc}{section}{คำถามทบทวนท้ายบทที่ 2}
+
+\begin{enumerate}
+    \item จงอธิบายหลักการทำงานของสัญญาณเชิงผลต่าง (Differential Signaling) ในมาตรฐาน RS485 และเหตุผลที่สามารถหักล้างสัญญาณรบกวนร่วมได้
+    \item เพราะเหตุใดในโปรโตคอล Modbus RTU จึงจำเป็นต้องกำหนดช่วงเวลาเงียบว่างระหว่างเฟรมไม่น้อยกว่า 3.5 ตัวอักษร ($t_{3.5}$)
+    \item จงแสดงการคำนวณหาค่า CRC-16 ของชุดข้อมูล 2 ไบต์ ได้แก่ $[\mathtt{0x01}, \mathtt{0x03}]$ ตามขั้นตอนวิธีที่ระบุในบทเรียน
+    \item หากเชื่อมต่อหัววัดดินเข้ากับสมาร์ตโฟนแล้วพบว่าไฟแสดงสถานะบนสายแปลงกะพริบแต่แอปพลิเคชันแจ้งเตือน CRC Error จงวิเคราะห์สาเหตุและแนวทางแก้ไข
+\end{enumerate}

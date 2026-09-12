@@ -1,0 +1,70 @@
+\documentclass[12pt, a4paper, oneside]{book}
+
+% นำเข้าไฟล์สไตล์มาตรฐาน RBRU
+\usepackage{styles/rbru_style}
+
+\begin{document}
+
+% ----------------------------------------------------
+% ส่วนนำ (Frontmatter)
+% ----------------------------------------------------
+\frontmatter
+
+% ปกนอกระดับวิชาการพรีเมียม (Modern Academic Full-Page Cover)
+\input{frontmatter/cover}
+
+% หน้าปกรอง (Title Page)
+\include{frontmatter/titlepage}
+
+% คำนำ (Preface)
+\include{frontmatter/preface}
+
+% สารบัญหลัก (Table of Contents)
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{สารบัญ}
+\tableofcontents
+
+% สารบัญตาราง (List of Tables)
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{สารบัญตาราง}
+\listoftables
+
+% สารบัญภาพ (List of Figures)
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{สารบัญภาพ}
+\listoffigures
+
+% ----------------------------------------------------
+% ส่วนเนื้อหาหลัก (Mainmatter)
+% ----------------------------------------------------
+\mainmatter
+
+\include{chapters/ch01_foundations}
+\include{chapters/ch02_hardware_modbus}
+\include{chapters/ch03_deep_learning_pinn}
+\include{chapters/ch04_prompt_engineering}
+\include{chapters/ch05_source_code}
+\include{chapters/ch06_validation_deployment}
+
+% ----------------------------------------------------
+% ภาคผนวก (Appendices)
+% ----------------------------------------------------
+\appendix
+\renewcommand{\chapterlabelname}{ภาคผนวก}
+\renewcommand{\thechapter}{\ifcase\value{chapter}\or ก\or ข\or ค\or ง\or จ\else\Alph{chapter}\fi}
+\include{appendix/appendix_a_prompts}
+\include{appendix/appendix_b_code}
+
+% ----------------------------------------------------
+% ส่วนท้าย (Backmatter)
+% ----------------------------------------------------
+\backmatter
+
+\include{backmatter/references}
+\include{backmatter/biography}
+\include{backmatter/index}
+
+\end{document}

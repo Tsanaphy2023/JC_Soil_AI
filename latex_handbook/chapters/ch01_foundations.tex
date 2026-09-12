@@ -1,0 +1,246 @@
+\chapter{รากฐานฟิสิกส์เกษตรดิจิทัลและสถาปัตยกรรมระบบ}
+\label{chap:ch01}
+
+\section*{แผนบริหารการสอนประจำบทที่ 1}
+\addcontentsline{toc}{section}{แผนบริหารการสอนประจำบทที่ 1}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={1. หัวข้อเนื้อหาประจำบท},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item ความสำคัญของสมบัติทางกายภาพและเคมีของดินต่อสรีรวิทยาของพืชเศรษฐกิจ
+    \item พารามิเตอร์คุณภาพดิน 8 มิติสำหรับการเกษตรแม่นยำ
+    \item ทฤษฎีสภาพยอมทางไฟฟ้าและแบบจำลองการแพร่ของไอออนในสารละลายดิน
+    \item ข้อจำกัดเชิงโครงสร้างของวิธีการตรวจวัดแบบดั้งเดิมในสนามจริง
+    \item สถาปัตยกรรมการประมวลผลสองขั้นตอนแบบ Edge Two-Stage Decoupling
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={2. วัตถุประสงค์เชิงพฤติกรรม},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+เมื่อศึกษาบทเรียนนี้จบแล้ว ผู้เรียนสามารถ
+\begin{enumerate}
+    \item อธิบายกลไกทางสรีรวิทยาของรากพืชที่ตอบสนองต่อพารามิเตอร์ดินทั้ง 8 ตัวได้อย่างถูกต้อง
+    \item อธิบายสมการเชิงประจักษ์ของท็อปป์ (Topp's Equation) และทฤษฎีสภาพยอมทางไฟฟ้าได้อย่างแม่นยำ
+    \item วิเคราะห์สาเหตุของความคลาดเคลื่อนจากการเลื่อนลอยตามอุณหภูมิของหัววัดดินได้อย่างเป็นระบบ
+    \item ออกแบบสถาปัตยกรรมระบบตรวจวัดดินอัจฉริยะที่ผสานการประมวลผลบนอุปกรณ์สมาร์ตโฟนได้อย่างสมบูรณ์
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={3. วิธีสอนและกิจกรรมการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การบรรยายเชิงปฏิสัมพันธ์ร่วมกับการสาธิตปรากฏการณ์ทางฟิสิกส์ในดิน
+    \item การอภิปรายกลุ่มย่อยเกี่ยวกับกรณีศึกษาปัญหาดินกรดและดินเค็มในแปลงทุเรียนจังหวัดจันทบุรี
+    \item การฝึกปฏิบัติการคำนวณการแปลงสภาพยอมทางไฟฟ้าเป็นความชื้นดินเชิงปริมาตร
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={4. สื่อการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item สไลด์บรรยายอิเล็กทรอนิกส์และเอกสารคำสอนวิชาฟิสิกส์เกษตรดิจิทัล
+    \item ชุดหัววัดดิน 8-in-1 อุตสาหกรรม และตัวอย่างหน้าตัดชั้นดินจำลอง
+    \item แอปพลิเคชันจำลองการคำนวณบนสมาร์ตโฟน JC AI Detector
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={5. การวัดและประเมินผล},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การประเมินความรู้ผ่านแบบฝึกหัดและคำถามทบทวนท้ายบท
+    \item การประเมินทักษะการวิเคราะห์โจทย์ฟิสิกส์เกษตรจากการนำเสนอของกลุ่มผู้เรียน
+    \item การสังเกตพฤติกรรมการมีส่วนร่วมและการซักถามในชั้นเรียน
+\end{enumerate}
+\end{tcolorbox}
+
+\clearpage
+
+% ==============================================================================
+% ภาพประกอบเกริ่นนำประจำบทที่ 1 (Introductory Infographic)
+% ==============================================================================
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    box/.style={rectangle, rounded corners=2.5mm, draw=rbruNavy, line width=1.0pt, fill=white, drop shadow={shadow xshift=1pt, shadow yshift=-1.5pt, opacity=0.15}, align=center, inner sep=6pt},
+    header/.style={rectangle, rounded corners=1.5mm, draw=rbruNavy, fill=rbruNavy, text=white, font=\bfseries\small, align=center, inner sep=4pt},
+    arrow/.style={-{Stealth[scale=1.1]}, line width=1.2pt, draw=rbruBlue}
+]
+    % คอลัมน์ที่ 1: ปัจจัยดินกายภาพและเคมี
+    \node[box, fill=cyan!8, minimum width=3.6cm] (col1) {
+        \textbf{8 พารามิเตอร์ดิน}\\[3pt]
+        \footnotesize
+        $\bullet$ อุณหภูมิ \& ความชื้น\\
+        $\bullet$ สภาพนำไฟฟ้า (EC)\\
+        $\bullet$ ความเป็นกรด-ด่าง (pH)\\
+        $\bullet$ ธาตุอาหาร N, P, K\\
+        $\bullet$ ดัชนีความสมบูรณ์
+    };
+    \node[header, above=2pt of col1] {1. แหล่งกำเนิดสัญญาณ};
+
+    % คอลัมน์ที่ 2: ทฤษฎีฟิสิกส์หลักการแรก
+    \node[box, fill=rbruGold!10, minimum width=4.0cm, right=1.2cm of col1] (col2) {
+        \textbf{สมการหลักการแรก}\\[3pt]
+        \footnotesize
+        $\bullet$ Topp's Permittivity ($\varepsilon_r$)\\
+        $\bullet$ Arrhenius Temp Drift\\
+        $\bullet$ Nernst Ionic Potential\\
+        $\bullet$ Rhoades EC Conduction
+    };
+    \node[header, fill=rbruGold!90!black, above=2pt of col2] {2. กลไกฟิสิกส์เชิงลึก};
+
+    % คอลัมน์ที่ 3: สถาปัตยกรรม Edge AI บนสมาร์ตโฟน
+    \node[box, fill=green!8, minimum width=3.8cm, right=1.2cm of col2] (col3) {
+        \textbf{ระบบ JC AI Detector}\\[3pt]
+        \footnotesize
+        $\bullet$ USB-C OTG Interface\\
+        $\bullet$ RS485 Modbus RTU\\
+        $\bullet$ Two-Stage PINN\\
+        $\bullet$ Offline Real-Time Dashboard
+    };
+    \node[header, fill=green!60!black, above=2pt of col3] {3. ปัญญาประดิษฐ์ฝังตัว};
+
+    % ลูกศรเชื่อมโยงกระบวนการ
+    \draw[arrow] (col1) -- node[above, font=\scriptsize\bfseries\color{rbruNavy}] {ตรวจวัด} (col2);
+    \draw[arrow] (col2) -- node[above, font=\scriptsize\bfseries\color{rbruNavy}] {ชดเชยค่า} (col3);
+
+    % กรอบล่างแสดงเป้าหมายปลายทาง
+    \node[rectangle, rounded corners=2mm, draw=rbruNavy!60, fill=rbruNavy!5, line width=0.8pt, minimum width=13.5cm, minimum height=0.9cm, below=0.7cm of col2, align=center] (goal) {
+        \small\textbf{เป้าหมายทางวิชาการ:} ยกระดับการประเมินสุขภาพดินแปลงทุเรียนอย่างแม่นยำ ปราศจากของเสียสารเคมี และรู้ผลทันทีในระดับเสี้ยววินาที
+    };
+    \draw[arrow, dashed] (col2.south) -- (goal.north);
+\end{tikzpicture}
+\caption{ผังมโนทัศน์เกริ่นนำประจำบทที่ 1: การบูรณาการฟิสิกส์เกษตรดิจิทัล ทฤษฎีหลักการแรก และปัญญาประดิษฐ์บนสมาร์ตโฟน}
+\label{fig:ch01_concept_overview}
+\end{figure}
+
+\section{ความสำคัญของสมบัติทางกายภาพและเคมีของดิน}
+
+การบริหารจัดการดินในงานเกษตรกรรมแม่นยำ (Precision Agriculture) โดยเฉพาะในแปลงปลูกพืชเศรษฐกิจมูลค่าสูง เช่น ทุเรียนหมอนทอง (\textit{Durio zibethinus} Murr.) ในเขตจังหวัดจันทบุรีและตราด มีความจำเป็นต้องอาศัยข้อมูลสภาพดินที่รวดเร็ว ถูกต้อง และครอบคลุมพารามิเตอร์สำคัญ 8 ประการ
+
+\subsection{สรีรวิทยาของรากพืชและการตอบสนองต่อพารามิเตอร์ดิน}
+ระบบรากของทุเรียนเป็นรากที่ต้องการออกซิเจนสูงและมีความไวต่อสภาพความเป็นกรดและความเค็มในดินเป็นอย่างยิ่ง หากดินมีค่าความเป็นกรด-ด่างต่ำกว่า 5.5 ฟอสฟอรัสจะถูกตรึงด้วยเหล็กและอะลูมิเนียม ทำให้พืชไม่สามารถดูดซึมไปใช้ในการพัฒนาตาดอกได้ ในทางกลับกัน หากค่าสภาพนำไฟฟ้า (EC) สูงเกินกว่า 1,500 ไมโครซีเมนต์ต่อเซนติเมตร แรงดันออสโมซิสในสารละลายดินจะสูงกว่าแรงดันภายในเซลล์ราก ส่งผลให้เกิดภาวะขาดน้ำทางสรีรวิทยา (Physiological Drought) และเกิดอาการใบไหม้ร่วงหล่น
+
+\section{พารามิเตอร์คุณภาพดิน 8 มิติสำหรับการเกษตรแม่นยำ}
+
+ระบบตรวจวัดดินอัจฉริยะที่พัฒนาขึ้นมุ่งเน้นการตรวจวัดตัวแปรสำคัญ 8 มิติ ได้แก่
+\begin{enumerate}
+    \item \textbf{อุณหภูมิดิน (Soil Temperature)} ส่งผลโดยตรงต่อกิจกรรมของจุลินทรีย์และการดูดซึมน้ำของราก
+    \item \textbf{ความชื้นในดิน (Soil Moisture Content)} ตรวจวัดสัดส่วนปริมาตรน้ำในดิน (Volumetric Water Content หรือ VWC)
+    \item \textbf{สภาพนำไฟฟ้าของดิน (Electrical Conductivity หรือ EC)} บ่งชี้ความเข้มข้นของไอออนเกลือแร่ที่ละลายในดิน
+    \item \textbf{ความเป็นกรด-ด่าง (Soil pH)} ควบคุมความสามารถในการละลายของธาตุอาหารหลักและธาตุอาหารรอง
+    \item \textbf{ไนโตรเจนที่เป็นประโยชน์ (Available Nitrogen หรือ N)} ส่งเสริมการเจริญเติบโตของกิ่งก้านและใบ
+    \item \textbf{ฟอสฟอรัสที่เป็นประโยชน์ (Available Phosphorus หรือ P)} ส่งเสริมการแตกรากฝอยและการสะสมอาหารเพื่อการออกดอก
+    \item \textbf{โพแทสเซียมที่เป็นประโยชน์ (Available Potassium หรือ K)} ควบคุมการเปิดปิดปากใบและคุณภาพเนื้อผลไม้
+    \item \textbf{ดัชนีความอุดมสมบูรณ์รวม (Soil Fertility Index)} ตัวชี้วัดระดับความสมบูรณ์ของธาตุอาหารโดยรวม
+\end{enumerate}
+
+\section{ทฤษฎีฟิสิกส์ของสภาพยอมทางไฟฟ้าและการแพร่ของไอออน}
+
+\subsection{สมการเชิงประจักษ์ของท็อปป์ (Topp's Empirical Equation)}
+ดินเป็นตัวกลางรูพรุนหลายวัฏภาคประกอบด้วยอนุภาคดิน ของเหลว (น้ำ) และก๊าซ (อากาศ) ค่าสภาพยอมทางไฟฟ้าสัมพัทธ์ของอากาศเท่ากับ 1 ของอนุภาคดินแข็งเท่ากับ 3 ถึง 5 ขณะที่โมเลกุลน้ำมีค่าสูงถึง 78 ถึง 80 ที่อุณหภูมิห้อง ดังนั้น การวัดสภาพยอมทางไฟฟ้ารวม ($\varepsilon_b$) จึงสะท้อนปริมาณน้ำในดินได้อย่างชัดเจน ตามสมการพหุนามของท็อปป์
+
+\begin{equation}
+\theta_v = -0.053 + 0.0292\varepsilon_b - 5.5 \times 10^{-4}\varepsilon_b^2 + 4.3 \times 10^{-6}\varepsilon_b^3
+\end{equation}
+
+โดย $\theta_v$ คือ ปริมาณความชื้นเชิงปริมาตร (Volumetric Water Content)
+
+\subsection{สภาพนำไฟฟ้าปรากฏและแบบจำลองของโรดส์ (Rhoades Model)}
+ความสัมพันธ์ระหว่างสภาพนำไฟฟ้าปรากฏรวมของดิน ($EC_a$) ที่หัววัดอ่านได้ กับสภาพนำไฟฟ้าของสารละลายในช่องว่างรูพรุน ($EC_w$) อธิบายได้ด้วยแบบจำลองการนำไฟฟ้าขนานกันของโรดส์
+
+\begin{equation}
+EC_a = \theta_v \cdot T(\theta_v) \cdot EC_w + EC_s
+\end{equation}
+
+โดยที่ $T(\theta_v)$ คือ ฟังก์ชันความคดเคี้ยวของรูพรุน (Tortuosity Factor) และ $EC_s$ คือ สภาพนำไฟฟ้าที่ผิวอนุภาคดิน
+
+\section{ข้อจำกัดเชิงโครงสร้างของวิธีการตรวจวัดแบบดั้งเดิม}
+
+ในสภาพแปลงเกษตรกรรมจริง วิธีการวิเคราะห์ดินแบบดั้งเดิมเผชิญปัญหาเชิงโครงสร้าง 3 ประการสำคัญ ดังแสดงในตารางที่ \ref{tab:comparison_methods}
+
+\begin{table}[H]
+\centering
+\caption{การเปรียบเทียบสมรรถนะระหว่างวิธีการตรวจวัดดินแบบดั้งเดิมกับระบบ JC Digital Soil AI}
+\label{tab:comparison_methods}
+\begin{tabularx}{\textwidth}{p{3.0cm}p{3.2cm}p{3.5cm}Y}
+    \toprule
+    \textbf{คุณลักษณะ} & \textbf{วิธีแล็บเคมีมาตรฐาน} & \textbf{ชุดทดสอบเคมีภาคสนาม} & \textbf{ระบบ JC Digital Soil AI} \\
+    \midrule
+    ระยะเวลาวิเคราะห์ & 7 ถึง 14 วัน & 15 ถึง 30 นาที & เรียลไทม์ ($< 1.5$ วินาที) \\
+    ค่าใช้จ่ายต่อตัวอย่าง & 500 ถึง 1,500 บาท & 50 ถึง 100 บาท & ไม่มีค่าใช้จ่ายซ้ำซ้อน \\
+    ความแม่นยำเชิงปริมาณ & สูงมาก ($> 98\%$) & ปานกลางถึงต่ำ ($< 70\%$) & สูง ($> 96\%$ ด้วย AI PINN) \\
+    การชดเชยอุณหภูมิ & มีระบบปรับสภาพห้อง & ไม่มี & อัตโนมัติด้วย Deep Learning \\
+    ผลกระทบสิ่งแวดล้อม & มีของเสียสารเคมี & เกิดขยะสารเคมีอันตราย & ไร้สารเคมีและเป็นมิตร 100\% \\
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+\section{สถาปัตยกรรมการประมวลผลสองขั้นตอนแบบ Edge Two-Stage Decoupling}
+
+เพื่อแก้ปัญหาความคลาดเคลื่อนสะสมจากการเปลี่ยนแปลงอุณหภูมิดินตามรอบวัน ระบบ \textbf{JC AI Detector} ได้รับการออกแบบสถาปัตยกรรมแบบสองขั้นตอน (Two-Stage Decoupling) ทำงานบนสมาร์ตโฟนโดยตรง
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.6cm,
+    block/.style={rectangle, rounded corners=2mm, draw=rbruNavy, fill=rbruNavy!8, thick, minimum width=4.0cm, minimum height=0.9cm, align=center},
+    arrow/.style={-{Stealth[scale=1.2]}, thick, draw=rbruBlue}
+]
+    \node[block, fill=cyan!15] (sensor) {\textbf{หัววัดเซนเซอร์จริง 8-in-1}\\สัญญาณดิบผ่าน USB Type-C OTG};
+    \node[block, fill=rbruTeal!20, below=0.8cm of sensor] (stage1) {\textbf{ขั้นตอนที่ 1: First-Principles Physics}\\Topp Permittivity + Arrhenius EC + Nernst};
+    \node[block, fill=rbruGold!20, below=0.8cm of stage1] (stage2) {\textbf{ขั้นตอนที่ 2: Edge TinyML PINN}\\Non-linear MLP Error Compensation};
+    \node[block, fill=green!20, below=0.8cm of stage2] (ui) {\textbf{JC AI Detector Dashboard}\\แสดงผลสด บันทึก Excel และวิเคราะห์ดิน};
+
+    \draw[arrow] (sensor) -- (stage1);
+    \draw[arrow] (stage1) -- (stage2);
+    \draw[arrow] (stage2) -- (ui);
+\end{tikzpicture}
+\caption{ผังการทำงานของสถาปัตยกรรมการประมวลผลสองขั้นตอนแบบ Edge Two-Stage Decoupling}
+\label{fig:two_stage_arch}
+\end{figure}
+
+\section{สรุปสาระสำคัญประจำบทที่ 1}
+
+การทำความเข้าใจรากฐานฟิสิกส์เกษตรดิจิทัลเป็นบันไดก้าวสำคัญในการออกแบบระบบวิเคราะห์ดินอัจฉริยะ โดยสามารถสังเคราะห์สาระสำคัญได้ดังนี้
+\begin{enumerate}
+    \item \textbf{บูรณาการ 8 พารามิเตอร์ดิน:} การตรวจวัดดินเพื่อการเกษตรแม่นยำต้องพิจารณาความสัมพันธ์เชื่อมโยงระหว่างสมบัติทางกายภาพ (ความชื้น, อุณหภูมิ, EC) และสมบัติทางเคมี (pH, ไนโตรเจน, ฟอสฟอรัส, โพแทสเซียม) อย่างเป็นองค์รวม เนื่องจากมีผลต่อแรงดันออสโมซิสและการดูดซึมสารอาหารของพืช
+    \item \textbf{ข้อจำกัดของหัววัดภาคสนาม:} สัญญาณไฟฟ้าที่ตรวจวัดได้จากหัววัดมักเกิดการเลื่อนลอยตามอุณหภูมิ (Diurnal Temperature Drift) และความไม่เป็นเชิงเส้นอันเนื่องมาจากการเปลี่ยนแปลงสภาพยอมทางไฟฟ้าและการเคลื่อนที่ของไอออนในสารละลายดิน
+    \item \textbf{สถาปัตยกรรม Edge Two-Stage Decoupling:} การผสานฟิสิกส์หลักการแรกเข้ากับโครงข่ายประสาทเทียม PINN บนสมาร์ตโฟน ช่วยให้สามารถแยกผลกระทบของอุณหภูมิและความชื้นออกจากค่าความเข้มข้นของธาตุอาหารได้อย่างแม่นยำ โดยไม่ต้องพึ่งพาระบบคลาวด์
+\end{enumerate}
+
+ในบทถัดไป (บทที่ 2) จะกล่าวถึงการนำหลักการทางทฤษฎีเหล่านี้ไปสู่การเชื่อมต่อกับฮาร์ดแวร์จริง ผ่านโปรโตคอลอุตสาหกรรม Modbus RTU และพอร์ต USB Type-C OTG บนสมาร์ตโฟน
+
+\section*{คำถามทบทวนท้ายบทที่ 1}
+\addcontentsline{toc}{section}{คำถามทบทวนท้ายบทที่ 1}
+
+\begin{enumerate}
+    \item จงอธิบายบทบาทของสภาพยอมทางไฟฟ้า ($\varepsilon$) ในการประเมินปริมาณความชื้นในดินตามสมการเชิงประจักษ์ของท็อปป์
+    \item เพราะเหตุใดอุณหภูมิดินที่สูงขึ้นในเวลากลางวัน จึงทำให้หัววัดอ่านค่าความชื้นต่ำกว่าความเป็นจริงและค่าสภาพนำไฟฟ้าสูงเกินจริง
+    \item จงวิเคราะห์ผลกระทบต่อสรีรวิทยาของรากทุเรียน เมื่อดินมีค่า pH ลดลงต่ำกว่า 5.0 พร้อมระบุกลไกการตรึงธาตุฟอสฟอรัส
+    \item จงอธิบายความแตกต่างเชิงสถาปัตยกรรมระหว่างการประมวลผลบนคลาวด์ (Cloud AI) กับการประมวลผลบนอุปกรณ์สมาร์ตโฟน (Edge AI) ในงานเกษตรกรรมแม่นยำ
+\end{enumerate}

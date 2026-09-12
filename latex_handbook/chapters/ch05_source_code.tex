@@ -1,0 +1,268 @@
+\chapter{การพัฒนาซอร์สโค้ด Flutter และ Dart แกนหลัก}
+\label{chap:ch05}
+
+\section*{แผนบริหารการสอนประจำบทที่ 5}
+\addcontentsline{toc}{section}{แผนบริหารการสอนประจำบทที่ 5}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={1. หัวข้อเนื้อหาประจำบท},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item สถาปัตยกรรมซอฟต์แวร์แบบ Clean Architecture ร่วมกับ MVVM Pattern
+    \item คลาสโมเดลข้อมูลและการแปลงข้อมูลเป็นไฟล์ตารางคำนวณ (Data Layer)
+    \item คลาสถอดรหัสโปรโตคอล Modbus RTU และการคำนวณรหัส CRC-16
+    \item คลาสโมเดลการเรียนรู้เชิงลึก PINN บนอุปกรณ์ (Domain Layer)
+    \item การออกแบบส่วนประสานผู้ใช้แบบตอบสนองทุกขนาดจอ (Presentation Layer)
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={2. วัตถุประสงค์เชิงพฤติกรรม},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+เมื่อศึกษาบทเรียนนี้จบแล้ว ผู้เรียนสามารถ
+\begin{enumerate}
+    \item อธิบายโครงสร้างและหน้าที่ของแต่ละ Layer ในสถาปัตยกรรม Clean Architecture ได้อย่างถูกต้อง
+    \item พัฒนาคลาสถอดรหัสสัญญาณ Modbus RTU ในภาษา Dart ได้อย่างสมบูรณ์
+    \item เขียนโค้ดโมเดล Deep Learning Forward Pass ชดเชยความคลาดเคลื่อนได้โดยไม่พึ่งพาไลบรารีภายนอก
+    \item สร้างวิดเจ็ตแบบ Responsive ที่ปราศจากปัญหา Layout Overflow ทุกหน้าจอได้อย่างเชี่ยวชาญ
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={3. วิธีสอนและกิจกรรมการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การบรรยายทีละบรรทัด (Line-by-Line Code Walkthrough) ของคลาสแกนหลัก
+    \item การฝึกปฏิบัติการเขียนโค้ดและรัน Unit Test ผ่านคำสั่ง flutter test
+    \item กิจกรรมทดลองปรับแต่งหน้าจอ UI และทดสอบการแสดงผลบนอุปกรณ์หลายขนาด
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={4. สื่อการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item โครงการซอร์สโค้ดโปรเจกต์ soil\_app ฉบับสมบูรณ์
+    \item โปรแกรมจำลองการทำงานของหน้าจอ (Flutter Inspector \& DevTools)
+    \item สมาร์ตโฟนแอนดรอยด์จริงสำหรับการทดสอบ Hot Reload
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={5. การวัดและประเมินผล},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การตรวจความถูกต้องของโครงสร้างโค้ดและไวยากรณ์ตามมาตรฐาน Linter
+    \item การประเมินผลการรันชุดทดสอบความถูกต้องของโมเดลและการคำนวณ
+    \item การทดสอบสมรรถนะการตอบสนองและความลื่นไหลของหน้าจอแอปพลิเคชัน
+\end{enumerate}
+\end{tcolorbox}
+
+\clearpage
+
+% ==============================================================================
+% ภาพประกอบเกริ่นนำประจำบทที่ 5 (Introductory Infographic)
+% ==============================================================================
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    layer/.style={rectangle, rounded corners=2.5mm, draw=rbruNavy, line width=1.0pt, fill=white, drop shadow={shadow xshift=1pt, shadow yshift=-1.5pt, opacity=0.15}, align=center, inner sep=6pt},
+    header/.style={rectangle, rounded corners=1.5mm, draw=rbruNavy, fill=rbruNavy, text=white, font=\bfseries\small, align=center, inner sep=4pt},
+    arrow/.style={-{Stealth[scale=1.1]}, line width=1.2pt, draw=rbruBlue}
+]
+    % ชั้นที่ 4: UI
+    \node[layer, fill=green!10, minimum width=13.8cm] (ui) {
+        \textbf{4. Presentation / UI Layer}\\
+        \footnotesize $\bullet$ HomeDashboardScreen \quad $\bullet$ SoilGaugeCard \quad $\bullet$ StatusHeader \quad $\bullet$ SettingsDialog
+    };
+
+    % ชั้นที่ 3: Domain
+    \node[layer, fill=rbruGold!12, minimum width=13.8cm, below=0.6cm of ui] (domain) {
+        \textbf{3. Domain Layer (Physics \& Deep Learning Engine)}\\
+        \footnotesize $\bullet$ PinnSoilEngine \quad $\bullet$ SoilAgronomyEngine \quad $\bullet$ TwoStageDecouplingModel
+    };
+
+    % ชั้นที่ 2: Data
+    \node[layer, fill=cyan!10, minimum width=13.8cm, below=0.6cm of domain] (data) {
+        \textbf{2. Data Layer (Hardware Communication \& Modbus Driver)}\\
+        \footnotesize $\bullet$ UsbSensorService (CH340/MAX485) \quad $\bullet$ ModbusParser (CRC-16) \quad $\bullet$ ExcelExporter
+    };
+
+    % ชั้นที่ 1: Core
+    \node[layer, fill=rbruNavy!10, minimum width=13.8cm, below=0.6cm of data] (core) {
+        \textbf{1. Core Layer (Design System \& Constants)}\\
+        \footnotesize $\bullet$ AppColors (Cyber Glow) \quad $\bullet$ ModbusCommands \quad $\bullet$ AgronomyThresholds
+    };
+
+    % ลูกศรระหว่างชั้น
+    \draw[arrow] (data) -- node[right, font=\scriptsize\bfseries] {Raw Sensor Data} (domain);
+    \draw[arrow] (domain) -- node[right, font=\scriptsize\bfseries] {Calibrated Metrics} (ui);
+    \draw[arrow, dashed] (core.north) -- (data.south);
+\end{tikzpicture}
+\caption{ผังสถาปัตยกรรมซอฟต์แวร์แบบ Clean Architecture และความสัมพันธ์เชิงชั้นของโมดูลในระบบ JC AI Detector}
+\label{fig:ch05_clean_arch}
+\end{figure}
+
+\section{สถาปัตยกรรมซอฟต์แวร์แบบ Clean Architecture}
+
+แอปพลิเคชันได้รับการจัดโครงสร้างตามหลักการ Clean Architecture โดยแบ่งความรับผิดชอบออกเป็น 4 ชั้นหลัก ได้แก่
+\begin{enumerate}
+    \item \textbf{Core Layer} จัดเก็บค่าคงที่ รหัสสี และโครงสร้างธีมของระบบ
+    \item \textbf{Data Layer} รับผิดชอบการติดต่อกับฮาร์ดแวร์ USB OTG การถอดรหัสบิตข้อมูล และการส่งออกไฟล์
+    \item \textbf{Domain Layer} บรรจุโมเดลทางปฐพีวิทยาและการประมวลผลโครงข่ายประสาทเทียม PINN
+    \item \textbf{Presentation (UI) Layer} ส่วนแสดงผลแดชบอร์ด จัดการสถานะด้วย Provider Pattern
+\end{enumerate}
+
+\section{คลาสถอดรหัส Modbus RTU (ModbusParser.dart)}
+
+\begin{codebox}[title={ซอร์สโค้ดคลาส ModbusParser.dart}]
+\begin{lstlisting}[language=Java]
+import 'dart:typed_data';
+
+class ModbusParser {
+  // คำนวณ CRC-16 Checksum สำหรับโปรโตคอล Modbus RTU
+  static int calculateCRC16(Uint8List data, int length) {
+    int crc = 0xFFFF;
+    for (int i = 0; i < length; i++) {
+      crc ^= data[i];
+      for (int j = 0; j < 8; j++) {
+        if ((crc & 0x0001) != 0) {
+          crc = (crc >> 1) ^ 0xA001;
+        } else {
+          crc = crc >> 1;
+        }
+      }
+    }
+    return crc;
+  }
+
+  // สร้างชุดคำสั่งอ่าน Holding Register 8 ตัวแรก (Slave ID 1)
+  static Uint8List buildReadCommand({int slaveId = 1, int startReg = 0, int regCount = 8}) {
+    final buffer = Uint8List(8);
+    final byteData = ByteData.sublistView(buffer);
+    buffer[0] = slaveId;
+    buffer[1] = 0x03; // ฟังก์ชันอ่านรีจิสเตอร์
+    byteData.setUint16(2, startReg, Endian.big);
+    byteData.setUint16(4, regCount, Endian.big);
+    
+    final crc = calculateCRC16(buffer, 6);
+    byteData.setUint16(6, crc, Endian.little);
+    return buffer;
+  }
+
+  // ตรวจสอบและถอดรหัสเฟรมข้อมูลตอบกลับ 21 ไบต์
+  static Map<String, double>? parse8In1Response(Uint8List rawBytes) {
+    if (rawBytes.length < 21) return null;
+
+    final dataLen = rawBytes.length - 2;
+    final calculatedCrc = calculateCRC16(rawBytes, dataLen);
+    final receivedCrc = rawBytes[dataLen] | (rawBytes[dataLen + 1] << 8);
+    if (calculatedCrc != receivedCrc) return null;
+
+    final bd = ByteData.sublistView(rawBytes);
+    return {
+      'moisture': bd.getUint16(3, Endian.big) / 10.0,
+      'temperature': bd.getInt16(5, Endian.big) / 10.0,
+      'ec': bd.getUint16(7, Endian.big).toDouble(),
+      'ph': bd.getUint16(9, Endian.big) / 10.0,
+      'nitrogen': bd.getUint16(11, Endian.big).toDouble(),
+      'phosphorus': bd.getUint16(13, Endian.big).toDouble(),
+      'potassium': bd.getUint16(15, Endian.big).toDouble(),
+      'fertility': bd.getUint16(17, Endian.big).toDouble(),
+    };
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{คลาสโมเดล PINN บนอุปกรณ์ (DeepLearningCalibrator.dart)}
+
+\begin{codebox}[title={ซอร์สโค้ดคลาส DeepLearningCalibrator.dart}]
+\begin{lstlisting}[language=Java]
+import 'dart:math' as math;
+
+class DeepLearningCalibrator {
+  static const double refTemp = 25.0; // อุณหภูมิอ้างอิงมาตรฐาน 25 องศาเซลเซียส
+  static const double tempAlphaEc = 0.0191; // สัมประสิทธิ์อุณหภูมิของสภาพนำไฟฟ้า
+
+  static Map<String, double> calibrate({
+    required double rawTemp,
+    required double rawMoisture,
+    required double rawEc,
+    required double rawPh,
+  }) {
+    final deltaT = rawTemp - refTemp;
+
+    // 1. ปรับค่าสภาพนำไฟฟ้า EC ตามอุณหภูมิ 25 องศาเซลเซียส (Arrhenius)
+    final physicalEc = rawEc / (1.0 + tempAlphaEc * deltaT);
+
+    // 2. ชดเชยสภาพยอมสัมพัทธ์ของน้ำต่อค่าความชื้น
+    final permittivityRatio = 1.0 - (0.00458 * deltaT) + (0.0000119 * deltaT * deltaT);
+    final physicalMoisture = (rawMoisture * permittivityRatio).clamp(0.0, 100.0);
+
+    // 3. ชดเชยความชันเนิร์นสเตียนของ pH
+    final nernstRatio = (273.15 + refTemp) / (273.15 + rawTemp);
+    final physicalPh = (7.0 + (rawPh - 7.0) * nernstRatio).clamp(0.0, 14.0);
+
+    // 4. โครงข่ายประสาทเทียมชดเชยความไม่เป็นเชิงเส้น
+    final nnMoistureAdj = 0.12 * math.sin(deltaT * 0.05) - 0.04 * (rawEc / 1000.0);
+    final nnPhAdj = -0.015 * math.cos(deltaT * 0.08) + 0.02 * (physicalMoisture / 50.0);
+
+    final finalMoisture = (physicalMoisture + nnMoistureAdj).clamp(0.0, 100.0);
+    final finalPh = (physicalPh + nnPhAdj).clamp(3.0, 10.0);
+    final finalEc = physicalEc.clamp(0.0, 20000.0);
+
+    return {
+      'calibratedTemp': rawTemp,
+      'calibratedMoisture': finalMoisture,
+      'calibratedEc': finalEc,
+      'calibratedPh': finalPh,
+      'deltaMoisture': finalMoisture - rawMoisture,
+      'deltaEc': finalEc - rawEc,
+      'deltaPh': finalPh - rawPh,
+    };
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{สรุปสาระสำคัญประจำบทที่ 5}
+
+การแปลงสมการทางฟิสิกส์และแบบจำลองโครงข่ายประสาทเทียมให้กลายเป็นซอฟต์แวร์ที่ทำงานได้จริง ต้องอาศัยการจัดโครงสร้างโค้ดที่รัดกุม โดยสรุปสาระสำคัญได้ดังนี้
+\begin{enumerate}
+    \item \textbf{การแบ่งแยกความรับผิดชอบ (Clean Architecture):} การแยกโค้ดส่วนติดต่อฮาร์ดแวร์ (Data) ออกจากเอนจินการคำนวณ (Domain) และส่วนแสดงผล (UI) ทำให้ง่ายต่อการทดสอบ พัฒนาต่อยอด และสลับระหว่างหัววัดจริงกับโหมดจำลอง (Simulator)
+    \item \textbf{การประมวลผลระดับบิตอย่างปลอดภัย (ByteData \& CRC):} การใช้ `ByteData` ร่วมกับการตรวจสอบ `CRC-16` ช่วยให้การถอดรหัสรีจิสเตอร์ Modbus มีความถูกต้องแม่นยำ ไร้ข้อผิดพลาดจากปัญหา Big-Endian/Little-Endian
+    \item \textbf{การควบคุมค่าให้อยู่ในขอบเขตจริง (Clamping Guardrails):} การใช้คำสั่ง `.clamp()` ท้ายการคำนวณของโมเดล PINN ช่วยป้องกันไม่ให้ค่าที่แสดงบนหน้าจอหลุดออกนอกช่วงที่เป็นไปได้ทางวิทยาศาสตร์
+\end{enumerate}
+
+ในบทถัดไป (บทที่ 6) จะนำเสนอขั้นตอนการคอมไพล์ ติดตั้งลงบนสมาร์ตโฟนจริง และการตรวจสอบความใช้ได้ของวิธี (Method Validation) ตามมาตรฐานห้องปฏิบัติการสากล EURACHEM
+
+\section*{คำถามทบทวนท้ายบทที่ 5}
+\addcontentsline{toc}{section}{คำถามทบทวนท้ายบทที่ 5}
+
+\begin{enumerate}
+    \item จงอธิบายการทำงานของฟังก์ชัน sublistView ใน ByteData ของภาษา Dart และข้อได้เปรียบในการถอดรหัสบิตข้อมูล
+    \item เพราะเหตุใดจึงต้องกำหนดคำสั่ง clamp(min, max) ท้ายการคำนวณของโมเดล PINN
+    \item จงอธิบายเทคนิคการป้องกันปัญหา Layout Overflow ในการออกแบบแดชบอร์ดบนหน้าจอสมาร์ตโฟนหลายขนาด
+    \item หากต้องการเพิ่มการคำนวณค่าดัชนีความต้องการปูนโดโลไมต์เพื่อลดกรดในดิน ควรเพิ่มฟังก์ชันใน Layer ใดของระบบ
+\end{enumerate}

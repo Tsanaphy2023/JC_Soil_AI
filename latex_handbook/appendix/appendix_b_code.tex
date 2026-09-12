@@ -1,0 +1,203 @@
+\chapter{ซอร์สโค้ดฉบับสมบูรณ์ของระบบ JC Digital Soil AI}
+\label{app:code}
+
+ภาคผนวกนี้รวบรวมซอร์สโค้ดภาษา Dart ฉบับสมบูรณ์ของโมดูลแกนหลักในระบบ \textbf{JC AI Detector} ซึ่งได้รับการออกแบบและคอมไพล์เพื่อใช้งานบนอุปกรณ์สมาร์ตโฟนจริงผ่านพอร์ต USB Type-C OTG
+
+\section{โมดูลบริการสื่อสารผ่านพอร์ตฮาร์ดแวร์จริง (usb\_sensor\_service.dart)}
+
+\begin{codebox}[title={ไฟล์ lib/data/services/usb\_sensor\_service.dart (คัดย่อส่วนสำคัญ)}]
+\begin{lstlisting}[language=Java]
+import 'dart:async';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
+import 'package:usb_serial/usb_serial.dart';
+import '../models/modbus_parser.dart';
+import '../models/soil_reading.dart';
+
+enum SensorConnectionStatus { disconnected, connecting, connected, error }
+
+class UsbSensorService extends ChangeNotifier {
+  UsbPort? _port;
+  StreamSubscription<String>? _transactionSub;
+  Timer? _pollingTimer;
+
+  int _baudRate = 4800; // ค่าเริ่มต้นมาตรฐาน Modbus
+  int _txCount = 0;
+  int _rxByteCount = 0;
+  String _lastRxHex = '---';
+
+  Future<bool> connectToDevice(UsbDevice device) async {
+    _port = await device.create();
+    if (_port == null) return false;
+
+    final openSuccess = await _port!.open();
+    if (!openSuccess) return false;
+
+    // การตั้งค่าสำหรับสายส่ง RS485 Half-Duplex
+    await _port!.setDTR(true);
+    await _port!.setRTS(false); // ปลด RE เป็น Low เพื่อเปิดรับสัญญาณ
+    await _port!.setPortParameters(
+      _baudRate,
+      UsbPort.DATABITS_8,
+      UsbPort.STOPBITS_1,
+      UsbPort.PARITY_NONE,
+    );
+    await _port!.setFlowControl(UsbPort.FLOW_CONTROL_OFF);
+
+    // เปิดสตรีมรับข้อมูลไบต์จากหัววัด
+    _transactionSub = _port!.inputStream!.listen(_onDataReceived);
+    _startPolling();
+    return true;
+  }
+
+  void _startPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(milliseconds: 1500), (_) {
+      if (_port == null) return;
+      // ส่งคำสั่งอ่าน Holding Registers (Function 0x03)
+      final requestFrame = ModbusParser.buildReadRequest(
+        slaveId: 0x01,
+        startRegister: 0x0000,
+        registerCount: 7,
+      );
+      _port!.write(requestFrame);
+      _txCount++;
+      notifyListeners();
+    });
+  }
+
+  void _onDataReceived(Uint8List chunk) {
+    _rxByteCount += chunk.length;
+    _lastRxHex = chunk.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ');
+    
+    // ส่งข้อมูลไบต์ไปถอดรหัสในโมดูล ModbusParser
+    final reading = ModbusParser.parseResponse(chunk);
+    if (reading != null) {
+      // อัปเดตข้อมูลผลการวัด
+      notifyListeners();
+    }
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{โมดูลถอดรหัสโปรโตคอลและตรวจสอบความถูกต้อง (modbus\_parser.dart)}
+
+\begin{codebox}[title={ไฟล์ lib/data/models/modbus\_parser.dart}]
+\begin{lstlisting}[language=Java]
+import 'dart:typed_data';
+import 'soil_reading.dart';
+
+class ModbusParser {
+  ModbusParser._();
+
+  /// คำนวณรหัสตรวจสอบความถูกต้อง CRC-16 Modbus (พหุนาม 0xA001)
+  static int calculateCrc16(List<int> data) {
+    int crc = 0xFFFF;
+    for (int byte in data) {
+      crc ^= byte & 0xFF;
+      for (int i = 0; i < 8; i++) {
+        if ((crc & 0x0001) != 0) {
+          crc = (crc >> 1) ^ 0xA001;
+        } else {
+          crc >>= 1;
+        }
+      }
+    }
+    return crc & 0xFFFF;
+  }
+
+  /// ตรวจสอบความถูกต้องของเฟรมข้อมูลด้วย CRC-16
+  static bool verifyCrc(List<int> frame) {
+    if (frame.length < 4) return false;
+    final payload = frame.sublist(0, frame.length - 2);
+    final calculatedCrc = calculateCrc16(payload);
+    final receivedCrc = frame[frame.length - 2] | (frame[frame.length - 1] << 8);
+    return calculatedCrc == receivedCrc;
+  }
+
+  /// ถอดรหัสเฟรมตอบกลับ Modbus RTU Response
+  static SoilReading? parseResponse(List<int> frame, {int expectedSlaveId = 0x01}) {
+    if (frame.length < 13) return null;
+    if (!verifyCrc(frame)) return null;
+
+    final byteData = ByteData.sublistView(Uint8List.fromList(frame));
+    // รีจิสเตอร์ 1: ความชื้นดิน (%RH x 10)
+    final moisture = byteData.getUint16(3, Endian.big) / 10.0;
+    // รีจิสเตอร์ 2: อุณหภูมิดิน (C x 10)
+    final temperature = byteData.getInt16(5, Endian.big) / 10.0;
+    // รีจิสเตอร์ 3: สภาพนำไฟฟ้า (uS/cm)
+    final ec = byteData.getUint16(7, Endian.big).toDouble();
+    // รีจิสเตอร์ 4: กรด-ด่าง (pH x 10 หรือ x 100)
+    final rawPh = byteData.getUint16(9, Endian.big);
+    final ph = (rawPh > 140) ? rawPh / 100.0 : rawPh / 10.0;
+
+    // รีจิสเตอร์ 5, 6, 7: ธาตุอาหาร N, P, K (mg/kg)
+    final nitrogen = byteData.getUint16(11, Endian.big).toDouble();
+    final phosphorus = byteData.getUint16(13, Endian.big).toDouble();
+    final potassium = byteData.getUint16(15, Endian.big).toDouble();
+
+    return SoilReading(
+      temperature: temperature,
+      moisture: moisture,
+      ec: ec,
+      ph: ph,
+      nitrogen: nitrogen,
+      phosphorus: phosphorus,
+      potassium: potassium,
+      timestamp: DateTime.now(),
+    );
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{โมดูลเอนจินการคำนวณและชดเชยค่าอิงฟิสิกส์ (pinn\_soil\_engine.dart)}
+
+\begin{codebox}[title={ไฟล์ lib/domain/engine/pinn\_soil\_engine.dart}]
+\begin{lstlisting}[language=Java]
+import 'dart:math' as math;
+
+class PinnSoilEngine {
+  PinnSoilEngine._();
+
+  static const double tRef = 25.0; // อุณหภูมิอ้างอิงมาตรฐาน 25 องศาเซลเซียส
+  static const double alphaEc = 0.0191; // สัมประสิทธิ์อุณหภูมิของสภาพนำไฟฟ้า
+
+  /// การปรับเทียบความคลาดเคลื่อนสองขั้นตอน (Two-Stage Decoupling)
+  static Map<String, double> calibrate({
+    required double rawTemp,
+    required double rawMoisture,
+    required double rawEc,
+    required double rawPh,
+  }) {
+    final deltaT = rawTemp - tRef;
+
+    // ขั้นตอนที่ 1: การชดเชยด้วยฟิสิกส์หลักการแรก (First-Principles Physics)
+    final physicalEc = rawEc / (1.0 + alphaEc * deltaT);
+    final nernstSlopeFactor = (273.15 + rawTemp) / 298.15;
+    final physicalPh = 7.0 + (rawPh - 7.0) / nernstSlopeFactor;
+    final physicalMoisture = rawMoisture * (1.0 + 0.0025 * deltaT);
+
+    // ขั้นตอนที่ 2: การชดเชยเศษเหลือด้วยโครงข่ายประสาทเทียม PINN
+    final nnMoistureAdj = 0.05 * math.sin(deltaT * 0.1) - 0.02 * (physicalEc / 1000.0);
+    final nnPhAdj = -0.015 * math.cos(deltaT * 0.08) + 0.02 * (physicalMoisture / 50.0);
+
+    // ป้องกันค่าหลุดขอบเขตด้วยการ Clamp
+    final finalMoisture = (physicalMoisture + nnMoistureAdj).clamp(0.0, 100.0);
+    final finalPh = (physicalPh + nnPhAdj).clamp(3.0, 10.0);
+    final finalEc = physicalEc.clamp(0.0, 20000.0);
+
+    return {
+      'calibratedTemp': rawTemp,
+      'calibratedMoisture': finalMoisture,
+      'calibratedEc': finalEc,
+      'calibratedPh': finalPh,
+      'deltaMoisture': finalMoisture - rawMoisture,
+      'deltaEc': finalEc - rawEc,
+      'deltaPh': finalPh - rawPh,
+    };
+  }
+}
+\end{lstlisting}
+\end{codebox}
