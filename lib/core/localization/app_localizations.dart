@@ -443,6 +443,36 @@ class AppLocalizations {
       AppLanguage.english: 'Tap any coordinate pin to view sample telemetry',
       AppLanguage.chinese: '点击图钉查看该采样点遥测参数',
     },
+    'basemapSatellite': {
+      AppLanguage.thai: '🛰️ ภาพดาวเทียมจริง',
+      AppLanguage.english: '🛰️ Satellite Imagery',
+      AppLanguage.chinese: '🛰️ 真实卫星影像',
+    },
+    'basemapStreet': {
+      AppLanguage.thai: '🗺️ แผนที่ถนน (OSM)',
+      AppLanguage.english: '🗺️ Street Map (OSM)',
+      AppLanguage.chinese: '🗺️ 街道地图 (OSM)',
+    },
+    'basemapOffline': {
+      AppLanguage.thai: '⬛ ผังออฟไลน์ (Grid)',
+      AppLanguage.english: '⬛ Offline Grid',
+      AppLanguage.chinese: '⬛ 离线网格',
+    },
+    'toggleContour': {
+      AppLanguage.thai: 'เส้นชั้น Contour',
+      AppLanguage.english: 'Contour Isolines',
+      AppLanguage.chinese: '等值线 (Contour)',
+    },
+    'toggleHeatmap': {
+      AppLanguage.thai: 'พื้นผิว Heatmap',
+      AppLanguage.english: 'Surface Heatmap',
+      AppLanguage.chinese: '热力图图层',
+    },
+    'basemap': {
+      AppLanguage.thai: 'แผนที่ฐาน',
+      AppLanguage.english: 'Basemap',
+      AppLanguage.chinese: '底图',
+    },
   };
 
   String t(String key) {

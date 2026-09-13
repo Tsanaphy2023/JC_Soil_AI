@@ -702,14 +702,21 @@ adb pull /sdcard/Android/data/com.agriphysics.soil_app/files/soil_dataset ./my_s
   4. ใบสั่งสูตรปุ๋ยเฉพาะแปลง อัตราปูนโดโลไมต์ปรับสภาพดินกรด และรอบการให้น้ำ
   5. บันทึกเป็นไฟล์เอกสารลงใน `soil_dataset/data/SOIL_REPORT_<sampleId>.html` รองรับการพิมพ์ตรง (Print to PDF) และแชร์ผ่าน LINE ได้ทันที
 
-#### 8.6.2 ระบบแผนที่แปลงดินเชิงพื้นที่และความอุดมสมบูรณ์ (GIS Soil Spatial Map & Heatmap Screen)
+#### 8.6.2 ระบบแผนที่แปลงดินเชิงพื้นที่และความอุดมสมบูรณ์ (GIS Soil Spatial Map & Real Basemap with Contour)
 * **การทำงาน:** เข้าถึงผ่านปุ่มไอคอนแผนที่ `[Icons.map_outlined]` บนแถบ AppBar ของหน้าคลังข้อมูล
 * **คุณสมบัติเด่น:**
-  1. **Interactive Field Canvas:** พล็อตตำแหน่งหมุดพิกัดตามตำแหน่งทางภูมิศาสตร์จริงแบบ Normalized Geographic Projection
-  2. **60 FPS Smooth Gesture:** รองรับการซูม (Pinch-to-zoom) และการเลื่อนดูแปลง (Pan) ได้อย่างลื่นไหล
-  3. **สลับเลเยอร์สี (Layer Filter Chips):** สลับดู 5 มิติ: สุขภาพดินรวม (Health Score), กรด-ด่าง (pH), ความชื้น (Moisture %), สภาพนำไฟฟ้า (EC), และธาตุอาหาร N-P-K
-  4. **Interactive Pin Tap:** แตะที่หมุดพิกัดใดๆ เพื่อเปิด Modal Sheet ดูข้อมูลตรวจวัดของจุดนั้น พร้อมปุ่ม **"พิมพ์ใบรายงานผลตรวจดิน A4"** และปุ่ม **"เปิดนำทางด้วย Google Maps"**
-  5. **ระบบส่งออกเชิงพื้นที่ (Spatial Data Exporter):** ปุ่มส่งออกไฟล์มาตรฐาน **GeoJSON** (`.geojson`) และ **Google Earth KML** (`.kml`) สำหรับเปิดในโปรแกรม QGIS หรือป้อนข้อมูลโดรนเกษตรได้ทันที
+  1. **แผนที่จริงหลายมิติ (Multi-Source Real Basemaps):**
+     * 🛰️ **ภาพถ่ายดาวเทียมจริง (Satellite Imagery):** ดึงภาพดาวเทียมความละเอียดสูงระดับแปลงเกษตรจาก Esri ArcGIS World Imagery แบบ Real-time ทั่วโลก
+     * 🗺️ **แผนที่ถนนและภูมิประเทศ (Street Map):** ดึงจาก OpenStreetMap (OSM) เพื่อดูเส้นทางและบริบทพื้นที่แปลง
+     * ⬛ **ผังออฟไลน์ (Offline Precision Grid):** โหมดหน้าจอดำสำหรับใช้งานในพื้นที่ห่างไกลที่ไม่มีสัญญาณอินเทอร์เน็ต
+  2. **เส้นชั้นความอุดมสมบูรณ์ดิน (Marching Squares Contour Isolines):**
+     * คำนวณเส้นชั้นความเข้มเท่ากัน (Isolines) เช่น เส้น pH 5.5, 6.0, 6.5 หรือเส้นความชื้น 30%, 45%, 60% พร้อมป้ายตัวเลขกำกับบนเส้น
+     * มีปุ่มควบคุมกระจกใส (Glassmorphism Toggle) สำหรับเปิด/ปิดเส้น Contour ได้อย่างอิสระ
+  3. **พื้นผิวไล่เฉดสีความอุดมสมบูรณ์ (IDW Geostatistical Heatmap):**
+     * ใช้อัลกอริทึม **Inverse Distance Weighting (IDW)** ประมาณค่าความต่อเนื่องเชิงพื้นที่ 36x36 กริด ระบายเฉดสีโปร่งแสงทับบนภาพถ่ายดาวเทียมจริงอย่างลงตัว
+  4. **สลับเลเยอร์สี 5 มิติ (Layer Filter Chips):** สลับดูสุขภาพดินรวม (Health Score), กรด-ด่าง (pH), ความชื้น (Moisture %), สภาพนำไฟฟ้า (EC), และธาตุอาหาร N-P-K
+  5. **Interactive Pin Tap:** แตะที่หมุดพิกัดใดๆ เพื่อเปิด Modal Sheet ดูข้อมูลตรวจวัดของจุดนั้น พร้อมปุ่ม **"พิมพ์ใบรายงานผลตรวจดิน A4"** และปุ่ม **"เปิดนำทางด้วย Google Maps"**
+  6. **ระบบส่งออกเชิงพื้นที่ (Spatial Data Exporter):** ปุ่มส่งออกไฟล์มาตรฐาน **GeoJSON** (`.geojson`) และ **Google Earth KML** (`.kml`) สำหรับเปิดในโปรแกรม QGIS หรือป้อนข้อมูลโดรนเกษตรได้ทันที
 
 ---
 
