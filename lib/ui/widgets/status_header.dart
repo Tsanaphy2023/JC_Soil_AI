@@ -99,124 +99,53 @@ class StatusHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              // Futuristic JC Emblem Button (Replaces the traditional flask icon)
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: onSimulationTap,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: status == UsbConnectionStatus.simulating
-                            ? [const Color(0xFFFFD54F), const Color(0xFFFF8F00)]
-                            : [const Color(0xFF00E5FF), const Color(0xFF0091EA)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        width: 1.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: (status == UsbConnectionStatus.simulating
-                                  ? Colors.amberAccent
-                                  : Colors.cyanAccent)
-                              .withValues(alpha: 0.5),
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'JC',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.8,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black45,
-                                blurRadius: 3,
-                                offset: Offset(0, 1),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 3),
-                        Icon(
-                          status == UsbConnectionStatus.simulating
-                              ? Icons.bolt
-                              : Icons.auto_awesome,
-                          color: Colors.white,
-                          size: 13,
-                        ),
-                      ],
-                    ),
+              // Combined Futuristic Brand Logo Lockup: JC AI + SOIL / AI ANALYZER
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: _buildUnifiedBrandLogo(context),
                   ),
                 ),
               ),
 
-              // Title SOIL AI ANALYZER with custom logo
-              Expanded(
-                child: Center(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: Image.asset(
-                            'assets/images/app_icon.png',
-                            width: 26,
-                            height: 26,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'SOIL AI ANALYZER',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              const SizedBox(width: 4),
 
               // AI Vision Camera icon
               IconButton(
-                icon: const Icon(Icons.camera_alt, color: Colors.cyanAccent),
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                icon: const Icon(Icons.camera_alt, color: Colors.cyanAccent, size: 21),
                 tooltip: 'AI Camera / Record Data',
                 onPressed: onCameraTap,
               ),
 
               // AI Dataset Gallery icon
               IconButton(
-                icon: const Icon(Icons.photo_library_outlined, color: Colors.tealAccent),
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                icon: const Icon(Icons.photo_library_outlined, color: Colors.tealAccent, size: 21),
                 tooltip: 'คลังภาพ & ข้อมูล AI',
                 onPressed: onGalleryTap,
               ),
 
+              const SizedBox(width: 2),
+
               // Flag Language Switcher (TH / EN / ZH)
               const LanguageSelectorButton(compact: true),
+
               const SizedBox(width: 2),
 
               // Settings icon
               IconButton(
-                icon: const Icon(Icons.settings, color: Colors.white),
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                icon: const Icon(Icons.settings, color: Colors.white, size: 21),
                 tooltip: 'Settings & Serial Config',
                 onPressed: onSettingsTap,
               ),
@@ -450,6 +379,197 @@ class StatusHeader extends StatelessWidget {
             ],
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildUnifiedBrandLogo(BuildContext context) {
+    final isSim = (status == UsbConnectionStatus.simulating);
+
+    return Semantics(
+      label: 'JC AI SOIL AI ANALYZER',
+      button: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onSimulationTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.28),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSim
+                    ? Colors.amberAccent.withValues(alpha: 0.8)
+                    : Colors.cyanAccent.withValues(alpha: 0.45),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isSim
+                      ? Colors.amber.withValues(alpha: 0.25)
+                      : Colors.cyanAccent.withValues(alpha: 0.15),
+                  blurRadius: 8,
+                  spreadRadius: 0.5,
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Left Column: JC AI Emblem Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isSim
+                          ? const [Color(0xFFFF8F00), Color(0xFFFFD54F)]
+                          : const [Color(0xFF0D47A1), Color(0xFF00B0FF)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isSim
+                            ? Colors.amber.withValues(alpha: 0.4)
+                            : Colors.blueAccent.withValues(alpha: 0.35),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'JC',
+                        style: TextStyle(
+                          color: isSim ? Colors.black87 : Colors.white,
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                          shadows: isSim
+                              ? null
+                              : const [
+                                  Shadow(
+                                    color: Colors.black45,
+                                    offset: Offset(0, 1),
+                                    blurRadius: 2,
+                                  ),
+                                ],
+                        ),
+                      ),
+                      const SizedBox(width: 3.5),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: isSim
+                              ? Colors.black87
+                              : const Color(0xFF00E5FF).withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: isSim ? Colors.transparent : Colors.cyanAccent,
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Text(
+                          'AI',
+                          style: TextStyle(
+                            color: isSim ? Colors.amberAccent : Colors.cyanAccent,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Luminous Vertical Divider
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  width: 1.5,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        isSim ? Colors.amberAccent : Colors.cyanAccent,
+                        Colors.transparent,
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
+
+                // Right Column: Two-line Typography (Top: SOIL, Bottom: AI ANALYZER)
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Line 1: SOIL
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'SOIL',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.8,
+                            height: 1.1,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Container(
+                          width: 5,
+                          height: 5,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF00E676), // Neon nature emerald
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFF00E676),
+                                blurRadius: 4,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 1.5),
+                    // Line 2: AI ANALYZER
+                    Text(
+                      'AI ANALYZER',
+                      style: TextStyle(
+                        color: isSim ? Colors.amberAccent : const Color(0xFF64FFDA),
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.4,
+                        height: 1.0,
+                        shadows: [
+                          Shadow(
+                            color: isSim
+                                ? Colors.amber.withValues(alpha: 0.6)
+                                : const Color(0xFF64FFDA).withValues(alpha: 0.5),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
