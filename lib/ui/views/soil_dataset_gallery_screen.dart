@@ -6,9 +6,9 @@ import '../../core/constants/app_colors.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/localization/language_provider.dart';
 import '../../data/models/soil_dataset_item.dart';
-import '../../data/services/export_service.dart';
 import '../../data/services/soil_dataset_service.dart';
 import '../viewmodels/soil_sensor_viewmodel.dart';
+import '../widgets/soil_video_player_viewer.dart';
 import 'historical_data_screen.dart';
 
 enum GalleryFilter { all, images, videos, csv }
@@ -638,48 +638,50 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                       controller: scrollController,
                       padding: const EdgeInsets.all(14),
                       children: [
-                        // Media Display Box (Pinch-to-zoom for image)
+                        // Media Display Box (In-App Video Player with Telemetry HUD for videos, Pinch-to-zoom for images)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Container(
-                            height: 280,
+                            height: item.isVideo ? 420 : 280,
                             color: Colors.black,
-                            child: item.isImage && item.fileExists
-                                ? InteractiveViewer(
-                                    minScale: 0.8,
-                                    maxScale: 4.0,
-                                    child: Image.file(
-                                      File(item.filePath),
-                                      fit: BoxFit.contain,
-                                    ),
-                                  )
-                                : Center(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          item.isVideo ? Icons.videocam : Icons.broken_image,
-                                          color: item.isVideo ? Colors.redAccent : Colors.grey,
-                                          size: 50,
+                            child: item.isVideo && item.fileExists
+                                ? SoilVideoPlayerViewer(item: item)
+                                : item.isImage && item.fileExists
+                                    ? InteractiveViewer(
+                                        minScale: 0.8,
+                                        maxScale: 4.0,
+                                        child: Image.file(
+                                          File(item.filePath),
+                                          fit: BoxFit.contain,
                                         ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          item.fileName,
-                                          style: const TextStyle(color: Colors.white70, fontSize: 12),
-                                        ),
-                                        if (item.isVideo)
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 8),
-                                            child: ElevatedButton.icon(
-                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade800),
-                                              icon: const Icon(Icons.play_arrow),
-                                              label: const Text('แชร์ / เปิดด้วยโปรแกรมเล่นวิดีโอ'),
-                                              onPressed: () => _shareItem(item),
+                                      )
+                                    : Center(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              item.isVideo ? Icons.videocam_off : Icons.broken_image,
+                                              color: item.isVideo ? Colors.redAccent : Colors.grey,
+                                              size: 50,
                                             ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              item.fileName,
+                                              style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                            ),
+                                            if (item.isVideo)
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 8),
+                                                child: ElevatedButton.icon(
+                                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade800),
+                                                  icon: const Icon(Icons.share),
+                                                  label: const Text('แชร์ไฟล์วิดีโอ'),
+                                                  onPressed: () => _shareItem(item),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
                           ),
                         ),
                         const SizedBox(height: 12),

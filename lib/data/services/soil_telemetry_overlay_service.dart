@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -100,7 +99,7 @@ class SoilTelemetryOverlayService {
     // App Title
     _drawText(
       canvas: canvas,
-      text: '🌱 SOIL AI ANALYZER  |  RBRU Agriphysics',
+      text: '🌱 JC SOIL AI ANALYZER  |  SciRBRU AgriPhysics',
       offset: ui.Offset(24 * scale, 18 * scale),
       fontSize: 22 * scale,
       fontWeight: FontWeight.bold,

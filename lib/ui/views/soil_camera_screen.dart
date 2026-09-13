@@ -3,7 +3,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/constants/app_colors.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/localization/language_provider.dart';
 import '../../data/services/soil_dataset_service.dart';
@@ -390,12 +389,26 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
+                            children: const [
+                              Text(
+                                '🌱 JC SOIL AI ANALYZER  |  SciRBRU AgriPhysics',
+                                style: TextStyle(
+                                  color: Color(0xFF00FFFF),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Row(
                             children: [
                               const Icon(Icons.location_on, color: Colors.amberAccent, size: 14),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  location?.formattedCoordinates ?? lang.t('gpsLocating'),
+                                  location.formattedCoordinates,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 11.5,
@@ -412,7 +425,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                               const Icon(Icons.terrain, color: Colors.cyanAccent, size: 12),
                               const SizedBox(width: 4),
                               Text(
-                                '${lang.t('altitude')}: ${location?.formattedAltitude ?? '-'} (MSL)',
+                                '${lang.t('altitude')}: ${location.formattedAltitude} (MSL)',
                                 style: const TextStyle(color: Colors.cyanAccent, fontSize: 10.5),
                               ),
                               const Spacer(),

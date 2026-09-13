@@ -43,6 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+.kotlin/
+android/.kotlin/
 
 # Large APK files (>100MB strictly blocked by GitHub)
 Soil_Parameter_Detector.apk

@@ -107,7 +107,7 @@ class SoilDatasetItem {
     final durationStr = isVideo && durationSeconds != null ? 'ความยาวคลิป: $durationSeconds วินาที\n' : '';
 
     return '''
-🌿 [SOIL AI ANALYZER - ข้อมูลตัวอย่างดินวิจัย]
+🌿 [JC SOIL AI ANALYZER - ข้อมูลตัวอย่างดินวิจัย]
 รหัสตัวอย่าง: $sampleId
 ประเภท: $typeStr
 เวลาบันทึก: $dateStr
@@ -130,8 +130,8 @@ ${aiConfidenceScore != null ? '• ดัชนีความเชื่อม
 • EC หลังสอบเทียบ: ${aiConductivity ?? conductivity} µS/cm
 • ความชื้นหลังสอบเทียบ: ${aiMoisture?.toStringAsFixed(1) ?? moisture.toStringAsFixed(1)}%
 
-บันทึกโดยแอปพลิเคชัน: SOIL AI ANALYZER (JC Soil AI)
-มหาวิทยาลัยราชภัฏรำไพพรรณี (RBRU Agriphysics)
+บันทึกโดยแอปพลิเคชัน: JC SOIL AI ANALYZER | SciRBRU AgriPhysics
+มหาวิทยาลัยราชภัฏรำไพพรรณี (SciRBRU AgriPhysics)
 '''.trim();
   }
 

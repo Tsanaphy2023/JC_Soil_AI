@@ -146,6 +146,24 @@ class SoilDatasetService {
 
     await video.saveTo(savedFile.path);
 
+    // Also write synchronized SRT telemetry subtitle alongside MP4 for external players
+    try {
+      final srtPath = savedFile.path.replaceAll('.mp4', '.srt');
+      final srtFile = File(srtPath);
+      final dur = durationSeconds > 0 ? durationSeconds : 5;
+      final durMin = (dur ~/ 60).toString().padLeft(2, '0');
+      final durSec = (dur % 60).toString().padLeft(2, '0');
+      final srtContent = '''1
+00:00:00,000 --> $durMin:$durSec,000
+🌱 JC SOIL AI ANALYZER | SciRBRU AgriPhysics
+📍 GPS: ${latVal?.toStringAsFixed(5) ?? '0.0'}° N, ${lonVal?.toStringAsFixed(5) ?? '0.0'}° E (Alt: ${altVal.toStringAsFixed(1)}m)
+ความชื้น: ${rawReading.moisture.toStringAsFixed(1)}% | อุณหภูมิ: ${rawReading.temperature.toStringAsFixed(1)}°C | EC: ${rawReading.conductivity} µS/cm | pH: ${rawReading.ph.toStringAsFixed(2)}
+N-P-K: ${rawReading.nitrogen}-${rawReading.phosphorus}-${rawReading.potassium} mg/kg | Fertility: ${rawReading.fertility}
+🤖 AI PINN: pH ${calibrated.calibratedReading.ph.toStringAsFixed(2)} | EC ${calibrated.calibratedReading.conductivity}µS | Moist ${calibrated.calibratedReading.moisture.toStringAsFixed(1)}%
+''';
+      await srtFile.writeAsString(srtContent);
+    } catch (_) {}
+
     final item = SoilDatasetItem(
       sampleId: 'SAMPLE_${now.millisecondsSinceEpoch}',
       timestamp: now,
@@ -352,8 +370,8 @@ class SoilDatasetService {
 
     await Share.shareXFiles(
       validFiles,
-      text: 'ชุดข้อมูลตัวอย่างดินวิจัย (${validFiles.length} รายการ) - SOIL AI ANALYZER',
-      subject: 'Soil AI Dataset Export',
+      text: 'ชุดข้อมูลตัวอย่างดินวิจัย (${validFiles.length} รายการ) - JC SOIL AI ANALYZER | SciRBRU AgriPhysics',
+      subject: 'JC Soil AI Dataset Export',
     );
   }
 
