@@ -164,9 +164,25 @@ adb shell am start -n com.agriphysics.soil_app/com.agriphysics.soil_app.MainActi
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.48\textwidth]{figures/app_ui.jpg}
-\caption{หน้าจอแดชบอร์ดหลักของแอปพลิเคชัน JC AI Detector บนสมาร์ตโฟนจริง}
+\caption{หน้าจอแดชบอร์ดหลักของแอปพลิเคชัน SOIL AI ANALYZER บนสมาร์ตโฟนจริง}
 \label{fig:app_ui_screen}
 \end{figure}
+
+\section{ระบบคลังภาพ วิดีโอ และการส่งออกชุดข้อมูลวิจัยมัลติโมดอล}
+
+เพื่อสนับสนุนการตรวจสอบย้อนกลับ (Traceability) และการสร้างชุดข้อมูลสำหรับการเรียนรู้เชิงลึก (AI Model Retraining) แอปพลิเคชันได้รับการยกระดับระบบจัดเก็บและคลังสื่อ (Soil AI Media \& Dataset Explorer):
+
+\subsection{การระบุพิกัดดาวเทียมอัตโนมัติและกล้อง AI Vision ภาคสนาม}
+ระบบเชื่อมโยงชิปดาวเทียม GNSS ภายในสมาร์ตโฟนเพื่อดึงพิกัด Latitude, Longitude และความสูงระดับน้ำทะเล (Altitude MSL) ซ้อนทับลงบนภาพสดและตารางข้อมูลอัตโนมัติ โดยผู้ใช้สามารถบันทึกภาพถ่ายดินความละเอียดสูงหรือวิดีโอกระบวนการเก็บตัวอย่างที่มีแผงข้อมูลเซนเซอร์ (Telemetry HUD) ลอยอยู่บนภาพสดแบบเรียลไทม์
+
+\subsection{คลังภาพอัจฉริยะและการซูมตรวจสอบเนื้อดิน (Pinch-to-zoom)}
+ผู้ใช้งานสามารถเข้าถึงคลังสื่อผ่านปุ่ม \textbf{Gallery} บนแดชบอร์ดหลัก หรือปุ่มลัดในหน้ากล้อง โดยมีระบบซูมภาพแบบสองมิติ (\textit{InteractiveViewer}) ขยายได้สูงสุด 4 เท่า เพื่อตรวจสอบลักษณะทางสัณฐานวิทยาของดิน (Soil Morphology), โครงสร้างเม็ดดิน, ระดับความชื้น, และสีดินตามระบบ Munsell ได้โดยตรง
+
+\subsection{ระบบแชร์ข้อมูลอัจฉริยะ (Smart Sharing) สู่ภายนอก}
+ผู้ใช้สามารถกดปุ่ม \textbf{Share} เพื่อส่งภาพถ่ายหรือวิดีโอพร้อมข้อความสรุปค่าพารามิเตอร์ 8-in-1, ค่าสอบเทียบโมเดล PINN, และลิงก์พิกัดแปลงบน Google Maps ไปยังแอปพลิเคชันภายนอก (LINE, Gmail, Google Drive, WhatsApp) ได้ในคลิกเดียว หรือเลือกส่งออกชุดข้อมูลวิจัยทั้งหมด (\textit{Full Dataset Package}) ประกอบด้วยไฟล์ดัชนี \texttt{dataset\_manifest.json}, ตาราง \texttt{Soil\_parameters.csv}, และไฟล์ภาพ/วิดีโอทั้งหมดผ่านพอร์ต USB หรือคำสั่ง ADB:
+\begin{lstlisting}[language=bash]
+adb pull /sdcard/Android/data/com.agriphysics.soil_app/files/soil_dataset ./my_soil_dataset
+\end{lstlisting}
 
 \section{เกณฑ์การตรวจสอบความใช้ได้ของวิธีตามมาตรฐานสากล}
 

@@ -19,7 +19,20 @@
 - **Action Buttons ด้านล่าง:**
   - `[ Save to *.xls ]`: บันทึกข้อมูลลงไฟล์ตารางคำนวณในเครื่อง พร้อมเมนูแชร์ไฟล์ (LINE, Drive, Gmail)
   - `[ Data ]`: เปิดดูประวัติตารางบันทึกข้อมูลย้อนหลัง และค่าเฉลี่ยสถิติ
-- **Status Header:** แสดงสถานะการเชื่อมต่อ USB OTG พร้อมปุ่มเปิด/ปิด **Demo Simulation Mode** สำหรับทดสอบได้ทันที
+  - `[ Gallery ]`: คลังภาพถ่ายและวิดีโออัจฉริยะ (Soil AI Media & Dataset Explorer) พร้อมระบบซูมเนื้อดิน (Pinch-to-zoom) และปุ่มแชร์ด่วน
+- **Status Header:** แสดงสถานะการเชื่อมต่อ USB OTG พร้อมพิกัด GPS สด, ปุ่ม AI Vision & GPS, ปุ่มเปิดคลังภาพ, และปุ่มเปิด/ปิด **Demo Simulation Mode** สำหรับทดสอบได้ทันที
+- **Floating Action Button:** `[ AI Vision & GPS ]` สำหรับเปิดกล้องส่องแปลงดิน ถ่ายภาพและบันทึกวิดีโอพร้อมข้อมูล Telemetry ลอยบนจอแบบเรียลไทม์
+
+---
+
+## 📷 คลังภาพ วิดีโอ และการระบุพิกัดดาวเทียม (AI Vision, GPS & Media Gallery)
+
+1. **Automated GPS Geotagging:** ดึงพิกัดจากชิปดาวเทียมในสมาร์ตโฟน (Latitude, Longitude, Altitude MSL) บันทึกลงในทุกภาพถ่าย วิดีโอ และตาราง CSV อัตโนมัติ
+2. **AI Vision & Live Telemetry HUD:** กล้องถ่ายภาพและบันทึกวิดีโอแปลงดิน พร้อมแสดงผลพารามิเตอร์ดิน 8 ค่าและพิกัด GPS ซ้อนทับบนภาพสดแบบเรียลไทม์
+3. **Soil AI Media Gallery:** หน้าต่างรวบรวมภาพถ่ายและวิดีโอทั้งหมดในเครื่อง พร้อมตัวกรองประเภทสื่อและสถิติขนาดพื้นที่หน่วยความจำ
+4. **Pinch-to-zoom & Telemetry HUD:** แตะเปิดดูภาพขนาดใหญ่ ซูมดูรายละเอียดเนื้อดินได้ 4 เท่า พร้อมแผงข้อมูลการตรวจวัด 8-in-1 และค่าสอบเทียบ AI PINN
+5. **Smart Sharing:** กดแชร์ภาพถ่ายหรือวิดีโอพร้อมข้อความสรุปค่าวิเคราะห์ดินทั้งหมดไปยัง LINE, Facebook, Google Drive, Gmail, WhatsApp ได้ใน 1 คลิก
+6. **AI Training Dataset:** ข้อมูลถูกบันทึกลง `/Android/data/com.agriphysics.soil_app/files/soil_dataset/` พร้อมไฟล์ `dataset_manifest.json` สำหรับนำไปเทรนโมเดล Multimodal AI ในคอมพิวเตอร์ต่อยอดทันที
 
 ---
 
