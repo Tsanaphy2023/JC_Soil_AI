@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/sensor_constants.dart';
+import '../../core/localization/language_provider.dart';
 import '../../data/services/usb_sensor_service.dart';
 import '../../domain/models/soil_color_scale.dart';
 import '../viewmodels/soil_sensor_viewmodel.dart';
@@ -21,6 +22,7 @@ class HomeDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SoilSensorViewModel>();
+    final lang = context.watch<LanguageProvider>();
     final reading = vm.displayReading;
     final calResult = vm.calibrationResult;
     final isOffline = (vm.status == UsbConnectionStatus.disconnected ||
@@ -122,7 +124,7 @@ class HomeDashboardScreen extends StatelessWidget {
                           children: [
                             // 1. Temperature (°C) - Green
                             ParameterCard(
-                              title: SensorConstants.titleTemperature,
+                              title: lang.t('temperature'),
                               unit: SensorConstants.unitTemperature,
                               value: fmtVal(reading.temperature, decimals: 1),
                               backgroundColor: AppColors.temperature,
@@ -135,7 +137,7 @@ class HomeDashboardScreen extends StatelessWidget {
 
                             // 2. Moisture (%) - Blue
                             ParameterCard(
-                              title: SensorConstants.titleMoisture,
+                              title: lang.t('moisture'),
                               unit: SensorConstants.unitMoisture,
                               value: fmtVal(reading.moisture, decimals: 1),
                               backgroundColor: AppColors.moisture,
@@ -148,7 +150,7 @@ class HomeDashboardScreen extends StatelessWidget {
 
                             // 3. Conductivity(EC) us/cm - Purple
                             ParameterCard(
-                              title: SensorConstants.titleConductivity,
+                              title: lang.t('conductivity'),
                               unit: SensorConstants.unitConductivity,
                               value: isOffline && !vm.isSimulationMode
                                   ? '***'
@@ -163,7 +165,7 @@ class HomeDashboardScreen extends StatelessWidget {
 
                             // 4. pH - Orange
                             ParameterCard(
-                              title: SensorConstants.titlePh,
+                              title: lang.t('ph'),
                               unit: SensorConstants.unitPh,
                               value: fmtVal(reading.ph, decimals: 2),
                               backgroundColor: AppColors.ph,
@@ -177,7 +179,7 @@ class HomeDashboardScreen extends StatelessWidget {
 
                             // 5. (N) Nitrogen - Magenta / Pink
                             ParameterCard(
-                              title: SensorConstants.titleNitrogen,
+                              title: lang.t('nitrogen'),
                               unit: SensorConstants.unitNitrogen,
                               value: isOffline && !vm.isSimulationMode
                                   ? '***'
@@ -191,7 +193,7 @@ class HomeDashboardScreen extends StatelessWidget {
 
                             // 6. (P) Phosphorus - Cyan / Light Blue
                             ParameterCard(
-                              title: SensorConstants.titlePhosphorus,
+                              title: lang.t('phosphorus'),
                               unit: SensorConstants.unitPhosphorus,
                               value: isOffline && !vm.isSimulationMode
                                   ? '***'
@@ -205,7 +207,7 @@ class HomeDashboardScreen extends StatelessWidget {
 
                             // 7. (K) Potassium - Teal
                             ParameterCard(
-                              title: SensorConstants.titlePotassium,
+                              title: lang.t('potassium'),
                               unit: SensorConstants.unitPotassium,
                               value: isOffline && !vm.isSimulationMode
                                   ? '***'
@@ -219,7 +221,7 @@ class HomeDashboardScreen extends StatelessWidget {
 
                             // 8. Fertility - Coral / Salmon
                             ParameterCard(
-                              title: SensorConstants.titleFertility,
+                              title: lang.t('fertility'),
                               unit: SensorConstants.unitFertility,
                               value: isOffline && !vm.isSimulationMode
                                   ? '***'
@@ -279,11 +281,14 @@ class HomeDashboardScreen extends StatelessWidget {
                                     height: 20,
                                     child: CircularProgressIndicator(strokeWidth: 2),
                                   )
-                                : const Text(
-                                    'Save to *.xls',
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w500,
+                                : FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      '${lang.t('saveTo')} *.xls',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                           ),
@@ -301,6 +306,7 @@ class HomeDashboardScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(2),
                               ),
                               elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
                             ),
                             onPressed: () {
                               Navigator.push(
@@ -310,11 +316,14 @@ class HomeDashboardScreen extends StatelessWidget {
                                 ),
                               );
                             },
-                            child: const Text(
-                              'Data',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                lang.t('historicalData'),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ),
@@ -332,6 +341,7 @@ class HomeDashboardScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(2),
                               ),
                               elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
                             ),
                             onPressed: () {
                               Navigator.push(
@@ -341,82 +351,85 @@ class HomeDashboardScreen extends StatelessWidget {
                                 ),
                               );
                             },
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.photo_library, size: 16),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Gallery',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.photo_library, size: 16),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    lang.t('gallery'),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
-              ),
-            ),
-
-            // 4. Footer info text
-            Container(
-              width: double.infinity,
-              color: Colors.black,
-              padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 6),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1100),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'The data is stored in root directory.(${SensorConstants.defaultCsvFileName})',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 11,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        '${SensorConstants.appVersion} | AI PINN',
-                        style: TextStyle(
-                          color: Colors.cyanAccent.withValues(alpha: 0.8),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+
+              // 4. Footer info text
+              Container(
+                width: double.infinity,
+                color: Colors.black,
+                padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 6),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1100),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${lang.t('storageNotice')} (${SensorConstants.defaultCsvFileName})',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontSize: 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '${SensorConstants.appVersion} | AI PINN',
+                          style: TextStyle(
+                            color: Colors.cyanAccent.withValues(alpha: 0.8),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.teal.shade900,
-        foregroundColor: Colors.white,
-        elevation: 6,
-        icon: const Icon(Icons.camera_alt, color: Colors.cyanAccent),
-        label: const Text(
-          'AI Vision & GPS',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
+        floatingActionButton: FloatingActionButton.extended(
+          backgroundColor: Colors.teal.shade900,
+          foregroundColor: Colors.white,
+          elevation: 6,
+          icon: const Icon(Icons.camera_alt, color: Colors.cyanAccent),
+          label: Text(
+            lang.t('aiVisionGps'),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SoilCameraScreen()),
+            );
+          },
         ),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const SoilCameraScreen()),
-          );
-        },
-      ),
-    );
+      );
+    }
   }
-}

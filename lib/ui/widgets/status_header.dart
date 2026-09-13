@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
-import '../../data/services/usb_sensor_service.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/constants/app_colors.dart';
+import '../../core/localization/language_provider.dart';
 import '../../data/models/geo_location_data.dart';
+import '../../data/services/usb_sensor_service.dart';
+import 'language_selector_button.dart';
 
 class StatusHeader extends StatelessWidget {
   final UsbConnectionStatus status;
@@ -38,18 +41,19 @@ class StatusHeader extends StatelessWidget {
     this.onGalleryTap,
   });
 
-  String get _statusLabel {
+  String _getStatusLabel(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     switch (status) {
       case UsbConnectionStatus.connected:
-        return 'USB CONNECTED';
+        return lang.t('connected');
       case UsbConnectionStatus.connecting:
-        return 'CONNECTING...';
+        return lang.t('connecting');
       case UsbConnectionStatus.simulating:
-        return 'SIMULATION (DEMO)';
+        return 'DEMO SIMULATION';
       case UsbConnectionStatus.error:
         return 'USB ERROR';
       case UsbConnectionStatus.disconnected:
-        return 'DISCONNECTED';
+        return lang.t('disconnected');
     }
   }
 
@@ -206,6 +210,10 @@ class StatusHeader extends StatelessWidget {
                 onPressed: onGalleryTap,
               ),
 
+              // Flag Language Switcher (TH / EN / ZH)
+              const LanguageSelectorButton(compact: true),
+              const SizedBox(width: 2),
+
               // Settings icon
               IconButton(
                 icon: const Icon(Icons.settings, color: Colors.white),
@@ -246,7 +254,7 @@ class StatusHeader extends StatelessWidget {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        _statusLabel,
+                        _getStatusLabel(context),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 11,
@@ -260,67 +268,77 @@ class StatusHeader extends StatelessWidget {
               ),
 
               // 2. AI Deep Learning Calibration Badge
-              InkWell(
-                onTap: onAiTap,
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
-                  decoration: BoxDecoration(
-                    color: isAiCalibrated
-                        ? Colors.black.withValues(alpha: 0.3)
-                        : Colors.black.withValues(alpha: 0.15),
+              Builder(
+                builder: (ctx) {
+                  final lang = ctx.watch<LanguageProvider>();
+                  return InkWell(
+                    onTap: onAiTap,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isAiCalibrated ? Colors.cyanAccent : Colors.white24,
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        color: isAiCalibrated ? Colors.cyanAccent : Colors.white54,
-                        size: 13,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        isAiCalibrated ? 'AI CALIBRATION: ON' : 'AI CALIBRATION: OFF',
-                        style: TextStyle(
-                          color: isAiCalibrated ? Colors.cyanAccent : Colors.white60,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.3,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
+                      decoration: BoxDecoration(
+                        color: isAiCalibrated
+                            ? Colors.black.withValues(alpha: 0.3)
+                            : Colors.black.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isAiCalibrated ? Colors.cyanAccent : Colors.white24,
+                          width: 1.0,
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.auto_awesome,
+                            color: isAiCalibrated ? Colors.cyanAccent : Colors.white54,
+                            size: 13,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isAiCalibrated ? lang.t('aiCalibrationOn') : lang.t('aiCalibrationOff'),
+                            style: TextStyle(
+                              color: isAiCalibrated ? Colors.cyanAccent : Colors.white60,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
 
               // 3. GPS Geotag Badge (Lat, Lon, Alt)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.22),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.amberAccent.withValues(alpha: 0.6)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.location_on, color: Colors.amberAccent, size: 12),
-                    const SizedBox(width: 4),
-                    Text(
-                      location?.summary ?? 'GPS: กำลังค้นหาพิกัด...',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.bold,
-                      ),
+              Builder(
+                builder: (ctx) {
+                  final lang = ctx.watch<LanguageProvider>();
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.22),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.amberAccent.withValues(alpha: 0.6)),
                     ),
-                  ],
-                ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.location_on, color: Colors.amberAccent, size: 12),
+                        const SizedBox(width: 4),
+                        Text(
+                          location?.summary ?? lang.t('gpsLocating'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),

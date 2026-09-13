@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/localization/app_localizations.dart';
+import '../../core/localization/language_provider.dart';
 import '../../data/models/soil_dataset_item.dart';
 import '../../data/services/export_service.dart';
 import '../../data/services/soil_dataset_service.dart';
@@ -146,19 +148,21 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'คลังภาพ & ชุดข้อมูล AI ดิน',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+              lang.t('galleryTitle'),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             Text(
-              'Soil AI Media & Research Dataset Explorer',
-              style: TextStyle(fontSize: 11, color: Colors.cyanAccent),
+              lang.t('gallerySubtitle'),
+              style: const TextStyle(fontSize: 10.5, color: Colors.cyanAccent),
             ),
           ],
         ),
@@ -166,12 +170,12 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined, color: Colors.cyanAccent),
-            tooltip: 'แชร์ชุดข้อมูลทั้งหมด (Share All)',
+            tooltip: lang.t('shareDataset'),
             onPressed: _items.isEmpty ? null : _shareAllDataset,
           ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white70),
-            tooltip: 'รีเฟรชข้อมูล',
+            tooltip: 'Refresh',
             onPressed: _loadData,
           ),
         ],
@@ -179,10 +183,10 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
       body: Column(
         children: [
           // 1. Top Statistics Header Card
-          _buildStatsCard(),
+          _buildStatsCard(lang),
 
           // 2. Filter Tabs
-          _buildFilterTabs(),
+          _buildFilterTabs(lang),
 
           // 3. Main Content
           Expanded(
@@ -190,14 +194,14 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                 ? const Center(child: CircularProgressIndicator(color: Colors.cyanAccent))
                 : _currentFilter == GalleryFilter.csv
                     ? _buildCsvTabContent()
-                    : _buildMediaGrid(),
+                    : _buildMediaGrid(lang),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatsCard() {
+  Widget _buildStatsCard(LanguageProvider lang) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       padding: const EdgeInsets.all(12),
@@ -216,13 +220,13 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatColumn('📷 ภาพถ่าย', '${_stats['images'] ?? 0}', Colors.tealAccent),
+          _buildStatColumn('📷 ${lang.t('photosCount')}', '${_stats['images'] ?? 0}', Colors.tealAccent),
           _buildStatDivider(),
-          _buildStatColumn('🎥 วิดีโอ', '${_stats['videos'] ?? 0}', Colors.redAccent),
+          _buildStatColumn('🎥 ${lang.t('videosCount')}', '${_stats['videos'] ?? 0}', Colors.redAccent),
           _buildStatDivider(),
-          _buildStatColumn('📍 ระบุพิกัด GPS', '${_stats['geotagged'] ?? 0}', Colors.amberAccent),
+          _buildStatColumn('📍 ${lang.t('geotaggedCount')}', '${_stats['geotagged'] ?? 0}', Colors.amberAccent),
           _buildStatDivider(),
-          _buildStatColumn('💾 พื้นที่จัดเก็บ', '${_stats['formattedSize'] ?? '0 MB'}', Colors.cyanAccent),
+          _buildStatColumn('💾 ${lang.t('storageSize')}', '${_stats['formattedSize'] ?? '0 MB'}', Colors.cyanAccent),
         ],
       ),
     );
@@ -254,18 +258,18 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
     );
   }
 
-  Widget _buildFilterTabs() {
+  Widget _buildFilterTabs(LanguageProvider lang) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Row(
         children: [
-          _buildFilterChip('ทั้งหมด (${_items.length})', GalleryFilter.all),
+          _buildFilterChip('${lang.t('filterAll')} (${_items.length})', GalleryFilter.all),
           const SizedBox(width: 6),
-          _buildFilterChip('📷 ภาพถ่าย (${_stats['images'] ?? 0})', GalleryFilter.images),
+          _buildFilterChip('📷 ${lang.t('filterPhotos')} (${_stats['images'] ?? 0})', GalleryFilter.images),
           const SizedBox(width: 6),
-          _buildFilterChip('🎥 วิดีโอ (${_stats['videos'] ?? 0})', GalleryFilter.videos),
+          _buildFilterChip('🎥 ${lang.t('filterVideos')} (${_stats['videos'] ?? 0})', GalleryFilter.videos),
           const SizedBox(width: 6),
-          _buildFilterChip('📊 ตาราง CSV', GalleryFilter.csv),
+          _buildFilterChip('📊 ${lang.t('filterCsv')}', GalleryFilter.csv),
         ],
       ),
     );
@@ -304,7 +308,7 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
     );
   }
 
-  Widget _buildMediaGrid() {
+  Widget _buildMediaGrid(LanguageProvider lang) {
     final items = _filteredItems;
 
     if (items.isEmpty) {
@@ -314,14 +318,22 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
           children: [
             Icon(Icons.photo_library_outlined, size: 64, color: Colors.grey.shade600),
             const SizedBox(height: 12),
-            const Text(
-              'ยังไม่มีภาพถ่ายหรือวิดีโอที่บันทึกไว้',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+            Text(
+              lang.currentLanguage == AppLanguage.chinese
+                  ? '暂无保存的土壤图片或视频'
+                  : (lang.currentLanguage == AppLanguage.english
+                      ? 'No photos or videos recorded yet'
+                      : 'ยังไม่มีภาพถ่ายหรือวิดีโอที่บันทึกไว้'),
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'แตะปุ่ม "AI Vision & GPS" ที่หน้าหลักเพื่อถ่ายภาพพร้อมพารามิเตอร์ดิน',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
+            Text(
+              lang.currentLanguage == AppLanguage.chinese
+                  ? '点击主界面上的 "AI视觉与GPS" 按钮即可拍摄包含土壤参数的图像'
+                  : (lang.currentLanguage == AppLanguage.english
+                      ? 'Tap "AI Vision & GPS" on home screen to capture samples'
+                      : 'แตะปุ่ม "AI Vision & GPS" ที่หน้าหลักเพื่อถ่ายภาพพร้อมพารามิเตอร์ดิน'),
+              style: const TextStyle(color: Colors.white38, fontSize: 12),
               textAlign: TextAlign.center,
             ),
           ],

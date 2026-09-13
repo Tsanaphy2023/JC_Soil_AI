@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'core/localization/language_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'data/repositories/soil_sensor_repository.dart';
 import 'ui/viewmodels/soil_sensor_viewmodel.dart';
@@ -38,6 +39,9 @@ class SoilParameterApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(
+          create: (_) => LanguageProvider()..loadPreferences(),
+        ),
         ChangeNotifierProvider(
           create: (_) => SoilSensorViewModel(
             repository: SoilSensorRepository(),

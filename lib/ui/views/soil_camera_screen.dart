@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/localization/app_localizations.dart';
+import '../../core/localization/language_provider.dart';
 import '../../data/services/soil_dataset_service.dart';
 import '../../data/services/usb_sensor_service.dart';
 import '../viewmodels/soil_sensor_viewmodel.dart';
@@ -89,12 +91,17 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
   }
 
   Future<void> _toggleAudio() async {
+    final lang = context.read<LanguageProvider>();
     if (_isRecordingVideo) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           backgroundColor: Colors.redAccent,
-          content: Text('กรุณาหยุดบันทึกวิดีโอก่อนเปลี่ยนโหมดเสียง'),
-          duration: Duration(seconds: 2),
+          content: Text(lang.currentLanguage == AppLanguage.chinese
+              ? '请在切换声音模式前先停止录制视频'
+              : (lang.currentLanguage == AppLanguage.english
+                  ? 'Please stop video recording before toggling audio mode'
+                  : 'กรุณาหยุดบันทึกวิดีโอก่อนเปลี่ยนโหมดเสียง')),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;
@@ -122,9 +129,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  _isAudioEnabled
-                      ? 'เปิดไมโครโฟน: บันทึกวิดีโอพร้อมเสียงบรรยายและเสียงรอบข้าง'
-                      : 'ปิดไมโครโฟน: ตัดเสียงรบกวนภายนอก 100% (Silent Video)',
+                  _isAudioEnabled ? lang.t('micOnDesc') : lang.t('micOffDesc'),
                   style: const TextStyle(fontSize: 12),
                 ),
               ),
@@ -146,6 +151,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
   Future<void> _capturePhoto(SoilSensorViewModel vm) async {
     if (_cameraController == null || !_cameraController!.value.isInitialized || _isProcessingCapture) return;
 
+    final lang = context.read<LanguageProvider>();
     setState(() => _isProcessingCapture = true);
     try {
       final photo = await _cameraController!.takePicture();
@@ -160,7 +166,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
 
       if (mounted) {
         setState(() {
-          _lastSavedNotice = 'บันทึกภาพและพิกัด GPS สำหรับเทรนโมเดลสำเร็จ';
+          _lastSavedNotice = lang.t('photoSavedNotice');
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -171,7 +177,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'บันทึกภาพชุดข้อมูลเรียบร้อย: ${savedPath.split('/').last}',
+                    '${lang.t('photoSavedNotice')}: ${savedPath.split('/').last}',
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
@@ -179,7 +185,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
             ),
             duration: const Duration(seconds: 4),
             action: SnackBarAction(
-              label: 'ดูคลังภาพ',
+              label: lang.t('viewGallery'),
               textColor: Colors.cyanAccent,
               onPressed: () {
                 Navigator.push(
@@ -201,6 +207,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
   Future<void> _toggleVideoRecording(SoilSensorViewModel vm) async {
     if (_cameraController == null || !_cameraController!.value.isInitialized) return;
 
+    final lang = context.read<LanguageProvider>();
     if (_isRecordingVideo) {
       // Stop Recording
       _recordingTimer?.cancel();
@@ -227,10 +234,10 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.teal.shade900,
-              content: Text('บันทึกวิดีโอเรียบร้อย (${duration}s): ${savedPath.split('/').last}'),
+              content: Text('${lang.t('videoSavedNotice')} (${duration}s): ${savedPath.split('/').last}'),
               duration: const Duration(seconds: 4),
               action: SnackBarAction(
-                label: 'ดูคลังวิดีโอ',
+                label: lang.t('viewGallery'),
                 textColor: Colors.cyanAccent,
                 onPressed: () {
                   Navigator.push(
@@ -273,6 +280,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     final vm = context.watch<SoilSensorViewModel>();
     final reading = vm.displayReading;
     final location = vm.currentLocation;
@@ -298,10 +306,17 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                   : Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          CircularProgressIndicator(color: Colors.cyanAccent),
-                          SizedBox(height: 16),
-                          Text('กำลังเปิดกล้อง AI Vision...', style: TextStyle(color: Colors.white70)),
+                        children: [
+                          const CircularProgressIndicator(color: Colors.cyanAccent),
+                          const SizedBox(height: 16),
+                          Text(
+                            lang.currentLanguage == AppLanguage.chinese
+                                ? '正在启动 AI 视觉摄像头...'
+                                : (lang.currentLanguage == AppLanguage.english
+                                    ? 'Starting AI Vision Camera...'
+                                    : 'กำลังเปิดกล้อง AI Vision...'),
+                            style: const TextStyle(color: Colors.white70),
+                          ),
                         ],
                       ),
                     ),
@@ -326,7 +341,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                       top: 4,
                       left: 8,
                       child: Text(
-                        'SOIL TARGET ZONE',
+                        lang.t('soilTargetZone'),
                         style: TextStyle(
                           color: _isRecordingVideo ? Colors.redAccent : Colors.cyanAccent,
                           fontSize: 9,
@@ -380,7 +395,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  location?.formattedCoordinates ?? 'GPS กำลังระบุพิกัด...',
+                                  location?.formattedCoordinates ?? lang.t('gpsLocating'),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 11.5,
@@ -397,7 +412,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                               const Icon(Icons.terrain, color: Colors.cyanAccent, size: 12),
                               const SizedBox(width: 4),
                               Text(
-                                'Alt: ${location?.formattedAltitude ?? '-'} (MSL)',
+                                '${lang.t('altitude')}: ${location?.formattedAltitude ?? '-'} (MSL)',
                                 style: const TextStyle(color: Colors.cyanAccent, fontSize: 10.5),
                               ),
                               const Spacer(),
@@ -410,7 +425,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  vm.status == UsbConnectionStatus.connected ? 'PROBE LIVE' : 'DEMO/OFFLINE',
+                                  vm.status == UsbConnectionStatus.connected ? lang.t('probeLive') : lang.t('demoOffline'),
                                   style: TextStyle(
                                     fontSize: 9,
                                     fontWeight: FontWeight.bold,
@@ -429,7 +444,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                   CircleAvatar(
                     backgroundColor: _isAudioEnabled ? Colors.black54 : Colors.redAccent.withValues(alpha: 0.85),
                     child: IconButton(
-                      tooltip: _isAudioEnabled ? 'ไมโครโฟนเปิดอยู่ (แตะเพื่อตัดเสียงรบกวน)' : 'ตัดเสียงรบกวนภายนอกอยู่ (แตะเพื่อเปิดไมค์)',
+                      tooltip: _isAudioEnabled ? lang.t('micOnDesc') : lang.t('micOffDesc'),
                       icon: Icon(
                         _isAudioEnabled ? Icons.mic : Icons.mic_off,
                         color: _isAudioEnabled ? Colors.greenAccent : Colors.white,
@@ -485,7 +500,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          _isAudioEnabled ? 'MIC ON' : 'ตัดเสียงรบกวน',
+                          _isAudioEnabled ? lang.t('micOn') : lang.t('micOff'),
                           style: TextStyle(
                             color: _isAudioEnabled ? Colors.white : Colors.yellowAccent,
                             fontSize: 10.5,
@@ -515,8 +530,8 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildHudChip('ความชื้น', '${reading.moisture.toStringAsFixed(1)} %', Colors.blueAccent),
-                        _buildHudChip('อุณหภูมิ', '${reading.temperature.toStringAsFixed(1)} °C', Colors.amberAccent),
+                        _buildHudChip(lang.t('moisture'), '${reading.moisture.toStringAsFixed(1)} %', Colors.blueAccent),
+                        _buildHudChip(lang.t('temperature'), '${reading.temperature.toStringAsFixed(1)} °C', Colors.amberAccent),
                         _buildHudChip('EC', '${reading.conductivity}', Colors.purpleAccent),
                         _buildHudChip('pH', reading.ph.toStringAsFixed(2), Colors.greenAccent),
                       ],
@@ -525,9 +540,9 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildHudChip('ไนโตรเจน (N)', '${reading.nitrogen} mg/kg', Colors.cyanAccent),
-                        _buildHudChip('ฟอสฟอรัส (P)', '${reading.phosphorus} mg/kg', Colors.orangeAccent),
-                        _buildHudChip('โพแทสเซียม (K)', '${reading.potassium} mg/kg', Colors.pinkAccent),
+                        _buildHudChip(lang.t('nitrogen'), '${reading.nitrogen} mg/kg', Colors.cyanAccent),
+                        _buildHudChip(lang.t('phosphorus'), '${reading.phosphorus} mg/kg', Colors.orangeAccent),
+                        _buildHudChip(lang.t('potassium'), '${reading.potassium} mg/kg', Colors.pinkAccent),
                       ],
                     ),
                   ],
@@ -549,7 +564,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                       GestureDetector(
                         onTap: () => setState(() => _captureMode = CameraCaptureMode.photo),
                         child: Text(
-                          'PHOTO (ภาพถ่าย)',
+                          lang.t('photoMode'),
                           style: TextStyle(
                             color: _captureMode == CameraCaptureMode.photo ? Colors.cyanAccent : Colors.white54,
                             fontWeight: FontWeight.bold,
@@ -561,7 +576,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                       GestureDetector(
                         onTap: () => setState(() => _captureMode = CameraCaptureMode.video),
                         child: Text(
-                          'VIDEO (วิดีโอ LIVE)',
+                          lang.t('videoMode'),
                           style: TextStyle(
                             color: _captureMode == CameraCaptureMode.video ? Colors.redAccent : Colors.white54,
                             fontWeight: FontWeight.bold,
@@ -639,7 +654,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                _isAudioEnabled ? 'เสียงเปิด' : 'ตัดเสียง',
+                                _isAudioEnabled ? lang.t('micOn') : lang.t('micOff'),
                                 style: TextStyle(
                                   color: _isAudioEnabled ? Colors.greenAccent : Colors.orangeAccent,
                                   fontSize: 10,
