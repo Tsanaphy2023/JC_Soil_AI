@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/sensor_constants.dart';
@@ -16,11 +21,80 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   int _selectedBaud = SensorConstants.defaultBaudRate;
   final int _slaveId = SensorConstants.defaultSlaveId;
+  bool _isExportingPdf = false;
+  String? _savedPdfPath;
 
   @override
   void initState() {
     super.initState();
     _selectedBaud = context.read<SoilSensorViewModel>().baudRate;
+  }
+
+  Future<void> _downloadOrSharePdfManual({bool shareImmediately = false}) async {
+    setState(() => _isExportingPdf = true);
+    try {
+      final byteData = await rootBundle.load('assets/docs/JC_Digital_Soil_AI_Beginner_Guide.pdf');
+      final bytes = byteData.buffer.asUint8List();
+
+      File targetFile;
+      try {
+        final downloadDir = Directory('/storage/emulated/0/Download');
+        if (Platform.isAndroid && await downloadDir.exists()) {
+          targetFile = File('${downloadDir.path}/JC_Digital_Soil_AI_Beginner_Guide.pdf');
+        } else {
+          final docsDir = await getApplicationDocumentsDirectory();
+          targetFile = File('${docsDir.path}/JC_Digital_Soil_AI_Beginner_Guide.pdf');
+        }
+      } catch (_) {
+        final tmpDir = Directory.systemTemp;
+        targetFile = File('${tmpDir.path}/JC_Digital_Soil_AI_Beginner_Guide.pdf');
+      }
+
+      await targetFile.writeAsBytes(bytes, flush: true);
+      setState(() {
+        _isExportingPdf = false;
+        _savedPdfPath = targetFile.path;
+      });
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.teal.shade900,
+          duration: const Duration(seconds: 6),
+          content: Text(
+            'บันทึกคู่มือ PDF สำเร็จ!\nจัดเก็บไว้ที่: ${targetFile.path}',
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+          ),
+          action: SnackBarAction(
+            label: 'เปิด / แชร์',
+            textColor: Colors.cyanAccent,
+            onPressed: () {
+              Share.shareXFiles(
+                [XFile(targetFile.path)],
+                text: 'คู่มือการใช้งานระบบ JC Digital Soil AI Analyzer (ฉบับสมบูรณ์ PDF)',
+              );
+            },
+          ),
+        ),
+      );
+
+      if (shareImmediately) {
+        await Share.shareXFiles(
+          [XFile(targetFile.path)],
+          text: 'คู่มือการใช้งานระบบ JC Digital Soil AI Analyzer (ฉบับสมบูรณ์ PDF)',
+        );
+      }
+    } catch (e) {
+      setState(() => _isExportingPdf = false);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red.shade900,
+          content: Text('เกิดข้อผิดพลาดในการดาวน์โหลดคู่มือ: $e'),
+        ),
+      );
+    }
   }
 
   @override
@@ -226,9 +300,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             'Protocol Framing:',
                             style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
-                          Text(
-                            '8-N-1 (Half-Duplex RS485)',
-                            style: TextStyle(color: Colors.white70, fontSize: 13),
+                          Flexible(
+                            child: Text(
+                              '8-N-1 (Half-Duplex RS485)',
+                              style: TextStyle(color: Colors.white70, fontSize: 13),
+                              textAlign: TextAlign.right,
+                            ),
                           ),
                         ],
                       ),
@@ -259,16 +336,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('สถานะข้อมูลเซนเซอร์:', style: TextStyle(color: Colors.white70)),
-                          Text(
-                            vm.hasReceivedValidReading
-                                ? '● ได้รับข้อมูลปกติ (Valid CRC)'
-                                : (vm.rxByteCount > 0 ? '● ได้รับไบต์ แต่ยังไม่ครบเฟรม' : '○ ยังไม่มีข้อมูลตอบกลับ'),
-                            style: TextStyle(
-                              color: vm.hasReceivedValidReading
-                                  ? Colors.greenAccent
-                                  : (vm.rxByteCount > 0 ? Colors.amberAccent : Colors.redAccent),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              vm.hasReceivedValidReading
+                                  ? '● ได้รับข้อมูลปกติ (Valid CRC)'
+                                  : (vm.rxByteCount > 0 ? '● ได้รับไบต์ แต่ยังไม่ครบเฟรม' : '○ ยังไม่มีข้อมูลตอบกลับ'),
+                              style: TextStyle(
+                                color: vm.hasReceivedValidReading
+                                    ? Colors.greenAccent
+                                    : (vm.rxByteCount > 0 ? Colors.amberAccent : Colors.redAccent),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                              textAlign: TextAlign.right,
                             ),
                           ),
                         ],
@@ -408,7 +489,191 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               const SizedBox(height: 20),
 
-              // Section 5: Optimization & Troubleshooting Guide
+              // Section 5: User Manual & Academic Handbook Download
+              const Text(
+                'คู่มือการใช้งานและเอกสารวิชาการ (User Manual & Academic Handbook)',
+                style: TextStyle(
+                  color: Colors.greenAccent,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Card(
+                color: AppColors.cardSurface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: Colors.greenAccent.withValues(alpha: 0.4),
+                    width: 1.0,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFE53935), Color(0xFFC62828)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.red.withValues(alpha: 0.4),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.picture_as_pdf,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'JC Digital Soil AI Beginner Guide',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  'คู่มือฉบับสมบูรณ์ (LaTeX / PDF 60 หน้า) ครอบคลุมฮาร์ดแวร์ Modbus RTU, โมเดล PINN Deep Learning, ซอร์สโค้ด และผลวิจัยแปลงจริง',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.75),
+                                    fontSize: 12,
+                                    height: 1.3,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black45,
+                                        borderRadius: BorderRadius.circular(4),
+                                        border: Border.all(color: Colors.white24, width: 0.7),
+                                      ),
+                                      child: const Text(
+                                        'PDF 1.5 MB',
+                                        style: TextStyle(color: Colors.cyanAccent, fontSize: 10, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black45,
+                                        borderRadius: BorderRadius.circular(4),
+                                        border: Border.all(color: Colors.white24, width: 0.7),
+                                      ),
+                                      child: const Text(
+                                        'มาตรฐาน RBRU',
+                                        style: TextStyle(color: Colors.amberAccent, fontSize: 10, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      const Divider(color: Colors.white10),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal.shade700,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              icon: _isExportingPdf
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                    )
+                                  : const Icon(Icons.download, size: 18),
+                              label: Text(
+                                _isExportingPdf ? 'กำลังดาวน์โหลด...' : 'ดาวน์โหลดคู่มือ PDF',
+                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+                              ),
+                              onPressed: _isExportingPdf ? null : () => _downloadOrSharePdfManual(shareImmediately: false),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.cyanAccent,
+                                side: const BorderSide(color: Colors.cyanAccent),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              icon: const Icon(Icons.share, size: 18),
+                              label: const Text(
+                                'เปิดอ่าน / ส่งต่อ',
+                                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+                              ),
+                              onPressed: _isExportingPdf ? null : () => _downloadOrSharePdfManual(shareImmediately: true),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_savedPdfPath != null) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.teal.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.tealAccent.withValues(alpha: 0.5), width: 0.8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.check_circle, color: Colors.greenAccent, size: 14),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'บันทึกแล้วที่: $_savedPdfPath',
+                                  style: const TextStyle(color: Colors.greenAccent, fontSize: 11),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Section 6: Optimization & Troubleshooting Guide
               const Text(
                 'เทคนิคการเชื่อมต่อและการปรับความเร็วเรียลไทม์ (Optimization Guide)',
                 style: TextStyle(

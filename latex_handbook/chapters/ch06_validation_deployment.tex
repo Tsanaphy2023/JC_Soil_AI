@@ -163,9 +163,45 @@ adb shell am start -n com.agriphysics.soil_app/com.agriphysics.soil_app.MainActi
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.48\textwidth]{figures/app_ui.jpg}
-\caption{หน้าจอแดชบอร์ดหลักของแอปพลิเคชัน SOIL AI ANALYZER บนสมาร์ตโฟนจริง}
+\includegraphics[width=0.48\textwidth]{figures/app_dashboard_live.png}
+\caption{หน้าจอแดชบอร์ดหลักของแอปพลิเคชัน JC AI SOIL ANALYZER บนสมาร์ตโฟนจริง พร้อมโลโก้แบรนด์ 2 คอลัมน์ แถบสถานะ GPS และป้ายธงชาติสลับภาษา}
 \label{fig:app_ui_screen}
+\end{figure}
+
+\section{อัตลักษณ์แบรนด์ไฮเทคและการออกแบบส่วนต่อประสานผู้ใช้}
+
+แถบหัวเรื่องของแอปพลิเคชัน (\texttt{StatusHeader}) ได้รับการปรับปรุงเป็นโครงสร้างโลโก้แบรนด์ไฮเทคแบบ 2 คอลัมน์ (Two-Column Unified Badge) สไตล์ Cyber-Glassmorphic:
+\begin{enumerate}
+    \item \textbf{คอลัมน์ซ้าย (JC AI Emblem Badge):} แบดจ์ทรงมนเคลือบเกรเดียนท์สีน้ำเงินสดสู่ฟ้าเทคโนโลยี (\texttt{\#0D47A1} ถึง \texttt{\#00B0FF}) และเปลี่ยนเป็นสีทองอำพันเรืองแสงเมื่ออยู่ในโหมดจำลอง (Simulation Mode) พร้อมชิปแท็ก \textbf{AI} เรืองแสง
+    \item \textbf{เส้นแบ่งมิติแสง (Luminous Cyber Divider):} เส้นแบ่งแนวตั้งไล่เฉดแสงสีฟ้า Cyan สไตล์ Cyber-optics
+    \item \textbf{คอลัมน์ขวา (Two-Line Typography):} บรรทัดบนแสดงคำว่า \textbf{SOIL} สีขาวหนาพิเศษพร้อมจุดประกายสีเขียวมรกตเรืองแสง (Emerald Nature Dot) และบรรทัดล่างแสดงคำว่า \textbf{AI ANALYZER} สีเขียวน้ำทะเลนีออน (\texttt{\#64FFDA})
+\end{enumerate}
+
+\section{ระบบสามภาษา Tri-Lingual Localization และการสลับภาษาแบบเรียลไทม์}
+
+เพื่อรองรับการใช้งานในระดับสากล การวิจัยร่วม และตลาดส่งออกสินค้าเกษตร (เช่น ทุเรียนส่งออกไปยังประเทศจีน) ระบบได้รับการติดตั้งระบบสามภาษา (Tri-Lingual Localization) ครอบคลุม:
+\begin{itemize}
+    \item \textbf{ภาษาไทย (TH - ค่าปกติ):} สำหรับเกษตรกรไทยและนักวิชาการในประเทศ
+    \item \textbf{ภาษาอังกฤษ (EN):} สำหรับการวิจัยระดับนานาชาติและการเผยแพร่วิชาการสากล
+    \item \textbf{ภาษาจีน (ZH - Chinese):} สำหรับคู่ค้าและผู้ประกอบการโรงคัดบรรจุ (ล้ง) ผลไม้
+\end{itemize}
+
+การสลับภาษาสามารถทำได้ทันทีผ่านปุ่มป้ายธงชาติ (\textbf{National Flag Switcher Badge}) บริเวณมุมขวาบนของแถบหัวเรื่อง โดยแสดงหน้าต่าง Modal Bottom Sheet ให้เลือกภาษา และอัปเดตหน้าจอทั้งหมดทันทีแบบ Reactive Zero-Restart โดยไม่ต้องเปิดแอปใหม่ พร้อมบันทึกการตั้งค่าออฟไลน์ลงในหน่วยความจำของอุปกรณ์
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/app_language_selector.png}
+    \caption{หน้าต่างเลือกภาษาผ่านป้ายธงชาติ (National Flag Switcher Modal)}
+    \label{fig:app_lang_modal}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/app_camera_hud.png}
+    \caption{หน้าจอกล้อง AI Vision พร้อมเป้าเล็งหน้าดิน แผง HUD และปุ่มตัดเสียงภายนอก}
+    \label{fig:app_camera_hud}
+\end{minipage}
 \end{figure}
 
 \section{ระบบคลังภาพ วิดีโอ และการส่งออกชุดข้อมูลวิจัยมัลติโมดอล}
@@ -173,16 +209,26 @@ adb shell am start -n com.agriphysics.soil_app/com.agriphysics.soil_app.MainActi
 เพื่อสนับสนุนการตรวจสอบย้อนกลับ (Traceability) และการสร้างชุดข้อมูลสำหรับการเรียนรู้เชิงลึก (AI Model Retraining) แอปพลิเคชันได้รับการยกระดับระบบจัดเก็บและคลังสื่อ (Soil AI Media \& Dataset Explorer):
 
 \subsection{การระบุพิกัดดาวเทียมอัตโนมัติและกล้อง AI Vision ภาคสนาม}
-ระบบเชื่อมโยงชิปดาวเทียม GNSS ภายในสมาร์ตโฟนเพื่อดึงพิกัด Latitude, Longitude และความสูงระดับน้ำทะเล (Altitude MSL) ซ้อนทับลงบนภาพสดและตารางข้อมูลอัตโนมัติ โดยผู้ใช้สามารถบันทึกภาพถ่ายดินความละเอียดสูงหรือวิดีโอกระบวนการเก็บตัวอย่างที่มีแผงข้อมูลเซนเซอร์ (Telemetry HUD) ลอยอยู่บนภาพสดแบบเรียลไทม์
+ระบบเชื่อมโยงชิปดาวเทียม GNSS ภายในสมาร์ตโฟนเพื่อดึงพิกัด Latitude, Longitude และความสูงระดับน้ำทะเล (Altitude MSL) ซ้อนทับลงบนภาพสดและตารางข้อมูลอัตโนมัติ โดยผู้ใช้สามารถบันทึกภาพถ่ายดินความละเอียดสูงหรือวิดีโอกระบวนการเก็บตัวอย่างที่มีแผงข้อมูลเซนเซอร์ (Telemetry HUD) ลอยอยู่บนภาพสดแบบเรียลไทม์ พร้อมปุ่มเปิด/ปิดเสียงภายนอก (Audio Mute Toggle) เพื่อตัดเสียงลมหรือเสียงรบกวนในแปลงเกษตร
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/app_gallery_dataset.png}
+\caption{หน้าจอคลังภาพและข้อมูลวิจัย (Soil Dataset Gallery) พร้อมตัวกรองมัลติโมดอลและการแชร์}
+\label{fig:app_gallery_dataset}
+\end{figure}
 
 \subsection{คลังภาพอัจฉริยะและการซูมตรวจสอบเนื้อดิน (Pinch-to-zoom)}
 ผู้ใช้งานสามารถเข้าถึงคลังสื่อผ่านปุ่ม \textbf{Gallery} บนแดชบอร์ดหลัก หรือปุ่มลัดในหน้ากล้อง โดยมีระบบซูมภาพแบบสองมิติ (\textit{InteractiveViewer}) ขยายได้สูงสุด 4 เท่า เพื่อตรวจสอบลักษณะทางสัณฐานวิทยาของดิน (Soil Morphology), โครงสร้างเม็ดดิน, ระดับความชื้น, และสีดินตามระบบ Munsell ได้โดยตรง
 
-\subsection{ระบบแชร์ข้อมูลอัจฉริยะ (Smart Sharing) สู่ภายนอก}
+\subsection{ระบบแชร์ข้อมูลอัจฉริยะและการดาวน์โหลดคู่มือ PDF ในตัว}
 ผู้ใช้สามารถกดปุ่ม \textbf{Share} เพื่อส่งภาพถ่ายหรือวิดีโอพร้อมข้อความสรุปค่าพารามิเตอร์ 8-in-1, ค่าสอบเทียบโมเดล PINN, และลิงก์พิกัดแปลงบน Google Maps ไปยังแอปพลิเคชันภายนอก (LINE, Gmail, Google Drive, WhatsApp) ได้ในคลิกเดียว หรือเลือกส่งออกชุดข้อมูลวิจัยทั้งหมด (\textit{Full Dataset Package}) ประกอบด้วยไฟล์ดัชนี \texttt{dataset\_manifest.json}, ตาราง \texttt{Soil\_parameters.csv}, และไฟล์ภาพ/วิดีโอทั้งหมดผ่านพอร์ต USB หรือคำสั่ง ADB:
 \begin{lstlisting}[language=bash]
 adb pull /sdcard/Android/data/com.agriphysics.soil_app/files/soil_dataset ./my_soil_dataset
 \end{lstlisting}
+
+นอกจากนี้ ในเมนูการตั้งค่า (\textbf{Settings}) ได้เพิ่มฟังก์ชัน \textbf{ดาวน์โหลดคู่มือการใช้งาน (Download User Manual PDF)} ขนาด 1.5 MB ฉบับสมบูรณ์ 60 หน้าลงในโฟลเดอร์ Download ของสมาร์ตโฟนโดยตรง (\texttt{/storage/emulated/0/Download/}) และสามารถกดเปิดอ่านหรือส่งต่อไฟล์ PDF ผ่านแอปภายนอกได้ทันทีโดยไม่ต้องเชื่อมต่ออินเทอร์เน็ต
+
 
 \section{เกณฑ์การตรวจสอบความใช้ได้ของวิธีตามมาตรฐานสากล}
 

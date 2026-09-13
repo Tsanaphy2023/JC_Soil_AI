@@ -246,6 +246,131 @@ class DeepLearningCalibrator {
 \end{lstlisting}
 \end{codebox}
 
+\section{คลาสจัดการระบบหลายภาษาและการสลับภาษา (LanguageProvider.dart)}
+
+\begin{codebox}[title={ซอร์สโค้ดคลาส LanguageProvider.dart}]
+\begin{lstlisting}[language=Java]
+import 'package:flutter/material.dart';
+import '../../core/localization/app_localizations.dart';
+
+class LanguageProvider extends ChangeNotifier {
+  AppLanguage _currentLanguage = AppLanguage.thai;
+  AppLanguage get currentLanguage => _currentLanguage;
+
+  // คืนค่าข้อความตามรหัสคำศัพท์ในภาษาปัจจุบัน
+  String t(String key) {
+    return AppLocalizations.get(key, _currentLanguage);
+  }
+
+  // สลับภาษาและแจ้งเตือนวิดเจ็ตทั้งแอปให้รีเฟรชทันที
+  Future<void> setLanguage(AppLanguage lang) async {
+    if (_currentLanguage == lang) return;
+    _currentLanguage = lang;
+    notifyListeners();
+    // บันทึกลง app_preferences.json อัตโนมัติ
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{วิดเจ็ตตราสัญลักษณ์แบรนด์ไฮเทค 2 คอลัมน์ (StatusHeader.dart)}
+
+\begin{codebox}[title={ฟังก์ชันสร้างตราสัญลักษณ์แบรนด์ไฮเทคใน StatusHeader.dart}]
+\begin{lstlisting}[language=Java]
+Widget _buildUnifiedBrandLogo(BuildContext context) {
+  final isSim = (status == UsbConnectionStatus.simulating);
+  return Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: onSimulationTap, // แตะเพื่อสลับโหมดทดลอง
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.28),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSim ? Colors.amberAccent : Colors.cyanAccent.withOpacity(0.45),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // คอลัมน์ซ้าย: JC AI Badge เกรเดียนท์สีน้ำเงิน-ฟ้า
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isSim 
+                    ? [Color(0xFFFF8F00), Color(0xFFFFD54F)]
+                    : [Color(0xFF0D47A1), Color(0xFF00B0FF)],
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(children: [
+                Text('JC', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
+                SizedBox(width: 3.5),
+                Text('AI', style: TextStyle(fontSize: 9.5, color: Colors.cyanAccent)),
+              ]),
+            ),
+            // เส้นแบ่งมิติแสงแนวตั้ง
+            Container(margin: EdgeInsets.symmetric(horizontal: 8), width: 1.5, height: 26, color: Colors.cyanAccent),
+            // คอลัมน์ขวา: บรรทัดบน SOIL / บรรทัดล่าง AI ANALYZER
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  Text('SOIL', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
+                  SizedBox(width: 4),
+                  CircleAvatar(radius: 2.5, backgroundColor: Color(0xFF00E676)), // จุดเขียวมรกต
+                ]),
+                Text('AI ANALYZER', style: TextStyle(fontSize: 9.5, color: Color(0xFF64FFDA))),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{ระบบดาวน์โหลดคู่มือ PDF ในตัว (SettingsScreen.dart)}
+
+\begin{codebox}[title={ฟังก์ชันบันทึกและแชร์คู่มือ PDF ใน SettingsScreen.dart}]
+\begin{lstlisting}[language=Java]
+Future<void> _downloadOrSharePdfManual({bool shareImmediately = false}) async {
+  setState(() => _isExportingPdf = true);
+  try {
+    // 1. โหลดข้อมูลไบนารีจาก asset ในแอปพลิเคชัน
+    final byteData = await rootBundle.load('assets/docs/JC_Digital_Soil_AI_Beginner_Guide.pdf');
+    final bytes = byteData.buffer.asUint8List();
+
+    // 2. บันทึกลงโฟลเดอร์ Download ของสมาร์ตโฟนแอนดรอยด์
+    File targetFile;
+    final downloadDir = Directory('/storage/emulated/0/Download');
+    if (Platform.isAndroid && await downloadDir.exists()) {
+      targetFile = File('${downloadDir.path}/JC_Digital_Soil_AI_Beginner_Guide.pdf');
+    } else {
+      final docsDir = await getApplicationDocumentsDirectory();
+      targetFile = File('${docsDir.path}/JC_Digital_Soil_AI_Beginner_Guide.pdf');
+    }
+    await targetFile.writeAsBytes(bytes, flush: true);
+
+    // 3. แจ้งเตือนผู้ใช้และส่งต่อผ่าน Intent / Share Sheet
+    if (shareImmediately) {
+      await Share.shareXFiles([XFile(targetFile.path)], text: 'คู่มือ JC Digital Soil AI Analyzer PDF');
+    }
+  } catch (e) {
+    // จัดการข้อผิดพลาด
+  } finally {
+    setState(() => _isExportingPdf = false);
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
 \section{สรุปสาระสำคัญประจำบทที่ 5}
 
 การแปลงสมการทางฟิสิกส์และแบบจำลองโครงข่ายประสาทเทียมให้กลายเป็นซอฟต์แวร์ที่ทำงานได้จริง ต้องอาศัยการจัดโครงสร้างโค้ดที่รัดกุม โดยสรุปสาระสำคัญได้ดังนี้
