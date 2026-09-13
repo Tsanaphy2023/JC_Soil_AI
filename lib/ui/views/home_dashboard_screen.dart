@@ -13,6 +13,7 @@ import '../widgets/status_header.dart';
 import 'historical_data_screen.dart';
 import 'settings_screen.dart';
 import 'soil_camera_screen.dart';
+import 'soil_dataset_gallery_screen.dart';
 
 class HomeDashboardScreen extends StatelessWidget {
   const HomeDashboardScreen({super.key});
@@ -62,6 +63,12 @@ class HomeDashboardScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const SoilCameraScreen()),
+                );
+              },
+              onGalleryTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SoilDatasetGalleryScreen()),
                 );
               },
               onAiTap: () {
@@ -306,9 +313,47 @@ class HomeDashboardScreen extends StatelessWidget {
                             child: const Text(
                               'Data',
                               style: TextStyle(
-                                fontSize: 17,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal.shade900,
+                              foregroundColor: Colors.cyanAccent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              elevation: 0,
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SoilDatasetGalleryScreen(),
+                                ),
+                              );
+                            },
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.photo_library, size: 16),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Gallery',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),

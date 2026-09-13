@@ -18,6 +18,7 @@ class StatusHeader extends StatelessWidget {
   final VoidCallback? onAiTap;
   final VoidCallback? onSwitchBaudTap;
   final VoidCallback? onCameraTap;
+  final VoidCallback? onGalleryTap;
 
   const StatusHeader({
     super.key,
@@ -34,6 +35,7 @@ class StatusHeader extends StatelessWidget {
     this.onAiTap,
     this.onSwitchBaudTap,
     this.onCameraTap,
+    this.onGalleryTap,
   });
 
   String get _statusLabel {
@@ -195,6 +197,13 @@ class StatusHeader extends StatelessWidget {
                 icon: const Icon(Icons.camera_alt, color: Colors.cyanAccent),
                 tooltip: 'AI Camera / Record Data',
                 onPressed: onCameraTap,
+              ),
+
+              // AI Dataset Gallery icon
+              IconButton(
+                icon: const Icon(Icons.photo_library_outlined, color: Colors.tealAccent),
+                tooltip: 'คลังภาพ & ข้อมูล AI',
+                onPressed: onGalleryTap,
               ),
 
               // Settings icon

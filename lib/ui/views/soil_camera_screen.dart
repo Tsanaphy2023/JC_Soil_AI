@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../data/services/soil_dataset_service.dart';
 import '../../data/services/usb_sensor_service.dart';
 import '../viewmodels/soil_sensor_viewmodel.dart';
+import 'soil_dataset_gallery_screen.dart';
 
 enum CameraCaptureMode { photo, video }
 
@@ -126,7 +127,17 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                 ),
               ],
             ),
-            duration: const Duration(seconds: 2),
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'ดูคลังภาพ',
+              textColor: Colors.cyanAccent,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SoilDatasetGalleryScreen()),
+                );
+              },
+            ),
           ),
         );
       }
@@ -166,7 +177,17 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
             SnackBar(
               backgroundColor: Colors.teal.shade900,
               content: Text('บันทึกวิดีโอเรียบร้อย (${duration}s): ${savedPath.split('/').last}'),
-              duration: const Duration(seconds: 3),
+              duration: const Duration(seconds: 4),
+              action: SnackBarAction(
+                label: 'ดูคลังวิดีโอ',
+                textColor: Colors.cyanAccent,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SoilDatasetGalleryScreen()),
+                  );
+                },
+              ),
             ),
           );
         }
@@ -460,23 +481,43 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // Dataset Samples Count Badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white24),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.dataset, color: Colors.greenAccent, size: 16),
-                            const SizedBox(width: 4),
-                            Text(
-                              '$_savedDatasetCount Samples',
-                              style: const TextStyle(color: Colors.white70, fontSize: 11),
-                            ),
-                          ],
+                      // Dataset Samples Gallery Shortcut Button
+                      GestureDetector(
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SoilDatasetGalleryScreen()),
+                          );
+                          _refreshDatasetCount();
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.black87,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.7)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.cyanAccent.withValues(alpha: 0.2),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.photo_library, color: Colors.cyanAccent, size: 18),
+                              const SizedBox(width: 5),
+                              Text(
+                                '$_savedDatasetCount รายการ',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
 

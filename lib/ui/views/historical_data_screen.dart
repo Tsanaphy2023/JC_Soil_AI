@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../viewmodels/soil_sensor_viewmodel.dart';
+import 'soil_dataset_gallery_screen.dart';
 
 class HistoricalDataScreen extends StatelessWidget {
   const HistoricalDataScreen({super.key});
@@ -21,6 +22,16 @@ class HistoricalDataScreen extends StatelessWidget {
         ),
         backgroundColor: AppColors.cardSurface,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.photo_library_outlined, color: Colors.cyanAccent),
+            tooltip: 'คลังภาพ & วิดีโอ (Photo/Video Gallery)',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SoilDatasetGalleryScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.share),
             tooltip: 'Share CSV/Excel',
