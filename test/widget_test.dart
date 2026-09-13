@@ -4,7 +4,7 @@ import 'package:soil_app/main.dart';
 void main() {
   testWidgets('SoilParameterApp renders dashboard correctly', (WidgetTester tester) async {
     await tester.pumpWidget(const SoilParameterApp());
-    expect(find.text('JC AI Detector'), findsOneWidget);
+    expect(find.text('SOIL AI ANALYZER'), findsOneWidget);
     expect(find.text('Save to *.xls'), findsOneWidget);
     expect(find.text('Data'), findsOneWidget);
   });

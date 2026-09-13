@@ -45,7 +45,7 @@ class SoilParameterApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'JC AI Detector',
+        title: 'SOIL AI ANALYZER',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         home: const HomeDashboardScreen(),

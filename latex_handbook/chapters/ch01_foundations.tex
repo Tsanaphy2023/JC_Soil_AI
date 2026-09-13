@@ -60,7 +60,7 @@
 \begin{enumerate}
     \item สไลด์บรรยายอิเล็กทรอนิกส์และเอกสารคำสอนวิชาฟิสิกส์เกษตรดิจิทัล
     \item ชุดหัววัดดิน 8-in-1 อุตสาหกรรม และตัวอย่างหน้าตัดชั้นดินจำลอง
-    \item แอปพลิเคชันจำลองการคำนวณบนสมาร์ตโฟน JC AI Detector
+    \item แอปพลิเคชันจำลองการคำนวณบนสมาร์ตโฟน SOIL AI ANALYZER (JC Soil AI)
 \end{enumerate}
 \end{tcolorbox}
 
@@ -115,7 +115,7 @@
 
     % คอลัมน์ที่ 3: สถาปัตยกรรม Edge AI บนสมาร์ตโฟน
     \node[box, fill=green!8, minimum width=3.8cm, right=1.2cm of col2] (col3) {
-        \textbf{ระบบ JC AI Detector}\\[3pt]
+        \textbf{ระบบ SOIL AI ANALYZER}\\[3pt]
         \footnotesize
         $\bullet$ USB-C OTG Interface\\
         $\bullet$ RS485 Modbus RTU\\
@@ -204,7 +204,7 @@ EC_a = \theta_v \cdot T(\theta_v) \cdot EC_w + EC_s
 
 ในการตรวจวิเคราะห์คุณภาพดินแบบดั้งเดิม ทั้งในห้องปฏิบัติการและชุดทดสอบภาคสนาม (Field Test Kits) เช่น ชุดตรวจสอบดินของกรมพัฒนาที่ดิน (LDD Soil Test Kit) หรือมาตรฐานสากล LaMotte และ FAO วิธีการหลักอาศัยปฏิกิริยาเคมีเกิดสี (Colorimetric Reactions) และการเปรียบเทียบระดับสีของสารละลายด้วยสายตากับแผ่นเทียบสีมาตรฐาน (Color Chart)
 
-การพัฒนาแอปพลิเคชันอัจฉริยะ \textbf{JC AI Detector} ไม่เพียงแต่มุ่งเน้นการแสดงผลค่าตัวเลขในหน่วยฟิสิกส์ ($\text{mg/kg}$ หรือ $\text{pH}$) เท่านั้น แต่ยังได้ออกแบบระบบ \textbf{Digital Colorimetric Bridge} เพื่อแปลงค่าตัวเลขที่ประมวลผลได้ผ่านโครงข่ายประสาทเทียม ให้สอดคล้องกับแถบสีเคมีที่เกษตรกรและนักวิชาการเกษตรคุ้นเคย ช่วยให้การตัดสินใจจัดการแปลงเป็นไปอย่างรวดเร็วและเป็นสากล
+การพัฒนาแอปพลิเคชันอัจฉริยะ \textbf{SOIL AI ANALYZER} ไม่เพียงแต่มุ่งเน้นการแสดงผลค่าตัวเลขในหน่วยฟิสิกส์ ($\text{mg/kg}$ หรือ $\text{pH}$) เท่านั้น แต่ยังได้ออกแบบระบบ \textbf{Digital Colorimetric Bridge} เพื่อแปลงค่าตัวเลขที่ประมวลผลได้ผ่านโครงข่ายประสาทเทียม ให้สอดคล้องกับแถบสีเคมีที่เกษตรกรและนักวิชาการเกษตรคุ้นเคย ช่วยให้การตัดสินใจจัดการแปลงเป็นไปอย่างรวดเร็วและเป็นสากล
 
 \subsection{หลักการปฏิกิริยาเคมีเกิดสีสำหรับธาตุอาหารและ pH}
 
@@ -269,7 +269,7 @@ EC_a = \theta_v \cdot T(\theta_v) \cdot EC_w + EC_s
 
 \section{สถาปัตยกรรมการประมวลผลสองขั้นตอนแบบ Edge Two-Stage Decoupling}
 
-เพื่อแก้ปัญหาความคลาดเคลื่อนสะสมจากการเปลี่ยนแปลงอุณหภูมิดินตามรอบวัน ระบบ \textbf{JC AI Detector} ได้รับการออกแบบสถาปัตยกรรมแบบสองขั้นตอน (Two-Stage Decoupling) ทำงานบนสมาร์ตโฟนโดยตรง
+เพื่อแก้ปัญหาความคลาดเคลื่อนสะสมจากการเปลี่ยนแปลงอุณหภูมิดินตามรอบวัน ระบบ \textbf{SOIL AI ANALYZER} ได้รับการออกแบบสถาปัตยกรรมแบบสองขั้นตอน (Two-Stage Decoupling) ทำงานบนสมาร์ตโฟนโดยตรง
 
 \begin{figure}[H]
 \centering
@@ -281,7 +281,7 @@ EC_a = \theta_v \cdot T(\theta_v) \cdot EC_w + EC_s
     \node[block, fill=cyan!15] (sensor) {\textbf{หัววัดเซนเซอร์จริง 8-in-1}\\สัญญาณดิบผ่าน USB Type-C OTG};
     \node[block, fill=rbruTeal!20, below=0.8cm of sensor] (stage1) {\textbf{ขั้นตอนที่ 1: First-Principles Physics}\\Topp Permittivity + Arrhenius EC + Nernst};
     \node[block, fill=rbruGold!20, below=0.8cm of stage1] (stage2) {\textbf{ขั้นตอนที่ 2: Edge TinyML PINN}\\Non-linear MLP Error Compensation};
-    \node[block, fill=green!20, below=0.8cm of stage2] (ui) {\textbf{JC AI Detector Dashboard}\\แสดงผลสด บันทึก Excel และวิเคราะห์ดิน};
+    \node[block, fill=green!20, below=0.8cm of stage2] (ui) {\textbf{SOIL AI ANALYZER Dashboard}\\แสดงผลสด บันทึก Excel และวิเคราะห์ดิน};
 
     \draw[arrow] (sensor) -- (stage1);
     \draw[arrow] (stage1) -- (stage2);

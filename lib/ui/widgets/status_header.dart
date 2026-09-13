@@ -87,19 +87,72 @@ class StatusHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              // Simulation quick switch
-              IconButton(
-                icon: Icon(
-                  status == UsbConnectionStatus.simulating
-                      ? Icons.play_circle_filled
-                      : Icons.science_outlined,
-                  color: Colors.white,
+              // Futuristic JC Emblem Button (Replaces the traditional flask icon)
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onSimulationTap,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: status == UsbConnectionStatus.simulating
+                            ? [const Color(0xFFFFD54F), const Color(0xFFFF8F00)]
+                            : [const Color(0xFF00E5FF), const Color(0xFF0091EA)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (status == UsbConnectionStatus.simulating
+                                  ? Colors.amberAccent
+                                  : Colors.cyanAccent)
+                              .withValues(alpha: 0.5),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'JC',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.8,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black45,
+                                blurRadius: 3,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 3),
+                        Icon(
+                          status == UsbConnectionStatus.simulating
+                              ? Icons.bolt
+                              : Icons.auto_awesome,
+                          color: Colors.white,
+                          size: 13,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                tooltip: 'Toggle Demo Simulation',
-                onPressed: onSimulationTap,
               ),
 
-              // Title JC AI Detector with custom icon
+              // Title SOIL AI ANALYZER with custom logo
               Expanded(
                 child: Center(
                   child: FittedBox(
@@ -117,12 +170,12 @@ class StatusHeader extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         const Text(
-                          'JC AI Detector',
+                          'SOIL AI ANALYZER',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 21,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                            letterSpacing: 0.8,
                           ),
                         ),
                       ],
