@@ -44,6 +44,7 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
 
   // Cached Contour computation
   SoilContourResult? _contourResult;
+  double _currentZoom = 16.5;
 
   @override
   void initState() {
@@ -231,7 +232,7 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
         _isLocatingLiveGps = false;
       });
 
-      _mapController.move(livePoint, 18.5);
+      _mapController.move(livePoint, 19.5);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -422,7 +423,7 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
                         onTap: () {
                           Navigator.pop(ctx);
                           final pos = LatLng(item.latitude, item.longitude);
-                          _mapController.move(pos, 18.5);
+                          _mapController.move(pos, 19.5);
                           setState(() => _selectedItem = item);
                           _showSampleDetailSheet(item);
                         },
@@ -676,22 +677,22 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
         return TileLayer(
           urlTemplate: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
           userAgentPackageName: 'com.agriphysics.soil_app',
-          maxNativeZoom: 19,
-          maxZoom: 20,
+          maxNativeZoom: 20,
+          maxZoom: 22,
         );
       case BasemapType.esriSatellite:
         return TileLayer(
           urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
           userAgentPackageName: 'com.agriphysics.soil_app',
-          maxNativeZoom: 18,
-          maxZoom: 20,
+          maxNativeZoom: 19,
+          maxZoom: 22,
         );
       case BasemapType.street:
         return TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           userAgentPackageName: 'com.agriphysics.soil_app',
           maxNativeZoom: 19,
-          maxZoom: 20,
+          maxZoom: 22,
         );
       case BasemapType.offlineGrid:
         return const SizedBox.shrink();
@@ -997,14 +998,21 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
                                 initialCenter: _centerPoint,
                                 initialZoom: 16.5,
                                 minZoom: 3.0,
-                                maxZoom: 20.0,
+                                maxZoom: 22.0,
                                 interactionOptions: const InteractionOptions(
                                   flags: InteractiveFlag.all, // Zoom, Pan, Two-finger Rotate, Double-tap zoom
                                 ),
                                 onPositionChanged: (pos, hasGesture) {
+                                  bool needsUpdate = false;
                                   if (pos.rotation != _rotation) {
-                                    setState(() => _rotation = pos.rotation);
+                                    _rotation = pos.rotation;
+                                    needsUpdate = true;
                                   }
+                                  if ((pos.zoom - _currentZoom).abs() > 0.05) {
+                                    _currentZoom = pos.zoom;
+                                    needsUpdate = true;
+                                  }
+                                  if (needsUpdate) setState(() {});
                                 },
                               ),
                               children: [
@@ -1067,13 +1075,34 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                // Live Zoom Level Badge
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF0F172A).withValues(alpha: 0.9),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.5), width: 1),
+                                  ),
+                                  child: Text(
+                                    '${_currentZoom.toStringAsFixed(1)}x',
+                                    style: const TextStyle(
+                                      color: Colors.cyanAccent,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
                                 FloatingActionButton.small(
                                   heroTag: 'zoom_in',
                                   backgroundColor: const Color(0xFF0F172A).withValues(alpha: 0.85),
                                   foregroundColor: Colors.cyanAccent,
                                   onPressed: () {
                                     final currentZoom = _mapController.camera.zoom;
-                                    _mapController.move(_mapController.camera.center, currentZoom + 1);
+                                    if (currentZoom < 22.0) {
+                                      _mapController.move(_mapController.camera.center, math.min(22.0, currentZoom + 1));
+                                    }
                                   },
                                   child: const Icon(Icons.add, size: 20),
                                 ),
@@ -1084,7 +1113,9 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
                                   foregroundColor: Colors.cyanAccent,
                                   onPressed: () {
                                     final currentZoom = _mapController.camera.zoom;
-                                    _mapController.move(_mapController.camera.center, currentZoom - 1);
+                                    if (currentZoom > 3.0) {
+                                      _mapController.move(_mapController.camera.center, math.max(3.0, currentZoom - 1));
+                                    }
                                   },
                                   child: const Icon(Icons.remove, size: 20),
                                 ),
