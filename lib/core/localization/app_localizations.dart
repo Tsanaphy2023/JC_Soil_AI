@@ -443,10 +443,15 @@ class AppLocalizations {
       AppLanguage.english: 'Tap any coordinate pin to view sample telemetry',
       AppLanguage.chinese: '点击图钉查看该采样点遥测参数',
     },
-    'basemapSatellite': {
-      AppLanguage.thai: '🛰️ ภาพดาวเทียมจริง',
-      AppLanguage.english: '🛰️ Satellite Imagery',
-      AppLanguage.chinese: '🛰️ 真实卫星影像',
+    'basemapGoogleHybrid': {
+      AppLanguage.thai: '🛰️ ดาวเทียม Google Hybrid',
+      AppLanguage.english: '🛰️ Google Hybrid Satellite',
+      AppLanguage.chinese: '🛰️ 谷歌混合卫星影像',
+    },
+    'basemapEsri': {
+      AppLanguage.thai: '🌍 ดาวเทียม Esri ArcGIS',
+      AppLanguage.english: '🌍 Esri World Imagery',
+      AppLanguage.chinese: '🌍 Esri全球卫星影像',
     },
     'basemapStreet': {
       AppLanguage.thai: '🗺️ แผนที่ถนน (OSM)',

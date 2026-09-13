@@ -131,9 +131,12 @@ void main() {
       expect(zoomWide, lessThan(15));
     });
 
-    test('getTileUrl returns valid Esri and OSM endpoints', () {
-      final satelliteUrl = SoilTileService.getTileUrl(BasemapType.satellite, 16, 51350, 30340);
-      expect(satelliteUrl, contains('ArcGIS/rest/services/World_Imagery/MapServer/tile/16/30340/51350'));
+    test('getTileUrl returns valid Google Hybrid, Esri and OSM endpoints', () {
+      final googleHybridUrl = SoilTileService.getTileUrl(BasemapType.googleHybrid, 16, 51350, 30340);
+      expect(googleHybridUrl, contains('mt1.google.com/vt/lyrs=y&x=51350&y=30340&z=16'));
+
+      final esriUrl = SoilTileService.getTileUrl(BasemapType.esriSatellite, 16, 51350, 30340);
+      expect(esriUrl, contains('ArcGIS/rest/services/World_Imagery/MapServer/tile/16/30340/51350'));
 
       final streetUrl = SoilTileService.getTileUrl(BasemapType.street, 16, 51350, 30340);
       expect(streetUrl, contains('tile.openstreetmap.org/16/51350/30340.png'));

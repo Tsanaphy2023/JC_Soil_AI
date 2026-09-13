@@ -3,7 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
 
 enum BasemapType {
-  satellite,
+  googleHybrid,
+  esriSatellite,
   street,
   offlineGrid,
 }
@@ -89,7 +90,10 @@ class SoilTileService {
   /// Get URL for tile
   static String getTileUrl(BasemapType type, int z, int x, int y) {
     switch (type) {
-      case BasemapType.satellite:
+      case BasemapType.googleHybrid:
+        // Google Maps Hybrid Satellite (High-res satellite + clear roads/labels)
+        return 'https://mt1.google.com/vt/lyrs=y&x=$x&y=$y&z=$z';
+      case BasemapType.esriSatellite:
         // Esri ArcGIS World Imagery (Free high-resolution global satellite)
         return 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/$z/$y/$x';
       case BasemapType.street:
@@ -132,6 +136,7 @@ class SoilTileService {
   }) {
     if (type == BasemapType.offlineGrid) return;
     final url = getTileUrl(type, tile.z, tile.x, tile.y);
+    if (url.isEmpty) return;
     final cacheKey = '${type.name}_${tile.tileKey}';
 
     if (_tileMemoryCache.containsKey(cacheKey) || _loadingKeys.contains(cacheKey)) {
@@ -141,7 +146,7 @@ class SoilTileService {
     _loadingKeys.add(cacheKey);
 
     final imageProvider = NetworkImage(url, headers: const {
-      'User-Agent': 'JC_Soil_AI_Precision_Agriphysics/1.0',
+      'User-Agent': 'Mozilla/5.0 (Android; Mobile) JC_Soil_AI/1.0',
     });
 
     final stream = imageProvider.resolve(ImageConfiguration.empty);

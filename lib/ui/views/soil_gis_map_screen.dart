@@ -23,7 +23,7 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> {
   List<SoilDatasetItem> _geotaggedItems = [];
   bool _isLoading = true;
   GisLayer _currentLayer = GisLayer.healthScore;
-  BasemapType _currentBasemap = BasemapType.satellite;
+  BasemapType _currentBasemap = BasemapType.googleHybrid;
   bool _showContour = true;
   bool _showHeatmap = true;
   SoilDatasetItem? _selectedItem;
@@ -373,12 +373,22 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> {
             onSelected: (type) => setState(() => _currentBasemap = type),
             itemBuilder: (ctx) => [
               PopupMenuItem(
-                value: BasemapType.satellite,
+                value: BasemapType.googleHybrid,
                 child: Row(
                   children: [
-                    Icon(Icons.satellite_alt, color: _currentBasemap == BasemapType.satellite ? Colors.cyanAccent : Colors.white70, size: 18),
+                    Icon(Icons.satellite_alt, color: _currentBasemap == BasemapType.googleHybrid ? Colors.cyanAccent : Colors.white70, size: 18),
                     const SizedBox(width: 8),
-                    Text(lang.t('basemapSatellite'), style: TextStyle(color: _currentBasemap == BasemapType.satellite ? Colors.cyanAccent : Colors.white, fontSize: 13)),
+                    Text(lang.t('basemapGoogleHybrid'), style: TextStyle(color: _currentBasemap == BasemapType.googleHybrid ? Colors.cyanAccent : Colors.white, fontSize: 13)),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: BasemapType.esriSatellite,
+                child: Row(
+                  children: [
+                    Icon(Icons.public, color: _currentBasemap == BasemapType.esriSatellite ? Colors.cyanAccent : Colors.white70, size: 18),
+                    const SizedBox(width: 8),
+                    Text(lang.t('basemapEsri'), style: TextStyle(color: _currentBasemap == BasemapType.esriSatellite ? Colors.cyanAccent : Colors.white, fontSize: 13)),
                   ],
                 ),
               ),
