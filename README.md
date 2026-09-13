@@ -1,6 +1,10 @@
 # 🌱 JC AI SOIL ANALYZER (แอปพลิเคชันตรวจวัดคุณภาพดิน 8 พารามิเตอร์อัจฉริยะ)
 ## Digital Agriphysics & Edge PINN Deep Learning Soil Diagnostics
 
+![JC SOIL AI ANALYZER PR Banner](assets/pr/jc_soil_ai_pr_banner_16x9.jpg)
+
+> 📢 **PR Media Kit & Marketing Assets**: ดูชุดภาพประชาสัมพันธ์ สื่อมวลชน และแคปชันทางการได้ที่ [pr_media_kit.html](pr_media_kit.html)
+
 แอปพลิเคชันมือถือพัฒนาด้วย **Flutter** ออกแบบและพัฒนาเพื่อเชื่อมต่อกับหัววัด **8-in-1 Soil Parameter Probe (USB Type-C OTG / RS485 Modbus RTU)** ตรวจวัดคุณภาพดินในเขตรากพืช แสดงผลแบบ Real-time ผสานโมเดล **Physics-Informed Neural Networks (PINN)** ชดเชยความคลาดเคลื่อนจากอุณหภูมิ พร้อมระบบสามภาษา (ไทย 🇹🇭 / อังกฤษ 🇬🇧 / จีน 🇨🇳), กล้อง AI Vision บันทึกภาพ/วิดีโอพร้อมแผง HUD ตัดเสียงรบกวน, คลังภาพและข้อมูลวิจัยมัลติโมดอล และระบบดาวน์โหลดคู่มือวิชาการ PDF ฉบับสมบูรณ์ในตัว
 
 ---

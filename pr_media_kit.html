@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JC SOIL AI ANALYZER - PR Media Kit & Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070e17;
+      --card-bg: rgba(16, 28, 44, 0.75);
+      --card-border: rgba(45, 212, 191, 0.2);
+      --primary-cyan: #2dd4bf;
+      --primary-emerald: #10b981;
+      --accent-gold: #f59e0b;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(45, 212, 191, 0.1) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--primary-cyan);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 30%, var(--primary-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .grid-pr {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .pr-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pr-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--primary-cyan);
+    }
+
+    .pr-img-wrap {
+      width: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .pr-img-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .pr-card:hover .pr-img-wrap img {
+      transform: scale(1.03);
+    }
+
+    .pr-content {
+      padding: 24px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .pr-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .pr-meta {
+      font-size: 0.88rem;
+      color: var(--primary-cyan);
+      margin-bottom: 12px;
+      display: flex;
+      gap: 15px;
+    }
+
+    .pr-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      flex: 1;
+      text-align: center;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-emerald), #059669);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #34d399, var(--primary-emerald));
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e5e7eb;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .press-kit-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 35px;
+      margin-bottom: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .press-kit-box h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem;
+      color: #ffffff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .caption-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .caption-title {
+      font-weight: 700;
+      color: var(--primary-cyan);
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .caption-text {
+      font-size: 0.95rem;
+      color: #e5e7eb;
+      white-space: pre-line;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(45, 212, 191, 0.15);
+      border: 1px solid var(--primary-cyan);
+      color: var(--primary-cyan);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--primary-cyan);
+      color: #042f2e;
+    }
+
+    .feature-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .feature-tag {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      color: #d1d5db;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 25px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge">PR Media Kit & Official Showcase</span>
+      <h1>JC SOIL AI ANALYZER</h1>
+      <p class="subtitle">ชุดภาพสื่อประชาสัมพันธ์ทางการ สำหรับเผยแพร่ผ่านสื่อมวลชน งานประชุมวิชาการ นิทรรศการ และสื่อสังคมออนไลน์ โดยหน่วยวิจัยฟิสิกส์เกษตรดิจิทัล คณะวิทยาศาสตร์และเทคโนโลยี มหาวิทยาลัยราชภัฏรำไพพรรณี (SciRBRU AgriPhysics)</p>
+    </header>
+
+    <div class="grid-pr">
+      <!-- Item 1: Hero Banner 16:9 -->
+      <div class="pr-card">
+        <div class="pr-img-wrap">
+          <img src="assets/pr/jc_soil_ai_pr_banner_16x9.jpg" alt="JC SOIL AI Hero PR Banner">
+        </div>
+        <div class="pr-content">
+          <div>
+            <div class="pr-title">1. Hero PR Banner (16:9)</div>
+            <div class="pr-meta">
+              <span>📐 16:9 Widescreen</span>
+              <span>⚡ 4K UHD Ultra-Res</span>
+            </div>
+            <p class="pr-desc">ภาพแบนเนอร์แนวนอนมาตรฐาน สไตล์พรีเมียมเทคโนโลยีการเกษตรอัจฉริยะ เหมาะสำหรับหน้าปกเว็บไซต์, ภาพหัวข่าวประชาสัมพันธ์, Facebook Cover, และสไลด์นำเสนอ Keynote</p>
+          </div>
+          <div class="btn-group">
+            <a href="assets/pr/jc_soil_ai_pr_banner_16x9.jpg" target="_blank" class="btn btn-primary">🔍 ดูภาพขนาดเต็ม</a>
+            <a href="assets/pr/jc_soil_ai_pr_banner_16x9.jpg" download class="btn btn-secondary">💾 บันทึกไฟล์</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 2: Square Social 1:1 -->
+      <div class="pr-card">
+        <div class="pr-img-wrap">
+          <img src="assets/pr/jc_soil_ai_pr_square_1x1.jpg" alt="JC SOIL AI Square Social Media Poster">
+        </div>
+        <div class="pr-content">
+          <div>
+            <div class="pr-title">2. Social Media Showcase (1:1)</div>
+            <div class="pr-meta">
+              <span>📐 1:1 Square</span>
+              <span>📱 Social & Feed</span>
+            </div>
+            <p class="pr-desc">ภาพโปสเตอร์สี่เหลี่ยมจัตุรัส เน้นจุดเด่น 4 ฟีเจอร์หลัก (AI Soil Vision, IoT 7-in-1, Live HUD, Subfolder Dataset) เหมาะสำหรับ Instagram, Facebook Feed, LINE Official, และโบรชัวร์</p>
+          </div>
+          <div class="btn-group">
+            <a href="assets/pr/jc_soil_ai_pr_square_1x1.jpg" target="_blank" class="btn btn-primary">🔍 ดูภาพขนาดเต็ม</a>
+            <a href="assets/pr/jc_soil_ai_pr_square_1x1.jpg" download class="btn btn-secondary">💾 บันทึกไฟล์</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 3: Vertical Roll-up 9:16 -->
+      <div class="pr-card">
+        <div class="pr-img-wrap">
+          <img src="assets/pr/jc_soil_ai_pr_vertical_9x16.jpg" alt="JC SOIL AI Vertical Exhibition Poster">
+        </div>
+        <div class="pr-content">
+          <div>
+            <div class="pr-title">3. Roll-up & Story Poster (9:16)</div>
+            <div class="pr-meta">
+              <span>📐 9:16 Vertical</span>
+              <span>🎪 Roll-up & Story</span>
+            </div>
+            <p class="pr-desc">โปสเตอร์แนวตั้งความละเอียดสูง ออกแบบตามสัดส่วน Roll-up Banner และ X-Stand สำหรับตั้งในงานประชุมวิชาการ งานนิทรรศการเกษตรแฟร์ รวมถึงใช้ใน TikTok, Reels และ Stories</p>
+          </div>
+          <div class="btn-group">
+            <a href="assets/pr/jc_soil_ai_pr_vertical_9x16.jpg" target="_blank" class="btn btn-primary">🔍 ดูภาพขนาดเต็ม</a>
+            <a href="assets/pr/jc_soil_ai_pr_vertical_9x16.jpg" download class="btn btn-secondary">💾 บันทึกไฟล์</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ready-to-use PR Captions -->
+    <div class="press-kit-box">
+      <h2>📢 ข้อความและแคปชันพร้อมโพสต์ประชาสัมพันธ์</h2>
+      
+      <div class="caption-box">
+        <button class="copy-btn" onclick="copyText('cap-th')">📋 คัดลอก</button>
+        <div class="caption-title">🇹🇭 ข้อความประชาสัมพันธ์ภาษาไทย (สำหรับ Facebook, ข่าว มรภ.รำไพพรรณี, สื่อสิ่งพิมพ์)</div>
+        <div class="caption-text" id="cap-th">🌱 นวัตกรรมใหม่เพื่อเกษตรกรไทย! เปิดตัวแอปพลิเคชัน "JC SOIL AI ANALYZER" 🔬📱
+เทคโนโลยีปัญญาประดิษฐ์วิเคราะห์ดินและฟิสิกส์เกษตรแม่นยำสูง โดยทีมวิจัย SciRBRU AgriPhysics มหาวิทยาลัยราชภัฏรำไพพรรณี
+
+✨ จุดเด่นและฟังก์ชันอัจฉริยะ:
+1. 📸 AI Soil Colorimetry: วิเคราะห์สีดินด้วยสายตาคอมพิวเตอร์และระบบมาตรฐาน Munsell ประเมินธาตุอาหาร N-P-K และค่า pH หน้าดินได้ทันทีผ่านกล้อง
+2. 🔌 IoT 7-in-1 Modbus RTU: เชื่อมต่อหัววัดเซนเซอร์ดินมาตรฐานอุตสาหกรรมผ่านพอร์ต Type-C OTG วัดความชื้น อุณหภูมิ EC ความเค็ม และ NPK ได้แบบเรียลไทม์
+3. 🎥 Real-time HUD Telemetry Burn-in: ประทับตราข้อมูลพิกัดดาวเทียม GPS และค่าเซนเซอร์ลงในภาพถ่ายและวิดีโอทันที ไม่ต้องจดบันทึกมือ
+4. 🎬 In-App Video Player with Telemetry Track: เปิดดูวิดีโอสำรวจแปลงพร้อมแทร็กคำบรรยายซิงค์ข้อมูลตรวจวัดตามวินาทีจริง
+5. 🗂️ Structured Subfolder & Multi-share: ระบบจัดหมวดหมู่แฟ้มภาพ วิดีโอ และสเปรดชีต CSV เป็นระเบียบ สามารถเลือกไฟล์หลายรายการเพื่อแชร์หรือลบได้ในคลิกเดียว
+
+#JCSoilAI #SciRBRU #AgriPhysics #SmartFarming #เกษตรแม่นยำ #ปัญญาประดิษฐ์เพื่อการเกษตร #มรภรำไพพรรณี</div>
+      </div>
+
+      <div class="caption-box">
+        <button class="copy-btn" onclick="copyText('cap-en')">📋 คัดลอก</button>
+        <div class="caption-title">🌐 English Press Release & Abstract (For International Conferences / LinkedIn / Web)</div>
+        <div class="caption-text" id="cap-en">🚀 Announcing "JC SOIL AI ANALYZER" – Intelligent Precision Agriphysics at Your Fingertips! 🌾🔬
+Developed by the Digital Agriphysics Research Group (SciRBRU AgriPhysics), Faculty of Science and Technology, Rambhai Barni Rajabhat University.
+
+Key Innovations:
+• 🧠 Digital Soil Colorimetry & Munsell AI: Real-time computer vision analysis for instant soil macronutrient and pH estimation.
+• ⚡ 7-in-1 RS485 Modbus Sensor Integration: Plug-and-play USB Type-C OTG interface for simultaneous moisture, temperature, EC, and NPK sensing.
+• 🛰️ Live HUD Telemetry Burn-in: Direct on-frame sensor data and GPS stamping for both still photographs and video recordings.
+• 📹 Synchronized In-App Video Playback: Play back field survey footage with live telemetry overlays via precision .SRT integration.
+• 📁 Structured Subfolder Storage: Fully organized images/, videos/, and data/ directory architecture with multi-select batch sharing and deletion.
+
+Empowering modern farmers and agricultural scientists with intelligent, reproducible field data!
+
+#PrecisionAgriculture #DigitalAgriphysics #SoilAI #IoT #SmartFarming #SciRBRU</div>
+      </div>
+
+      <div class="feature-tags">
+        <span class="feature-tag">🏷️ AI Colorimetry</span>
+        <span class="feature-tag">🏷️ RS485 Modbus RTU</span>
+        <span class="feature-tag">🏷️ USB OTG Plug-and-Play</span>
+        <span class="feature-tag">🏷️ GPS Telemetry HUD</span>
+        <span class="feature-tag">🏷️ In-App Video Player</span>
+        <span class="feature-tag">🏷️ Multi-Select Batch Share</span>
+        <span class="feature-tag">🏷️ Subfolder Data Archive</span>
+        <span class="feature-tag">🏷️ Offline Edge Computing</span>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2026 JC SOIL AI ANALYZER | SciRBRU AgriPhysics Research Team</p>
+      <p>Faculty of Science and Technology, Rambhai Barni Rajabhat University, Chanthaburi, Thailand</p>
+    </footer>
+  </div>
+
+  <script>
+    function copyText(id) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('คัดลอกข้อความประชาสัมพันธ์เรียบร้อยแล้ว!');
+      });
+    }
+  </script>
+</body>
+</html>
