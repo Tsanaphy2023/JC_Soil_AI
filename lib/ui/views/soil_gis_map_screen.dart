@@ -158,6 +158,53 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
     return _getColorForValue(val, _currentLayer);
   }
 
+  String _getLayerTitle(GisLayer layer, LanguageProvider lang) {
+    switch (layer) {
+      case GisLayer.healthScore:
+        return lang.t('layerHealthScore');
+      case GisLayer.ph:
+        return lang.t('layerPh');
+      case GisLayer.moisture:
+        return lang.t('layerMoisture');
+      case GisLayer.ec:
+        return lang.t('layerEc');
+      case GisLayer.npk:
+        return lang.t('layerNpk');
+    }
+  }
+
+  String _getMetricDisplayValue(SoilDatasetItem item, GisLayer layer) {
+    switch (layer) {
+      case GisLayer.healthScore:
+        final score = _getMetricValue(item, layer).toInt();
+        return '$score คะแนน';
+      case GisLayer.ph:
+        return 'pH ${item.ph.toStringAsFixed(2)}';
+      case GisLayer.moisture:
+        return '${item.moisture.toStringAsFixed(1)}%';
+      case GisLayer.ec:
+        return '${item.ec} µS/cm';
+      case GisLayer.npk:
+        final total = item.nitrogen + item.phosphorus + item.potassium;
+        return '$total mg/kg (N:${item.nitrogen} P:${item.phosphorus} K:${item.potassium})';
+    }
+  }
+
+  String _getMarkerBadgeText(SoilDatasetItem item, GisLayer layer) {
+    switch (layer) {
+      case GisLayer.healthScore:
+        return '${_getMetricValue(item, layer).toInt()}%';
+      case GisLayer.ph:
+        return 'pH ${item.ph.toStringAsFixed(1)}';
+      case GisLayer.moisture:
+        return '${item.moisture.toStringAsFixed(0)}%';
+      case GisLayer.ec:
+        return '${item.ec} µS';
+      case GisLayer.npk:
+        return '${item.nitrogen + item.phosphorus + item.potassium} NPK';
+    }
+  }
+
   void _recomputeContour(List<SoilDatasetItem> items) {
     if (items.isEmpty) {
       _contourResult = null;
@@ -457,10 +504,10 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
                                       item.sampleId,
                                       style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.bold),
                                     ),
-                                    Text(
-                                      '📍 ${item.latitude.toStringAsFixed(6)}, ${item.longitude.toStringAsFixed(6)} (Alt: ${item.altitude.toStringAsFixed(1)}m)',
-                                      style: const TextStyle(color: Colors.white60, fontSize: 10.5),
-                                    ),
+                                     Text(
+                                       '📊 ${_getLayerTitle(_currentLayer, lang)}: ${_getMetricDisplayValue(item, _currentLayer)}',
+                                       style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold),
+                                     ),
                                   ],
                                 ),
                               ),
@@ -570,9 +617,22 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          '${item.latitude.toStringAsFixed(6)}, ${item.longitude.toStringAsFixed(6)} (Alt: ${item.altitude.toStringAsFixed(1)}m)',
-                          style: const TextStyle(color: Colors.cyanAccent, fontSize: 11.5),
+                        Container(
+                          margin: const EdgeInsets.only(top: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: _getItemColor(item).withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: _getItemColor(item), width: 1),
+                          ),
+                          child: Text(
+                            '${_getLayerTitle(_currentLayer, lang)}: ${_getMetricDisplayValue(item, _currentLayer)}',
+                            style: TextStyle(
+                              color: _getItemColor(item),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -733,12 +793,12 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
     final markers = _geotaggedItems.map((item) {
       final color = _getItemColor(item);
       final isSelected = _selectedItem?.sampleId == item.sampleId;
-      final sampleNumber = item.sampleId.split('_').last;
+      final badgeValue = _getMarkerBadgeText(item, _currentLayer);
 
       return Marker(
         point: LatLng(item.latitude, item.longitude),
-        width: 70,
-        height: 60,
+        width: 86,
+        height: 62,
         child: GestureDetector(
           onTap: () => _showSampleDetailSheet(item),
           child: Column(
@@ -765,17 +825,29 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
                     : null,
               ),
               const SizedBox(height: 2),
-              // Sample Number Badge
+              // Value Badge showing the measured/analyzed quantity in the chosen color shade
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: color.withValues(alpha: 0.7), width: 1),
+                  color: Colors.black.withValues(alpha: 0.85),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: color, width: 1.2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.35),
+                      blurRadius: 4,
+                    ),
+                  ],
                 ),
                 child: Text(
-                  sampleNumber,
-                  style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.bold),
+                  badgeValue,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -977,6 +1049,9 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
                         ),
                       ),
                     ),
+
+                    // Dynamic Color Shade Scale Legend Bar
+                    _buildColorScaleLegend(lang),
 
                     // Google Maps Interactive 3D Canvas
                     Expanded(
@@ -1219,6 +1294,99 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
       backgroundColor: const Color(0xFF1E293B),
       padding: const EdgeInsets.symmetric(horizontal: 4),
       onSelected: (_) => _onLayerChanged(layer),
+    );
+  }
+
+  Widget _buildColorScaleLegend(LanguageProvider lang) {
+    List<Widget> legendItems;
+    switch (_currentLayer) {
+      case GisLayer.healthScore:
+        legendItems = [
+          _buildLegendItem(Colors.redAccent, '<50 (ต่ำ)'),
+          _buildLegendItem(Colors.amber, '50-74 (ปานกลาง)'),
+          _buildLegendItem(const Color(0xFF10B981), '≥75 (สมบูรณ์)'),
+        ];
+        break;
+      case GisLayer.ph:
+        legendItems = [
+          _buildLegendItem(Colors.redAccent, '<5.0 (กรดจัด)'),
+          _buildLegendItem(const Color(0xFF10B981), '5.0-6.5 (เหมาะสม)'),
+          _buildLegendItem(Colors.blueAccent, '>6.5 (ด่าง)'),
+        ];
+        break;
+      case GisLayer.moisture:
+        legendItems = [
+          _buildLegendItem(Colors.amber, '<30% (แห้ง)'),
+          _buildLegendItem(const Color(0xFF06B6D4), '30-65% (พอดี)'),
+          _buildLegendItem(const Color(0xFF3B82F6), '>65% (ชื้นสูง)'),
+        ];
+        break;
+      case GisLayer.ec:
+        legendItems = [
+          _buildLegendItem(const Color(0xFF10B981), '<800 (ต่ำ)'),
+          _buildLegendItem(Colors.orangeAccent, '800-1500 (ปานกลาง)'),
+          _buildLegendItem(Colors.redAccent, '>1500 (เค็มจัด)'),
+        ];
+        break;
+      case GisLayer.npk:
+        legendItems = [
+          _buildLegendItem(Colors.orangeAccent, '<50 (ต่ำ)'),
+          _buildLegendItem(Colors.amber, '50-90 (ปานกลาง)'),
+          _buildLegendItem(const Color(0xFF10B981), '>90 (อุดมสมบูรณ์)'),
+        ];
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: const BoxDecoration(
+        color: Color(0xFF070E17),
+        border: Border(
+          bottom: BorderSide(color: Colors.white12, width: 1),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.palette_outlined, color: Colors.cyanAccent, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            'เฉดสี ${_getLayerTitle(_currentLayer, lang)}: ',
+            style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: legendItems,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(Color color, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(color: color, fontSize: 10.5, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
     );
   }
 }
