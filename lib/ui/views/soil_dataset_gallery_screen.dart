@@ -22,15 +22,21 @@ class SoilDatasetGalleryScreen extends StatefulWidget {
 
 class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
   List<SoilDatasetItem> _items = [];
+  List<SoilDataFileInfo> _dataFiles = [];
   Map<String, dynamic> _stats = {
     'total': 0,
     'images': 0,
     'videos': 0,
+    'dataFiles': 0,
     'geotagged': 0,
     'formattedSize': '0 MB',
   };
   bool _isLoading = true;
   GalleryFilter _currentFilter = GalleryFilter.all;
+
+  // Multi-Selection State for Batch Sharing & Batch Deletion
+  bool _isSelectionMode = false;
+  final Set<String> _selectedSampleIds = <String>{};
 
   @override
   void initState() {
@@ -43,11 +49,19 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
     try {
       final items = await SoilDatasetService.getAllDatasetItems();
       final stats = await SoilDatasetService.getDatasetStats();
+      final dataFiles = await SoilDatasetService.getAllDataFiles();
       if (mounted) {
         setState(() {
           _items = items;
+          _dataFiles = dataFiles;
           _stats = stats;
           _isLoading = false;
+          // Clear any deleted items from selection
+          final validIds = items.map((e) => e.sampleId).toSet();
+          _selectedSampleIds.removeWhere((id) => !validIds.contains(id));
+          if (_selectedSampleIds.isEmpty) {
+            _isSelectionMode = false;
+          }
         });
       }
     } catch (e) {
@@ -69,6 +83,106 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
     }
   }
 
+  // Selection Mode Controllers
+  void _toggleSelection(SoilDatasetItem item) {
+    setState(() {
+      if (_selectedSampleIds.contains(item.sampleId)) {
+        _selectedSampleIds.remove(item.sampleId);
+        if (_selectedSampleIds.isEmpty) {
+          _isSelectionMode = false;
+        }
+      } else {
+        _selectedSampleIds.add(item.sampleId);
+      }
+    });
+  }
+
+  void _selectAll() {
+    setState(() {
+      _selectedSampleIds.clear();
+      for (final item in _filteredItems) {
+        _selectedSampleIds.add(item.sampleId);
+      }
+    });
+  }
+
+  void _deselectAll() {
+    setState(() {
+      _selectedSampleIds.clear();
+      _isSelectionMode = false;
+    });
+  }
+
+  Future<void> _shareSelectedItems(LanguageProvider lang) async {
+    final selectedItems = _items.where((e) => _selectedSampleIds.contains(e.sampleId)).toList();
+    if (selectedItems.isEmpty) return;
+
+    try {
+      await SoilDatasetService.shareMultipleItems(selectedItems);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red.shade900,
+            content: Text('เกิดข้อผิดพลาดในการแชร์: $e'),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteSelectedItems(LanguageProvider lang) async {
+    final selectedItems = _items.where((e) => _selectedSampleIds.contains(e.sampleId)).toList();
+    if (selectedItems.isEmpty) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardSurface,
+        title: Row(
+          children: [
+            const Icon(Icons.delete_sweep, color: Colors.redAccent, size: 24),
+            const SizedBox(width: 8),
+            Text(
+              lang.t('deleteConfirmTitle'),
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Text(
+          '${lang.t('deleteConfirmBatch')}\n\n(${lang.t('selectedCount')}: ${selectedItems.length} รายการ)',
+          style: const TextStyle(color: Colors.white70, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('ยกเลิก / Cancel', style: TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade800),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('${lang.t('deleteSelected')} (${selectedItems.length})', style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final count = await SoilDatasetService.deleteMultipleItems(selectedItems);
+      _deselectAll();
+      await _loadData();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('${lang.t('deletedSuccess')} ($count รายการ)'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _shareItem(SoilDatasetItem item) async {
     try {
       await SoilDatasetService.shareItem(item);
@@ -84,31 +198,31 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
     }
   }
 
-  Future<void> _confirmDeleteItem(SoilDatasetItem item) async {
+  Future<void> _confirmDeleteItem(SoilDatasetItem item, LanguageProvider lang) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.cardSurface,
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.delete_forever, color: Colors.redAccent),
-            SizedBox(width: 8),
-            Text('ยืนยันการลบไฟล์', style: TextStyle(color: Colors.white)),
+            const Icon(Icons.delete_forever, color: Colors.redAccent),
+            const SizedBox(width: 8),
+            Text(lang.t('deleteConfirmTitle'), style: const TextStyle(color: Colors.white, fontSize: 16)),
           ],
         ),
         content: Text(
-          'คุณต้องการลบ ${item.fileName} และข้อมูลตัวอย่างนี้ออกจากหน่วยความจำอย่างถาวรหรือไม่?',
-          style: const TextStyle(color: Colors.white70),
+          '${lang.t('deleteSingleConfirm')}\n\n• ${item.fileName}\n• ${item.sampleId}',
+          style: const TextStyle(color: Colors.white70, fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('ยกเลิก', style: TextStyle(color: Colors.white60)),
+            child: const Text('ยกเลิก / Cancel', style: TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade800),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('ลบข้อมูล', style: TextStyle(color: Colors.white)),
+            child: const Text('ลบข้อมูล / Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -120,10 +234,57 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
         await _loadData();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               backgroundColor: Colors.green,
-              content: Text('ลบตัวอย่างเรียบร้อยแล้ว'),
-              duration: Duration(seconds: 2),
+              content: Text(lang.t('deletedSuccess')),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteDataFile(SoilDataFileInfo dataFile, LanguageProvider lang) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardSurface,
+        title: Row(
+          children: [
+            const Icon(Icons.delete_forever, color: Colors.redAccent),
+            const SizedBox(width: 8),
+            Text(lang.t('deleteConfirmTitle'), style: const TextStyle(color: Colors.white, fontSize: 16)),
+          ],
+        ),
+        content: Text(
+          '${lang.t('deleteSingleConfirm')}\n\n• ${dataFile.fileName}\n• ขนาด: ${dataFile.formattedSize}',
+          style: const TextStyle(color: Colors.white70, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('ยกเลิก / Cancel', style: TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade800),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('ลบไฟล์ / Delete', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final success = await SoilDatasetService.deleteDataFile(dataFile.filePath);
+      if (success) {
+        await _loadData();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.green,
+              content: Text(lang.t('deletedSuccess')),
+              duration: const Duration(seconds: 2),
             ),
           );
         }
@@ -152,48 +313,83 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              lang.t('galleryTitle'),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+      appBar: _isSelectionMode
+          ? AppBar(
+              backgroundColor: Colors.teal.shade900,
+              leading: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white),
+                onPressed: _deselectAll,
+              ),
+              title: Text(
+                '${lang.t('selectedCount')}: ${_selectedSampleIds.length}',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.select_all, color: Colors.cyanAccent),
+                  tooltip: lang.t('selectAll'),
+                  onPressed: _selectAll,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share, color: Colors.white),
+                  tooltip: lang.t('shareSelected'),
+                  onPressed: _selectedSampleIds.isEmpty ? null : () => _shareSelectedItems(lang),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
+                  tooltip: lang.t('deleteSelected'),
+                  onPressed: _selectedSampleIds.isEmpty ? null : () => _deleteSelectedItems(lang),
+                ),
+              ],
+            )
+          : AppBar(
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    lang.t('galleryTitle'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  Text(
+                    lang.t('gallerySubtitle'),
+                    style: const TextStyle(fontSize: 10.5, color: Colors.cyanAccent),
+                  ),
+                ],
+              ),
+              backgroundColor: AppColors.cardSurface,
+              actions: [
+                if (_filteredItems.isNotEmpty && _currentFilter != GalleryFilter.csv)
+                  IconButton(
+                    icon: const Icon(Icons.checklist, color: Colors.cyanAccent),
+                    tooltip: lang.t('selectFiles'),
+                    onPressed: () => setState(() => _isSelectionMode = true),
+                  ),
+                IconButton(
+                  icon: const Icon(Icons.share_outlined, color: Colors.cyanAccent),
+                  tooltip: lang.t('shareDataset'),
+                  onPressed: _items.isEmpty ? null : _shareAllDataset,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: Colors.white70),
+                  tooltip: 'Refresh',
+                  onPressed: _loadData,
+                ),
+              ],
             ),
-            Text(
-              lang.t('gallerySubtitle'),
-              style: const TextStyle(fontSize: 10.5, color: Colors.cyanAccent),
-            ),
-          ],
-        ),
-        backgroundColor: AppColors.cardSurface,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined, color: Colors.cyanAccent),
-            tooltip: lang.t('shareDataset'),
-            onPressed: _items.isEmpty ? null : _shareAllDataset,
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white70),
-            tooltip: 'Refresh',
-            onPressed: _loadData,
-          ),
-        ],
-      ),
       body: Column(
         children: [
-          // 1. Top Statistics Header Card
+          // 1. Top Statistics Header Card (Images, Videos, Data, Storage)
           _buildStatsCard(lang),
 
-          // 2. Filter Tabs
+          // 2. Filter Tabs (All, Photos, Videos, CSV & Data)
           _buildFilterTabs(lang),
 
-          // 3. Main Content
+          // 3. Main Content (Grid or CSV List)
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator(color: Colors.cyanAccent))
                 : _currentFilter == GalleryFilter.csv
-                    ? _buildCsvTabContent()
+                    ? _buildCsvTabContent(lang)
                     : _buildMediaGrid(lang),
           ),
         ],
@@ -217,16 +413,45 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Column(
         children: [
-          _buildStatColumn('📷 ${lang.t('photosCount')}', '${_stats['images'] ?? 0}', Colors.tealAccent),
-          _buildStatDivider(),
-          _buildStatColumn('🎥 ${lang.t('videosCount')}', '${_stats['videos'] ?? 0}', Colors.redAccent),
-          _buildStatDivider(),
-          _buildStatColumn('📍 ${lang.t('geotaggedCount')}', '${_stats['geotagged'] ?? 0}', Colors.amberAccent),
-          _buildStatDivider(),
-          _buildStatColumn('💾 ${lang.t('storageSize')}', '${_stats['formattedSize'] ?? '0 MB'}', Colors.cyanAccent),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildStatColumn('📷 ${lang.t('photosCount')}', '${_stats['images'] ?? 0}', Colors.tealAccent),
+              _buildStatDivider(),
+              _buildStatColumn('🎥 ${lang.t('videosCount')}', '${_stats['videos'] ?? 0}', Colors.redAccent),
+              _buildStatDivider(),
+              _buildStatColumn('📊 ${lang.t('filterCsv')}', '${_dataFiles.length}', Colors.greenAccent),
+              _buildStatDivider(),
+              _buildStatColumn('💾 ${lang.t('storageSize')}', '${_stats['formattedSize'] ?? '0 MB'}', Colors.cyanAccent),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.black38,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.folder_copy_outlined, size: 13, color: Colors.cyanAccent),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    lang.t('subfoldersOrganized'),
+                    style: const TextStyle(color: Colors.white70, fontSize: 10),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -269,7 +494,7 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
           const SizedBox(width: 6),
           _buildFilterChip('🎥 ${lang.t('filterVideos')} (${_stats['videos'] ?? 0})', GalleryFilter.videos),
           const SizedBox(width: 6),
-          _buildFilterChip('📊 ${lang.t('filterCsv')}', GalleryFilter.csv),
+          _buildFilterChip('📊 ${lang.t('filterCsv')} (${_dataFiles.length})', GalleryFilter.csv),
         ],
       ),
     );
@@ -356,25 +581,49 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
           itemCount: items.length,
           itemBuilder: (context, index) {
             final item = items[index];
-            return _buildMediaCard(item);
+            return _buildMediaCard(item, lang);
           },
         );
       },
     );
   }
 
-  Widget _buildMediaCard(SoilDatasetItem item) {
+  Widget _buildMediaCard(SoilDatasetItem item, LanguageProvider lang) {
+    final isSelected = _selectedSampleIds.contains(item.sampleId);
+
     return GestureDetector(
-      onTap: () => _openDetailViewer(item),
-      child: Container(
+      onTap: () {
+        if (_isSelectionMode) {
+          _toggleSelection(item);
+        } else {
+          _openDetailViewer(item, lang);
+        }
+      },
+      onLongPress: () {
+        if (!_isSelectionMode) {
+          setState(() {
+            _isSelectionMode = true;
+            _selectedSampleIds.add(item.sampleId);
+          });
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
         decoration: BoxDecoration(
           color: AppColors.cardSurface,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.white12),
+          border: Border.all(
+            color: isSelected
+                ? Colors.cyanAccent
+                : (_isSelectionMode ? Colors.white24 : Colors.white12),
+            width: isSelected ? 2.2 : 1,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 4,
+              color: isSelected
+                  ? Colors.cyanAccent.withValues(alpha: 0.25)
+                  : Colors.black.withValues(alpha: 0.3),
+              blurRadius: isSelected ? 8 : 4,
               offset: const Offset(0, 2),
             ),
           ],
@@ -393,7 +642,15 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                   : _buildPlaceholderMedia(item),
             ),
 
-            // Top Gradient & GPS Badge
+            // Selection tint overlay
+            if (isSelected)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.cyan.withValues(alpha: 0.22),
+                ),
+              ),
+
+            // Top Gradient & Info/Action Bar
             Positioned(
               top: 0,
               left: 0,
@@ -410,7 +667,25 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (item.latitude != 0.0 || item.longitude != 0.0)
+                    if (_isSelectionMode)
+                      // Checkbox in selection mode
+                      GestureDetector(
+                        onTap: () => _toggleSelection(item),
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: isSelected ? Colors.cyanAccent : Colors.black54,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white70),
+                          ),
+                          child: Icon(
+                            isSelected ? Icons.check : Icons.circle_outlined,
+                            color: isSelected ? Colors.black : Colors.white70,
+                            size: 15,
+                          ),
+                        ),
+                      )
+                    else if (item.latitude != 0.0 || item.longitude != 0.0)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                         decoration: BoxDecoration(
@@ -433,19 +708,38 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                     else
                       const SizedBox.shrink(),
 
-                    // Share button icon on card
-                    GestureDetector(
-                      onTap: () => _shareItem(item),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white24),
-                        ),
-                        child: const Icon(Icons.share, color: Colors.cyanAccent, size: 13),
+                    // Action buttons (share & delete) when not in selection mode
+                    if (!_isSelectionMode)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: () => _shareItem(item),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white24),
+                              ),
+                              child: const Icon(Icons.share, color: Colors.cyanAccent, size: 13),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            onTap: () => _confirmDeleteItem(item, lang),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.5)),
+                              ),
+                              child: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 13),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -562,7 +856,7 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
   }
 
   /// Interactive Viewer Modal with Pinch-to-zoom and Full Telemetry
-  void _openDetailViewer(SoilDatasetItem item) {
+  void _openDetailViewer(SoilDatasetItem item, LanguageProvider lang) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -619,7 +913,7 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                               tooltip: 'ลบ',
                               onPressed: () {
                                 Navigator.pop(ctx);
-                                _confirmDeleteItem(item);
+                                _confirmDeleteItem(item, lang);
                               },
                             ),
                             IconButton(
@@ -782,12 +1076,12 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                             children: [
                               const Row(
                                 children: [
-                                  Icon(Icons.psychology, color: Colors.tealAccent, size: 18),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    'AI PINN (Physics-Informed Neural Network) Output',
-                                    style: TextStyle(color: Colors.tealAccent, fontSize: 12, fontWeight: FontWeight.bold),
-                                  ),
+                                    Icon(Icons.psychology, color: Colors.tealAccent, size: 18),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      'AI PINN (Physics-Informed Neural Network) Output',
+                                      style: TextStyle(color: Colors.tealAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                                    ),
                                 ],
                               ),
                               const SizedBox(height: 6),
@@ -867,14 +1161,15 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
     );
   }
 
-  /// Tab 4: CSV Logs & Spreadsheets Management
-  Widget _buildCsvTabContent() {
+  /// Tab 4: CSV Logs & Spreadsheets Management in soil_dataset/data/
+  Widget _buildCsvTabContent(LanguageProvider lang) {
     final vm = context.watch<SoilSensorViewModel>();
     final history = vm.history;
 
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
+        // Live memory session card
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
@@ -887,30 +1182,20 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
             children: [
               const Row(
                 children: [
-                  Icon(Icons.table_chart, color: Colors.greenAccent, size: 22),
+                  Icon(Icons.sensors, color: Colors.greenAccent, size: 20),
                   SizedBox(width: 8),
                   Text(
-                    'ไฟล์ตารางข้อมูล Soil_parameters.csv',
-                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                    'รอบตรวจวัดปัจจุบัน (Live Sensor Buffer)',
+                    style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
-                'บันทึกพารามิเตอร์เซนเซอร์ 12 คอลัมน์ (รวมพิกัด GPS: Lat, Lon, Alt) พร้อมเปิดดูใน Microsoft Excel, Google Sheets, หรือซอฟต์แวร์วิเคราะห์ทางสถิติ',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 11),
+                'ข้อมูลในหน่วยความจำ RAM ชั่วคราว: ${history.length} รายการ (ส่งออกเป็น CSV อัตโนมัติ)',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 11),
               ),
               const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'ข้อมูลในรอบบันทึกปัจจุบัน: ${history.length} รายการ',
-                    style: const TextStyle(color: Colors.cyanAccent, fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
               Row(
                 children: [
                   Expanded(
@@ -920,7 +1205,7 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                         foregroundColor: Colors.white,
                       ),
                       icon: const Icon(Icons.share, size: 16),
-                      label: const Text('แชร์ไฟล์ CSV', style: TextStyle(fontSize: 12)),
+                      label: const Text('แชร์ CSV สด', style: TextStyle(fontSize: 12)),
                       onPressed: history.isEmpty ? null : () => vm.shareExport(),
                     ),
                   ),
@@ -932,7 +1217,7 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                         side: const BorderSide(color: Colors.cyanAccent),
                       ),
                       icon: const Icon(Icons.list_alt, size: 16),
-                      label: const Text('ดูตารางบันทึก', style: TextStyle(fontSize: 12)),
+                      label: const Text('ดูตารางย้อนหลัง', style: TextStyle(fontSize: 12)),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -946,7 +1231,145 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
             ],
           ),
         ),
+
+        const SizedBox(height: 16),
+
+        // Section header for persistent data folder
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.folder_open, color: Colors.amberAccent, size: 18),
+                SizedBox(width: 6),
+                Text(
+                  'คลังไฟล์ข้อมูล soil_dataset/data/',
+                  style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade900.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.amberAccent.withValues(alpha: 0.4)),
+              ),
+              child: Text(
+                '${_dataFiles.length} ไฟล์',
+                style: const TextStyle(color: Colors.amberAccent, fontSize: 10.5, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        if (_dataFiles.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.cardSurface,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.description_outlined, size: 40, color: Colors.grey.shade600),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'ยังไม่มีไฟล์ข้อมูลในโฟลเดอร์ data/',
+                    style: TextStyle(color: Colors.white60, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ..._dataFiles.map((df) => _buildDataFileItem(df, lang)),
       ],
+    );
+  }
+
+  Widget _buildDataFileItem(SoilDataFileInfo dataFile, LanguageProvider lang) {
+    final isManifest = dataFile.fileName == SoilDatasetService.manifestFileName;
+    final isCsv = dataFile.isCsv;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isManifest ? Colors.cyanAccent.withValues(alpha: 0.4) : Colors.white12,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isCsv
+                  ? Colors.green.shade900.withValues(alpha: 0.4)
+                  : Colors.amber.shade900.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              isCsv ? Icons.table_chart : Icons.data_object,
+              color: isCsv ? Colors.greenAccent : Colors.amberAccent,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  dataFile.fileName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${dataFile.formattedSize} • ${dataFile.formattedDate}',
+                  style: const TextStyle(color: Colors.white54, fontSize: 10),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.share, color: Colors.cyanAccent, size: 18),
+            tooltip: 'แชร์ไฟล์',
+            onPressed: () async {
+              try {
+                await SoilDatasetService.shareDataFile(dataFile.filePath);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.red.shade900,
+                      content: Text('แชร์ไฟล์ไม่สำเร็จ: $e'),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+          if (!isManifest)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
+              tooltip: 'ลบไฟล์',
+              onPressed: () => _confirmDeleteDataFile(dataFile, lang),
+            ),
+        ],
+      ),
     );
   }
 }

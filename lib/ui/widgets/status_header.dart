@@ -665,9 +665,4 @@ class StatusHeader extends StatelessWidget {
       },
     );
   }
-
-  /// Retained for backward compatibility
-  Widget _buildUnifiedBrandLogo(BuildContext context) {
-    return _buildTallLogoCard(context);
-  }
 }

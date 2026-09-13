@@ -249,6 +249,11 @@ class AppLocalizations {
       AppLanguage.english: 'Storage',
       AppLanguage.chinese: '占用空间',
     },
+    'dataCount': {
+      AppLanguage.thai: 'ข้อมูล CSV',
+      AppLanguage.english: 'Data Files',
+      AppLanguage.chinese: '数据文件',
+    },
     'filterAll': {
       AppLanguage.thai: 'ทั้งหมด',
       AppLanguage.english: 'All',
@@ -265,9 +270,64 @@ class AppLocalizations {
       AppLanguage.chinese: '视频',
     },
     'filterCsv': {
-      AppLanguage.thai: 'ตาราง CSV',
-      AppLanguage.english: 'CSV Table',
-      AppLanguage.chinese: 'CSV表格',
+      AppLanguage.thai: 'ข้อมูล CSV & ตาราง',
+      AppLanguage.english: 'CSV & Data',
+      AppLanguage.chinese: 'CSV与数据',
+    },
+    'selectFiles': {
+      AppLanguage.thai: 'เลือกไฟล์',
+      AppLanguage.english: 'Select',
+      AppLanguage.chinese: '选择',
+    },
+    'selectedCount': {
+      AppLanguage.thai: 'เลือกแล้ว',
+      AppLanguage.english: 'Selected',
+      AppLanguage.chinese: '已选择',
+    },
+    'selectAll': {
+      AppLanguage.thai: 'เลือกทั้งหมด',
+      AppLanguage.english: 'Select All',
+      AppLanguage.chinese: '全选',
+    },
+    'deselectAll': {
+      AppLanguage.thai: 'ล้างการเลือก',
+      AppLanguage.english: 'Deselect All',
+      AppLanguage.chinese: '取消全选',
+    },
+    'shareSelected': {
+      AppLanguage.thai: 'แชร์ที่เลือก',
+      AppLanguage.english: 'Share Selected',
+      AppLanguage.chinese: '分享已选',
+    },
+    'deleteSelected': {
+      AppLanguage.thai: 'ลบที่เลือก',
+      AppLanguage.english: 'Delete Selected',
+      AppLanguage.chinese: '删除已选',
+    },
+    'deleteConfirmTitle': {
+      AppLanguage.thai: 'ยืนยันการลบไฟล์',
+      AppLanguage.english: 'Confirm Deletion',
+      AppLanguage.chinese: '确认删除',
+    },
+    'deleteConfirmBatch': {
+      AppLanguage.thai: 'คุณต้องการลบไฟล์ที่เลือกทั้งหมดออกจากหน่วยความจำอย่างถาวรหรือไม่?',
+      AppLanguage.english: 'Permanently delete all selected files from device?',
+      AppLanguage.chinese: '确定永久删除所有已选文件吗？',
+    },
+    'deleteSingleConfirm': {
+      AppLanguage.thai: 'คุณต้องการลบไฟล์นี้ออกจากหน่วยความจำอย่างถาวรหรือไม่?',
+      AppLanguage.english: 'Permanently delete this file?',
+      AppLanguage.chinese: '确定永久删除此文件吗？',
+    },
+    'deletedSuccess': {
+      AppLanguage.thai: 'ลบข้อมูลเรียบร้อยแล้ว',
+      AppLanguage.english: 'Deleted successfully',
+      AppLanguage.chinese: '删除成功',
+    },
+    'subfoldersOrganized': {
+      AppLanguage.thai: 'แยกจัดเก็บตามโฟลเดอร์ย่อย: images/, videos/, data/',
+      AppLanguage.english: 'Organized subfolders: images/, videos/, data/',
+      AppLanguage.chinese: '系统化子文件夹存储: images/, videos/, data/',
     },
     'share': {
       AppLanguage.thai: 'แชร์',

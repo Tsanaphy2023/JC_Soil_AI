@@ -33,7 +33,6 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
   bool _isAudioEnabled = true;
 
   int _savedDatasetCount = 0;
-  String? _lastSavedNotice;
 
   @override
   void initState() {
@@ -164,9 +163,6 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
       await _refreshDatasetCount();
 
       if (mounted) {
-        setState(() {
-          _lastSavedNotice = lang.t('photoSavedNotice');
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.teal.shade900,

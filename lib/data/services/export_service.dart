@@ -3,6 +3,7 @@ import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/soil_reading.dart';
+import 'soil_dataset_service.dart';
 
 class ExportResult {
   final bool success;
@@ -43,20 +44,33 @@ class ExportService {
 
       final csvContent = const ListToCsvConverter().convert(rows);
 
-      // Save to external storage or documents directory
-      Directory? directory;
-      if (Platform.isAndroid) {
-        directory = await getExternalStorageDirectory();
-      }
-      directory ??= await getApplicationDocumentsDirectory();
+      // Save into organized subfolder: soil_dataset/data/
+      final dataDir = await SoilDatasetService.getDataDirectory();
+      final now = DateTime.now();
+      final timeStamp = '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_'
+          '${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}';
 
-      final file = File('${directory.path}/$filename');
-      await file.writeAsString(csvContent);
+      final timestampedFile = File('${dataDir.path}/Soil_parameters_$timeStamp.csv');
+      await timestampedFile.writeAsString(csvContent);
+
+      final latestFile = File('${dataDir.path}/$filename');
+      await latestFile.writeAsString(csvContent);
+
+      // Also copy to root storage for legacy access
+      try {
+        Directory? directory;
+        if (Platform.isAndroid) {
+          directory = await getExternalStorageDirectory();
+        }
+        directory ??= await getApplicationDocumentsDirectory();
+        final legacyFile = File('${directory.path}/$filename');
+        await legacyFile.writeAsString(csvContent);
+      } catch (_) {}
 
       return ExportResult(
         success: true,
-        filePath: file.path,
-        message: 'File saved successfully: ${file.path}',
+        filePath: timestampedFile.path,
+        message: 'บันทึกในโฟลเดอร์ data เรียบร้อย: ${timestampedFile.path}',
       );
     } catch (e) {
       return ExportResult(

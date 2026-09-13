@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -19,6 +18,7 @@ class SoilDatasetService {
   static const String datasetFolder = 'soil_dataset';
   static const String imagesFolder = 'images';
   static const String videosFolder = 'videos';
+  static const String dataFolder = 'data';
   static const String manifestFileName = 'dataset_manifest.json';
 
   /// Get or create base dataset directories (prefers External Storage on Android for easy MTP/file access)
@@ -38,6 +38,7 @@ class SoilDatasetService {
     return targetDir;
   }
 
+  /// Subfolder 1: Images (JPEG photos with real-time HUD telemetry overlays)
   static Future<Directory> getImagesDirectory() async {
     final baseDir = await getDatasetDirectory();
     final imgDir = Directory('${baseDir.path}/$imagesFolder');
@@ -47,6 +48,7 @@ class SoilDatasetService {
     return imgDir;
   }
 
+  /// Subfolder 2: Videos (MP4 video streams and SRT synchronized subtitle telemetries)
   static Future<Directory> getVideosDirectory() async {
     final baseDir = await getDatasetDirectory();
     final vidDir = Directory('${baseDir.path}/$videosFolder');
@@ -56,9 +58,32 @@ class SoilDatasetService {
     return vidDir;
   }
 
-  static Future<File> getManifestFile() async {
+  /// Subfolder 3: Data (CSV logs, telemetry records, and dataset manifest JSON)
+  static Future<Directory> getDataDirectory() async {
     final baseDir = await getDatasetDirectory();
-    return File('${baseDir.path}/$manifestFileName');
+    final dataDir = Directory('${baseDir.path}/$dataFolder');
+    if (!await dataDir.exists()) {
+      await dataDir.create(recursive: true);
+    }
+    return dataDir;
+  }
+
+  static Future<File> getManifestFile() async {
+    final dataDir = await getDataDirectory();
+    final fileInData = File('${dataDir.path}/$manifestFileName');
+    if (await fileInData.exists()) {
+      return fileInData;
+    }
+    final baseDir = await getDatasetDirectory();
+    final fileInBase = File('${baseDir.path}/$manifestFileName');
+    if (await fileInBase.exists()) {
+      try {
+        await fileInBase.copy(fileInData.path);
+        await fileInBase.delete();
+      } catch (_) {}
+      return fileInData;
+    }
+    return fileInData;
   }
 
   /// Save captured soil photo and register sample in AI training dataset manifest
@@ -76,7 +101,7 @@ class SoilDatasetService {
     final altVal = location?.altitude ?? rawReading.altitude ?? 0.0;
     final lat = latVal?.toStringAsFixed(4) ?? '0.0';
     final lon = lonVal?.toStringAsFixed(4) ?? '0.0';
-    final fileName = 'SOIL_IMG_${timeStr}_LAT${lat}_LON${lon}.jpg';
+    final fileName = 'SOIL_IMG_${timeStr}_LAT${lat}_LON$lon.jpg';
     final savedFile = File('${imgDir.path}/$fileName');
 
     // Burn real-time HUD telemetry, GPS, and targeting reticle onto the photo
@@ -121,7 +146,6 @@ class SoilDatasetService {
     );
 
     await _appendManifest(item.toJson());
-    debugPrint('[SoilDatasetService] Saved training photo with HUD overlay: ${savedFile.path}');
     return savedFile.path;
   }
 
@@ -141,7 +165,7 @@ class SoilDatasetService {
     final altVal = location?.altitude ?? rawReading.altitude ?? 0.0;
     final lat = latVal?.toStringAsFixed(4) ?? '0.0';
     final lon = lonVal?.toStringAsFixed(4) ?? '0.0';
-    final fileName = 'SOIL_VID_${timeStr}_LAT${lat}_LON${lon}.mp4';
+    final fileName = 'SOIL_VID_${timeStr}_LAT${lat}_LON$lon.mp4';
     final savedFile = File('${vidDir.path}/$fileName');
 
     await video.saveTo(savedFile.path);
@@ -321,6 +345,15 @@ N-P-K: ${rawReading.nitrogen}-${rawReading.phosphorus}-${rawReading.potassium} m
         await file.delete();
       }
 
+      // If video, also delete matching .srt subtitle file
+      if (item.isVideo || item.filePath.toLowerCase().endsWith('.mp4')) {
+        final srtPath = item.filePath.replaceAll(RegExp(r'\.mp4$', caseSensitive: false), '.srt');
+        final srtFile = File(srtPath);
+        if (await srtFile.exists()) {
+          await srtFile.delete();
+        }
+      }
+
       // 2. Remove from manifest
       final manifestFile = await getManifestFile();
       if (await manifestFile.exists()) {
@@ -341,6 +374,57 @@ N-P-K: ${rawReading.nitrogen}-${rawReading.phosphorus}-${rawReading.potassium} m
       debugPrint('[SoilDatasetService] Delete item error: $e');
       return false;
     }
+  }
+
+  /// Delete multiple dataset items in a batch (both files, SRTs, and manifest entries)
+  static Future<int> deleteMultipleItems(List<SoilDatasetItem> items) async {
+    if (items.isEmpty) return 0;
+    int deletedCount = 0;
+    final itemSampleIds = items.map((e) => e.sampleId).toSet();
+    final itemPaths = items.map((e) => e.filePath).toSet();
+
+    for (final item in items) {
+      try {
+        final file = File(item.filePath);
+        if (await file.exists()) {
+          await file.delete();
+        }
+        if (item.isVideo || item.filePath.toLowerCase().endsWith('.mp4')) {
+          final srtPath = item.filePath.replaceAll(RegExp(r'\.mp4$', caseSensitive: false), '.srt');
+          final srtFile = File(srtPath);
+          if (await srtFile.exists()) {
+            await srtFile.delete();
+          }
+        }
+        deletedCount++;
+      } catch (e) {
+        debugPrint('[SoilDatasetService] Error deleting ${item.filePath}: $e');
+      }
+    }
+
+    // Batch update manifest in one write operation
+    try {
+      final manifestFile = await getManifestFile();
+      if (await manifestFile.exists()) {
+        final content = await manifestFile.readAsString();
+        if (content.isNotEmpty) {
+          final list = jsonDecode(content) as List<dynamic>;
+          final updated = list.where((entry) {
+            if (entry is Map<String, dynamic>) {
+              final sid = entry['sample_id'];
+              final fpath = entry['file_path'];
+              return !itemSampleIds.contains(sid) && !itemPaths.contains(fpath);
+            }
+            return true;
+          }).toList();
+          await manifestFile.writeAsString(const JsonEncoder.withIndent('  ').convert(updated));
+        }
+      }
+    } catch (e) {
+      debugPrint('[SoilDatasetService] Error batch updating manifest: $e');
+    }
+
+    return deletedCount;
   }
 
   /// Share a single dataset item (image or video) with comprehensive agronomic caption
@@ -412,7 +496,67 @@ N-P-K: ${rawReading.nitrogen}-${rawReading.phosphorus}-${rawReading.potassium} m
     }
   }
 
-  /// Calculate summary stats for the dataset
+  /// List all telemetry data files (CSV, JSON) stored in soil_dataset/data/
+  static Future<List<SoilDataFileInfo>> getAllDataFiles() async {
+    final results = <SoilDataFileInfo>[];
+    try {
+      final dataDir = await getDataDirectory();
+      if (await dataDir.exists()) {
+        final entities = dataDir.listSync();
+        for (final entity in entities) {
+          if (entity is File) {
+            final fileName = entity.path.split(Platform.pathSeparator).last;
+            if (!fileName.startsWith('.')) {
+              final stat = entity.statSync();
+              final ext = fileName.contains('.') ? fileName.split('.').last.toLowerCase() : '';
+              results.add(SoilDataFileInfo(
+                fileName: fileName,
+                filePath: entity.path,
+                fileSizeBytes: stat.size,
+                modified: stat.modified,
+                fileType: ext,
+              ));
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[SoilDatasetService] Error listing data files: $e');
+    }
+    // Newest first
+    results.sort((a, b) => b.modified.compareTo(a.modified));
+    return results;
+  }
+
+  /// Delete an exported data file from soil_dataset/data/
+  static Future<bool> deleteDataFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (await file.exists()) {
+        await file.delete();
+        return true;
+      }
+    } catch (e) {
+      debugPrint('[SoilDatasetService] Error deleting data file: $e');
+    }
+    return false;
+  }
+
+  /// Share a data file (CSV, JSON)
+  static Future<void> shareDataFile(String filePath) async {
+    final file = File(filePath);
+    if (!await file.exists()) {
+      throw Exception('ไม่พบไฟล์ข้อมูล: $filePath');
+    }
+    final fileName = filePath.split(Platform.pathSeparator).last;
+    await Share.shareXFiles(
+      [XFile(filePath)],
+      text: '📊 ไฟล์ข้อมูลการตรวจวัดดิน: $fileName\n🌱 JC SOIL AI ANALYZER | SciRBRU AgriPhysics',
+      subject: 'Soil Data Export [$fileName]',
+    );
+  }
+
+  /// Calculate summary stats for the dataset across all subfolders (images, videos, data)
   static Future<Map<String, dynamic>> getDatasetStats() async {
     final items = await getAllDatasetItems();
     int imgCount = 0;
@@ -427,6 +571,15 @@ N-P-K: ${rawReading.nitrogen}-${rawReading.phosphorus}-${rawReading.potassium} m
       totalBytes += item.fileSizeBytes;
     }
 
+    int dataFilesCount = 0;
+    try {
+      final dataFiles = await getAllDataFiles();
+      dataFilesCount = dataFiles.length;
+      for (final df in dataFiles) {
+        totalBytes += df.fileSizeBytes;
+      }
+    } catch (_) {}
+
     String formattedSize = '0 MB';
     if (totalBytes < 1024 * 1024) {
       formattedSize = '${(totalBytes / 1024).toStringAsFixed(1)} KB';
@@ -438,9 +591,42 @@ N-P-K: ${rawReading.nitrogen}-${rawReading.phosphorus}-${rawReading.potassium} m
       'total': items.length,
       'images': imgCount,
       'videos': vidCount,
+      'dataFiles': dataFilesCount,
       'geotagged': geotaggedCount,
       'totalBytes': totalBytes,
       'formattedSize': formattedSize,
+      'subfolderPath': 'soil_dataset/ (images, videos, data)',
     };
   }
+}
+
+/// Metadata model for files stored in soil_dataset/data/ (CSV logs, JSON manifest, etc.)
+class SoilDataFileInfo {
+  final String fileName;
+  final String filePath;
+  final int fileSizeBytes;
+  final DateTime modified;
+  final String fileType; // 'csv', 'json', etc.
+
+  const SoilDataFileInfo({
+    required this.fileName,
+    required this.filePath,
+    required this.fileSizeBytes,
+    required this.modified,
+    required this.fileType,
+  });
+
+  String get formattedSize {
+    if (fileSizeBytes < 1024) return '$fileSizeBytes B';
+    if (fileSizeBytes < 1024 * 1024) return '${(fileSizeBytes / 1024).toStringAsFixed(1)} KB';
+    return '${(fileSizeBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  String get formattedDate {
+    return '${modified.year}-${modified.month.toString().padLeft(2, '0')}-${modified.day.toString().padLeft(2, '0')} '
+        '${modified.hour.toString().padLeft(2, '0')}:${modified.minute.toString().padLeft(2, '0')}';
+  }
+
+  bool get isCsv => fileType.toLowerCase() == 'csv';
+  bool get isJson => fileType.toLowerCase() == 'json';
 }

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soil_app/data/models/soil_dataset_item.dart';
+import 'package:soil_app/data/services/soil_dataset_service.dart';
 
 void main() {
   group('SoilDatasetItem Tests', () {
@@ -108,6 +109,47 @@ void main() {
       expect(item.formattedGps, contains('13.75630°'));
       expect(item.formattedGps, contains('100.50180°'));
       expect(item.googleMapsUrl, contains('13.7563,100.5018'));
+    });
+  });
+
+  group('SoilDataset Subfolder Organization & DataFile Tests', () {
+    test('verifies subfolder naming conventions for images, videos, and data', () {
+      expect(SoilDatasetService.datasetFolder, 'soil_dataset');
+      expect(SoilDatasetService.imagesFolder, 'images');
+      expect(SoilDatasetService.videosFolder, 'videos');
+      expect(SoilDatasetService.dataFolder, 'data');
+      expect(SoilDatasetService.manifestFileName, 'dataset_manifest.json');
+    });
+
+    test('SoilDataFileInfo calculates size and formats date correctly', () {
+      final modified = DateTime(2026, 9, 13, 14, 30, 0);
+      final dataFile = SoilDataFileInfo(
+        fileName: 'Soil_parameters_20260913_143000.csv',
+        filePath: '/mock/soil_dataset/data/Soil_parameters_20260913_143000.csv',
+        fileSizeBytes: 2048,
+        modified: modified,
+        fileType: 'csv',
+      );
+
+      expect(dataFile.isCsv, isTrue);
+      expect(dataFile.isJson, isFalse);
+      expect(dataFile.formattedSize, '2.0 KB');
+      expect(dataFile.formattedDate, '2026-09-13 14:30');
+    });
+
+    test('SoilDataFileInfo identifies JSON manifest file', () {
+      final modified = DateTime(2026, 9, 13, 15, 0, 0);
+      final manifestInfo = SoilDataFileInfo(
+        fileName: 'dataset_manifest.json',
+        filePath: '/mock/soil_dataset/data/dataset_manifest.json',
+        fileSizeBytes: 524288,
+        modified: modified,
+        fileType: 'json',
+      );
+
+      expect(manifestInfo.isCsv, isFalse);
+      expect(manifestInfo.isJson, isTrue);
+      expect(manifestInfo.formattedSize, '512.0 KB');
     });
   });
 }
