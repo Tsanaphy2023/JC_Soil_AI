@@ -478,6 +478,21 @@ class AppLocalizations {
       AppLanguage.english: 'Basemap',
       AppLanguage.chinese: '底图',
     },
+    'view3D': {
+      AppLanguage.thai: 'มุมมอง 3 มิติ',
+      AppLanguage.english: '3D View',
+      AppLanguage.chinese: '3D透视',
+    },
+    'view2D': {
+      AppLanguage.thai: 'มุมมอง 2 มิติ',
+      AppLanguage.english: '2D View',
+      AppLanguage.chinese: '2D平面',
+    },
+    'resetNorth': {
+      AppLanguage.thai: 'รีเซ็ตทิศเหนือ',
+      AppLanguage.english: 'Reset North',
+      AppLanguage.chinese: '重置正北',
+    },
   };
 
   String t(String key) {

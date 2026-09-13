@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import '../../core/localization/language_provider.dart';
 import '../../data/models/soil_dataset_item.dart';
@@ -17,20 +19,23 @@ class SoilGisMapScreen extends StatefulWidget {
   State<SoilGisMapScreen> createState() => _SoilGisMapScreenState();
 }
 
-class _SoilGisMapScreenState extends State<SoilGisMapScreen> {
+class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerProviderStateMixin {
   late final SoilReportService _reportService;
+  late final MapController _mapController;
 
   List<SoilDatasetItem> _geotaggedItems = [];
   bool _isLoading = true;
   GisLayer _currentLayer = GisLayer.healthScore;
   BasemapType _currentBasemap = BasemapType.googleHybrid;
   bool _showContour = true;
-  bool _showHeatmap = true;
+  bool _is3DView = false;
+  double _rotation = 0.0;
   SoilDatasetItem? _selectedItem;
 
   // Bounding box
   double _minLat = 0.0, _maxLat = 0.0;
   double _minLng = 0.0, _maxLng = 0.0;
+  LatLng _centerPoint = const LatLng(12.6500, 102.1100);
 
   // Cached Contour computation
   SoilContourResult? _contourResult;
@@ -39,6 +44,7 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> {
   void initState() {
     super.initState();
     _reportService = SoilReportService();
+    _mapController = MapController();
     _loadData();
   }
 
@@ -75,6 +81,7 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> {
       _maxLat = maxLat;
       _minLng = minLng;
       _maxLng = maxLng;
+      _centerPoint = LatLng((minLat + maxLat) / 2, (minLng + maxLng) / 2);
     }
 
     _recomputeContour(items);
@@ -83,6 +90,14 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> {
       _geotaggedItems = items;
       _isLoading = false;
     });
+
+    if (items.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        try {
+          _mapController.move(_centerPoint, 16.5);
+        } catch (_) {}
+      });
+    }
   }
 
   double _getMetricValue(SoilDatasetItem item, GisLayer layer) {
@@ -160,6 +175,11 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> {
       _currentLayer = layer;
       _recomputeContour(_geotaggedItems);
     });
+  }
+
+  void _resetNorth() {
+    _mapController.rotate(0);
+    setState(() => _rotation = 0.0);
   }
 
   Future<void> _exportGeoJson() async {
@@ -343,9 +363,118 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> {
     );
   }
 
+  Widget _buildTileLayer() {
+    switch (_currentBasemap) {
+      case BasemapType.googleHybrid:
+        return TileLayer(
+          urlTemplate: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+          userAgentPackageName: 'com.agriphysics.soil_app',
+          maxNativeZoom: 19,
+          maxZoom: 20,
+        );
+      case BasemapType.esriSatellite:
+        return TileLayer(
+          urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          userAgentPackageName: 'com.agriphysics.soil_app',
+          maxNativeZoom: 18,
+          maxZoom: 20,
+        );
+      case BasemapType.street:
+        return TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.agriphysics.soil_app',
+          maxNativeZoom: 19,
+          maxZoom: 20,
+        );
+      case BasemapType.offlineGrid:
+        return const SizedBox.shrink();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
+
+    // Build Polylines for Connecting Survey Tracks
+    final polylines = <Polyline>[];
+    if (_geotaggedItems.length > 1) {
+      polylines.add(
+        Polyline(
+          points: _geotaggedItems.map((e) => LatLng(e.latitude, e.longitude)).toList(),
+          color: Colors.cyanAccent.withValues(alpha: 0.65),
+          strokeWidth: 2.2,
+        ),
+      );
+    }
+
+    // Build Polylines for Contour Isolines
+    if (_showContour && _contourResult != null && _contourResult!.geoSegments.isNotEmpty) {
+      for (final seg in _contourResult!.geoSegments) {
+        final color = _getColorForValue(seg.level, _currentLayer);
+        polylines.add(
+          Polyline(
+            points: [seg.start, seg.end],
+            color: color.withValues(alpha: 0.95),
+            strokeWidth: 2.4,
+          ),
+        );
+      }
+    }
+
+    // Build Markers for Geotagged Points
+    final markers = _geotaggedItems.map((item) {
+      final color = _getItemColor(item);
+      final isSelected = _selectedItem?.sampleId == item.sampleId;
+      final sampleNumber = item.sampleId.split('_').last;
+
+      return Marker(
+        point: LatLng(item.latitude, item.longitude),
+        width: 70,
+        height: 60,
+        child: GestureDetector(
+          onTap: () => _showSampleDetailSheet(item),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Pin icon with glow
+              Container(
+                width: isSelected ? 24 : 18,
+                height: isSelected ? 24 : 18,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.8),
+                      blurRadius: isSelected ? 12 : 6,
+                      spreadRadius: isSelected ? 3 : 1,
+                    ),
+                  ],
+                ),
+                child: isSelected
+                    ? const Center(child: Icon(Icons.check, color: Colors.white, size: 12))
+                    : null,
+              ),
+              const SizedBox(height: 2),
+              // Sample Number Badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: color.withValues(alpha: 0.7), width: 1),
+                ),
+                child: Text(
+                  sampleNumber,
+                  style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFF070E17),
@@ -365,6 +494,16 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> {
           ],
         ),
         actions: [
+          // 2D / 3D Perspective Toggle Button
+          IconButton(
+            tooltip: _is3DView ? lang.t('view2D') : lang.t('view3D'),
+            icon: Icon(
+              _is3DView ? Icons.view_in_ar : Icons.layers_outlined,
+              color: _is3DView ? Colors.orangeAccent : Colors.white70,
+            ),
+            onPressed: () => setState(() => _is3DView = !_is3DView),
+          ),
+
           // Basemap Selector Menu
           PopupMenuButton<BasemapType>(
             icon: const Icon(Icons.layers, color: Colors.cyanAccent),
@@ -491,92 +630,128 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> {
                       ),
                     ),
 
-                    // Interactive Map Canvas with Basemap & Contours
+                    // Google Maps Interactive 3D Canvas
                     Expanded(
                       child: Stack(
                         children: [
-                          InteractiveViewer(
-                            boundaryMargin: const EdgeInsets.all(120),
-                            minScale: 0.5,
-                            maxScale: 6.0,
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                final canvasWidth = constraints.maxWidth;
-                                final canvasHeight = constraints.maxHeight;
-
-                                return CustomPaint(
-                                  size: Size(canvasWidth, canvasHeight),
-                                  painter: _SoilGisPainter(
-                                    items: _geotaggedItems,
-                                    minLat: _minLat,
-                                    maxLat: _maxLat,
-                                    minLng: _minLng,
-                                    maxLng: _maxLng,
-                                    currentLayer: _currentLayer,
-                                    basemap: _currentBasemap,
-                                    showContour: _showContour,
-                                    showHeatmap: _showHeatmap,
-                                    contourResult: _contourResult,
-                                    selectedItem: _selectedItem,
-                                    colorGetter: _getItemColor,
-                                    valueColorGetter: (v) => _getColorForValue(v, _currentLayer),
-                                    onTileLoaded: () {
-                                      if (mounted) setState(() {});
-                                    },
-                                  ),
-                                  child: GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTapUp: (details) {
-                                      _handleCanvasTap(details.localPosition, canvasWidth, canvasHeight);
-                                    },
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-
-                          // Floating Overlay Controls: Contour & Heatmap Toggles
-                          Positioned(
-                            top: 14,
-                            left: 14,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          // 3D Perspective Tilt Transform
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeOutCubic,
+                            transform: _is3DView
+                                ? (Matrix4.identity()
+                                  ..setEntry(3, 2, 0.0012)
+                                  ..rotateX(36.0 * math.pi / 180.0))
+                                : Matrix4.identity(),
+                            transformAlignment: Alignment.center,
+                            child: FlutterMap(
+                              mapController: _mapController,
+                              options: MapOptions(
+                                initialCenter: _centerPoint,
+                                initialZoom: 16.5,
+                                minZoom: 3.0,
+                                maxZoom: 20.0,
+                                interactionOptions: const InteractionOptions(
+                                  flags: InteractiveFlag.all, // Zoom, Pan, Two-finger Rotate, Double-tap zoom
+                                ),
+                                onPositionChanged: (pos, hasGesture) {
+                                  if (pos.rotation != _rotation) {
+                                    setState(() => _rotation = pos.rotation);
+                                  }
+                                },
+                              ),
                               children: [
-                                _buildGlassToggle(
-                                  icon: Icons.waves,
-                                  label: lang.t('toggleContour'),
-                                  active: _showContour,
-                                  onTap: () => setState(() => _showContour = !_showContour),
-                                ),
-                                const SizedBox(height: 8),
-                                _buildGlassToggle(
-                                  icon: Icons.blur_on,
-                                  label: lang.t('toggleHeatmap'),
-                                  active: _showHeatmap,
-                                  onTap: () => setState(() => _showHeatmap = !_showHeatmap),
-                                ),
+                                _buildTileLayer(),
+                                PolylineLayer(polylines: polylines),
+                                MarkerLayer(markers: markers),
                               ],
                             ),
                           ),
 
-                          // Compass & North HUD
+                          // Floating Overlay: Contour Toggle
+                          Positioned(
+                            top: 14,
+                            left: 14,
+                            child: _buildGlassToggle(
+                              icon: Icons.waves,
+                              label: lang.t('toggleContour'),
+                              active: _showContour,
+                              onTap: () => setState(() => _showContour = !_showContour),
+                            ),
+                          ),
+
+                          // Dynamic Compass & North HUD
                           Positioned(
                             top: 14,
                             right: 14,
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.65),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.4)),
+                            child: GestureDetector(
+                              onTap: _resetNorth,
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.75),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.5), width: 1.5),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.5),
+                                      blurRadius: 8,
+                                    ),
+                                  ],
+                                ),
+                                child: Transform.rotate(
+                                  angle: -(_rotation * math.pi / 180.0),
+                                  child: const Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('N', style: TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                                      Icon(Icons.navigation, color: Colors.cyanAccent, size: 18),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              child: const Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('N', style: TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold)),
-                                  Icon(Icons.navigation, color: Colors.cyanAccent, size: 16),
-                                ],
-                              ),
+                            ),
+                          ),
+
+                          // Zoom In / Zoom Out Floating Controls
+                          Positioned(
+                            right: 14,
+                            bottom: 60,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                FloatingActionButton.small(
+                                  heroTag: 'zoom_in',
+                                  backgroundColor: const Color(0xFF0F172A).withValues(alpha: 0.85),
+                                  foregroundColor: Colors.cyanAccent,
+                                  onPressed: () {
+                                    final currentZoom = _mapController.camera.zoom;
+                                    _mapController.move(_mapController.camera.center, currentZoom + 1);
+                                  },
+                                  child: const Icon(Icons.add, size: 20),
+                                ),
+                                const SizedBox(height: 8),
+                                FloatingActionButton.small(
+                                  heroTag: 'zoom_out',
+                                  backgroundColor: const Color(0xFF0F172A).withValues(alpha: 0.85),
+                                  foregroundColor: Colors.cyanAccent,
+                                  onPressed: () {
+                                    final currentZoom = _mapController.camera.zoom;
+                                    _mapController.move(_mapController.camera.center, currentZoom - 1);
+                                  },
+                                  child: const Icon(Icons.remove, size: 20),
+                                ),
+                                const SizedBox(height: 8),
+                                FloatingActionButton.small(
+                                  heroTag: 'recenter',
+                                  backgroundColor: const Color(0xFF0F172A).withValues(alpha: 0.85),
+                                  foregroundColor: Colors.greenAccent,
+                                  onPressed: () {
+                                    _mapController.move(_centerPoint, 16.5);
+                                  },
+                                  child: const Icon(Icons.my_location, size: 18),
+                                ),
+                              ],
                             ),
                           ),
 
@@ -661,310 +836,5 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       onSelected: (_) => _onLayerChanged(layer),
     );
-  }
-
-  void _handleCanvasTap(Offset localPos, double width, double height) {
-    const padding = 40.0;
-    final drawW = width - (padding * 2);
-    final drawH = height - (padding * 2);
-
-    final lngDelta = _maxLng - _minLng;
-    final latDelta = _maxLat - _minLat;
-
-    SoilDatasetItem? tappedItem;
-    double closestDist = 32.0; // hit target radius
-
-    for (final item in _geotaggedItems) {
-      final normX = lngDelta > 0 ? (item.longitude - _minLng) / lngDelta : 0.5;
-      final normY = latDelta > 0 ? 1.0 - ((item.latitude - _minLat) / latDelta) : 0.5;
-
-      final px = padding + (normX * drawW);
-      final py = padding + (normY * drawH);
-
-      final dist = math.sqrt(math.pow(localPos.dx - px, 2) + math.pow(localPos.dy - py, 2));
-      if (dist < closestDist) {
-        closestDist = dist;
-        tappedItem = item;
-      }
-    }
-
-    if (tappedItem != null) {
-      _showSampleDetailSheet(tappedItem);
-    }
-  }
-}
-
-class _SoilGisPainter extends CustomPainter {
-  final List<SoilDatasetItem> items;
-  final double minLat, maxLat, minLng, maxLng;
-  final GisLayer currentLayer;
-  final BasemapType basemap;
-  final bool showContour;
-  final bool showHeatmap;
-  final SoilContourResult? contourResult;
-  final SoilDatasetItem? selectedItem;
-  final Color Function(SoilDatasetItem) colorGetter;
-  final Color Function(double) valueColorGetter;
-  final VoidCallback onTileLoaded;
-
-  _SoilGisPainter({
-    required this.items,
-    required this.minLat,
-    required this.maxLat,
-    required this.minLng,
-    required this.maxLng,
-    required this.currentLayer,
-    required this.basemap,
-    required this.showContour,
-    required this.showHeatmap,
-    required this.contourResult,
-    required this.selectedItem,
-    required this.colorGetter,
-    required this.valueColorGetter,
-    required this.onTileLoaded,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // 1. Base Dark Background
-    final bgPaint = Paint()..color = const Color(0xFF070E17);
-    canvas.drawRect(Offset.zero & size, bgPaint);
-
-    const padding = 40.0;
-    final drawW = size.width - (padding * 2);
-    final drawH = size.height - (padding * 2);
-
-    final lngDelta = maxLng - minLng;
-    final latDelta = maxLat - minLat;
-
-    // 2. Render Slippy Basemap Tiles (Satellite or Street)
-    if (basemap != BasemapType.offlineGrid && lngDelta > 0 && latDelta > 0) {
-      final tiles = SoilTileService.getTilesForBounds(
-        minLat: minLat,
-        maxLat: maxLat,
-        minLng: minLng,
-        maxLng: maxLng,
-      );
-
-      for (final tile in tiles) {
-        final cached = SoilTileService.getCachedTile(basemap, tile);
-        if (cached != null) {
-          final leftNorm = (tile.minLng - minLng) / lngDelta;
-          final rightNorm = (tile.maxLng - minLng) / lngDelta;
-          final topNorm = 1.0 - ((tile.maxLat - minLat) / latDelta);
-          final bottomNorm = 1.0 - ((tile.minLat - minLat) / latDelta);
-
-          final destRect = Rect.fromLTRB(
-            padding + leftNorm * drawW,
-            padding + topNorm * drawH,
-            padding + rightNorm * drawW,
-            padding + bottomNorm * drawH,
-          );
-
-          final srcRect = Rect.fromLTWH(0, 0, cached.width.toDouble(), cached.height.toDouble());
-          canvas.drawImageRect(cached, srcRect, destRect, Paint());
-        } else {
-          // Request tile for background fetch
-          SoilTileService.requestTile(
-            type: basemap,
-            tile: tile,
-            onLoaded: onTileLoaded,
-          );
-        }
-      }
-
-      // Add a subtle dark vignette to enhance pins and contours over satellite
-      final vignettePaint = Paint()
-        ..color = Colors.black.withValues(alpha: 0.28)
-        ..style = PaintingStyle.fill;
-      canvas.drawRect(Offset.zero & size, vignettePaint);
-    } else {
-      // Offline Grid Lines
-      final gridPaint = Paint()
-        ..color = const Color(0xFF1E293B).withValues(alpha: 0.45)
-        ..strokeWidth = 1.0;
-
-      const gridDivs = 8;
-      for (int i = 0; i <= gridDivs; i++) {
-        final x = (size.width / gridDivs) * i;
-        final y = (size.height / gridDivs) * i;
-        canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
-        canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
-      }
-    }
-
-    // 3. Render Continuous IDW Surface Heatmap Layer
-    if (showHeatmap && contourResult != null && contourResult!.grid.isNotEmpty) {
-      final res = contourResult!.grid.length;
-      final cellW = drawW / (res - 1);
-      final cellH = drawH / (res - 1);
-      final isRealMap = basemap != BasemapType.offlineGrid;
-
-      for (int r = 0; r < res - 1; r++) {
-        for (int c = 0; c < res - 1; c++) {
-          final val = contourResult!.grid[r][c];
-          final color = valueColorGetter(val);
-
-          final cellRect = Rect.fromLTWH(
-            padding + (c * cellW),
-            padding + (r * cellH),
-            cellW + 0.8, // slight overlap to prevent seams
-            cellH + 0.8,
-          );
-
-          final heatPaint = Paint()
-            ..color = color.withValues(alpha: isRealMap ? 0.38 : 0.48)
-            ..style = PaintingStyle.fill;
-
-          canvas.drawRect(cellRect, heatPaint);
-        }
-      }
-    }
-
-    // 4. Render Marching Squares Contour Isolines
-    if (showContour && contourResult != null && contourResult!.segments.isNotEmpty) {
-      final contourLinePaint = Paint()
-        ..strokeWidth = 1.8
-        ..style = PaintingStyle.stroke;
-
-      final haloLinePaint = Paint()
-        ..color = Colors.black.withValues(alpha: 0.6)
-        ..strokeWidth = 3.2
-        ..style = PaintingStyle.stroke;
-
-      int segIdx = 0;
-      for (final seg in contourResult!.segments) {
-        final p1 = Offset(
-          padding + seg.start.dx * drawW,
-          padding + seg.start.dy * drawH,
-        );
-        final p2 = Offset(
-          padding + seg.end.dx * drawW,
-          padding + seg.end.dy * drawH,
-        );
-
-        final color = valueColorGetter(seg.level);
-
-        // Halo under line for high contrast
-        canvas.drawLine(p1, p2, haloLinePaint);
-
-        // Core contour line
-        contourLinePaint.color = color;
-        canvas.drawLine(p1, p2, contourLinePaint);
-
-        // Draw Contour Level Label occasionally
-        if (segIdx % 16 == 0) {
-          final mid = Offset((p1.dx + p2.dx) / 2, (p1.dy + p2.dy) / 2);
-          final textSpan = TextSpan(
-            text: seg.level.toStringAsFixed(1),
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 8.5,
-              fontWeight: FontWeight.bold,
-              backgroundColor: Colors.black.withValues(alpha: 0.75),
-            ),
-          );
-          final tp = TextPainter(text: textSpan, textDirection: TextDirection.ltr)..layout();
-          tp.paint(canvas, Offset(mid.dx - (tp.width / 2), mid.dy - (tp.height / 2)));
-        }
-        segIdx++;
-      }
-    }
-
-    // 5. Connecting Survey Path
-    if (items.length > 1) {
-      final pathPaint = Paint()
-        ..color = Colors.cyanAccent.withValues(alpha: 0.4)
-        ..strokeWidth = 1.6
-        ..style = PaintingStyle.stroke;
-
-      final path = Path();
-      for (int i = 0; i < items.length; i++) {
-        final it = items[i];
-        final normX = lngDelta > 0 ? (it.longitude - minLng) / lngDelta : 0.5;
-        final normY = latDelta > 0 ? 1.0 - ((it.latitude - minLat) / latDelta) : 0.5;
-        final px = padding + (normX * drawW);
-        final py = padding + (normY * drawH);
-
-        if (i == 0) {
-          path.moveTo(px, py);
-        } else {
-          path.lineTo(px, py);
-        }
-      }
-      canvas.drawPath(path, pathPaint);
-    }
-
-    // 6. Draw Survey Pin Points
-    for (final item in items) {
-      final normX = lngDelta > 0 ? (item.longitude - minLng) / lngDelta : 0.5;
-      final normY = latDelta > 0 ? 1.0 - ((item.latitude - minLat) / latDelta) : 0.5;
-
-      final px = padding + (normX * drawW);
-      final py = padding + (normY * drawH);
-
-      final color = colorGetter(item);
-      final isSelected = selectedItem?.sampleId == item.sampleId;
-
-      // Glow halo
-      final haloPaint = Paint()
-        ..color = color.withValues(alpha: isSelected ? 0.6 : 0.3)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
-      canvas.drawCircle(Offset(px, py), isSelected ? 24 : 16, haloPaint);
-
-      // Core Pin Circle
-      final corePaint = Paint()
-        ..color = color
-        ..style = PaintingStyle.fill;
-      canvas.drawCircle(Offset(px, py), isSelected ? 9.0 : 6.5, corePaint);
-
-      // Contrast white border
-      final borderPaint = Paint()
-        ..color = Colors.white
-        ..strokeWidth = 1.8
-        ..style = PaintingStyle.stroke;
-      canvas.drawCircle(Offset(px, py), isSelected ? 9.0 : 6.5, borderPaint);
-
-      // Pin Label Badge
-      final sampleNumber = item.sampleId.split('_').last;
-      final textSpan = TextSpan(
-        text: sampleNumber,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 8.5,
-          fontWeight: FontWeight.bold,
-          shadows: [
-            Shadow(color: Colors.black, blurRadius: 3),
-          ],
-        ),
-      );
-      final textPainter = TextPainter(
-        text: textSpan,
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      // Label background pill
-      final labelBgRect = RRect.fromRectAndRadius(
-        Rect.fromCenter(
-          center: Offset(px, py + 15),
-          width: textPainter.width + 6,
-          height: textPainter.height + 3,
-        ),
-        const Radius.circular(4),
-      );
-      canvas.drawRRect(labelBgRect, Paint()..color = Colors.black.withValues(alpha: 0.75));
-      textPainter.paint(canvas, Offset(px - (textPainter.width / 2), py + 9.5));
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _SoilGisPainter oldDelegate) {
-    return oldDelegate.currentLayer != currentLayer ||
-        oldDelegate.basemap != basemap ||
-        oldDelegate.showContour != showContour ||
-        oldDelegate.showHeatmap != showHeatmap ||
-        oldDelegate.contourResult != contourResult ||
-        oldDelegate.selectedItem != selectedItem ||
-        oldDelegate.items.length != items.length;
   }
 }

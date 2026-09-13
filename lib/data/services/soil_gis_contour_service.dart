@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import '../models/soil_dataset_item.dart';
 
 class ContourSegment {
@@ -14,9 +15,22 @@ class ContourSegment {
   });
 }
 
+class LatLngContourSegment {
+  final LatLng start;
+  final LatLng end;
+  final double level;
+
+  const LatLngContourSegment({
+    required this.start,
+    required this.end,
+    required this.level,
+  });
+}
+
 class SoilContourResult {
   final List<List<double>> grid;
   final List<ContourSegment> segments;
+  final List<LatLngContourSegment> geoSegments;
   final double minVal;
   final double maxVal;
   final List<double> levels;
@@ -24,6 +38,7 @@ class SoilContourResult {
   SoilContourResult({
     required this.grid,
     required this.segments,
+    required this.geoSegments,
     required this.minVal,
     required this.maxVal,
     required this.levels,
@@ -48,6 +63,7 @@ class SoilGisContourService {
       return SoilContourResult(
         grid: [],
         segments: [],
+        geoSegments: [],
         minVal: 0,
         maxVal: 0,
         levels: [],
@@ -204,9 +220,24 @@ class SoilGisContourService {
       }
     }
 
+    // 5. Convert Normalized Segments to Real Geographic Coordinates (LatLng)
+    final geoSegments = segments.map((seg) {
+      final startLon = minLng + (seg.start.dx * lngDelta);
+      final startLat = minLat + ((1.0 - seg.start.dy) * latDelta);
+      final endLon = minLng + (seg.end.dx * lngDelta);
+      final endLat = minLat + ((1.0 - seg.end.dy) * latDelta);
+
+      return LatLngContourSegment(
+        start: LatLng(startLat, startLon),
+        end: LatLng(endLat, endLon),
+        level: seg.level,
+      );
+    }).toList();
+
     return SoilContourResult(
       grid: grid,
       segments: segments,
+      geoSegments: geoSegments,
       minVal: minVal,
       maxVal: maxVal,
       levels: levels,
