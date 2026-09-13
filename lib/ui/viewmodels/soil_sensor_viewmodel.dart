@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:usb_serial/usb_serial.dart';
 import '../../data/models/geo_location_data.dart';
 import '../../data/models/soil_reading.dart';
 import '../../data/repositories/soil_sensor_repository.dart';
@@ -138,6 +139,8 @@ class SoilSensorViewModel extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Future<List<UsbDevice>> getAvailableUsbDevices() => _repository.getAvailableUsbDevices();
 
   Future<ExportResult> exportToSpreadsheet({String filename = 'Soil_parameters.csv'}) async {
     _isExporting = true;

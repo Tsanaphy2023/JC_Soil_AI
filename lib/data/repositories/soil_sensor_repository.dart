@@ -1,3 +1,4 @@
+import 'package:usb_serial/usb_serial.dart';
 import '../models/geo_location_data.dart';
 import '../models/soil_reading.dart';
 import '../services/export_service.dart';
@@ -57,6 +58,7 @@ class SoilSensorRepository {
   void toggleAutoBaud([bool? enable]) => _sensorService.toggleAutoBaud(enable);
   void toggleAutoConnect([bool? enable]) => _sensorService.toggleAutoConnect(enable);
   void setPollingInterval(int ms) => _sensorService.setPollingInterval(ms);
+  Future<List<UsbDevice>> getAvailableUsbDevices() => _sensorService.getAvailableUsbDevices();
 
   Future<void> disconnect() => _sensorService.disconnect();
 

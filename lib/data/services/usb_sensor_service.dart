@@ -199,11 +199,28 @@ class UsbSensorService {
     _consecutiveEmptyPolls = 0;
 
     try {
-      final devices = await UsbSerial.listDevices();
+      // Multi-attempt scan to allow USB OTG power rail and hardware enumeration to settle
+      List<UsbDevice> devices = [];
+      for (int attempt = 1; attempt <= 4; attempt++) {
+        devices = await UsbSerial.listDevices();
+        if (devices.isNotEmpty) break;
+        if (attempt < 4) {
+          debugPrint('[UsbSensorService] USB list empty on attempt $attempt, retrying in 350ms...');
+          await Future.delayed(const Duration(milliseconds: 350));
+        }
+      }
+
       if (devices.isEmpty) {
-        debugPrint('[UsbSensorService] No USB devices found.');
+        debugPrint('[UsbSensorService] No USB devices found after 4 attempts.');
         _setStatus(UsbConnectionStatus.disconnected);
         return false;
+      }
+
+      debugPrint('[UsbSensorService] Found ${devices.length} USB device(s):');
+      for (final d in devices) {
+        final vidStr = d.vid != null ? d.vid!.toRadixString(16) : '????';
+        final pidStr = d.pid != null ? d.pid!.toRadixString(16) : '????';
+        debugPrint(' -> ${d.productName ?? 'USB-Serial Device'} (VID: 0x$vidStr, PID: 0x$pidStr, DevId: ${d.deviceId})');
       }
 
       // Pick first compatible device (CH340, CP2102, FTDI, or Prolific)
@@ -251,6 +268,16 @@ class UsbSensorService {
       return false;
     } finally {
       _isConnecting = false;
+    }
+  }
+
+  /// Discover all USB devices currently visible to Android USB Host
+  Future<List<UsbDevice>> getAvailableUsbDevices() async {
+    try {
+      return await UsbSerial.listDevices();
+    } catch (e) {
+      debugPrint('[UsbSensorService] getAvailableUsbDevices error: $e');
+      return [];
     }
   }
 
