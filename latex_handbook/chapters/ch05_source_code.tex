@@ -273,62 +273,62 @@ class LanguageProvider extends ChangeNotifier {
 \end{lstlisting}
 \end{codebox}
 
-\section{วิดเจ็ตตราสัญลักษณ์แบรนด์ไฮเทค 2 คอลัมน์ (StatusHeader.dart)}
+\section{สถาปัตยกรรมแถบสถานะส่วนหัว 2 คอลัมน์ (StatusHeader.dart)}
 
-\begin{codebox}[title={ฟังก์ชันสร้างตราสัญลักษณ์แบรนด์ไฮเทคใน StatusHeader.dart}]
+เพื่อเพิ่มประสิทธิภาพการใช้งานบนหน้าจอสมาร์ตโฟน แถบสถานะส่วนหัว (\texttt{StatusHeader}) ได้รับการออกแบบใหม่เป็นสถาปัตยกรรม 2 คอลัมน์ (Two-Column Architecture) โดยใช้ \texttt{IntrinsicHeight} ควบคู่กับ \texttt{Row} และ \texttt{Column} ทำให้คอลัมน์ซ้าย (การ์ดโลโก้กรอบเขียวนีออนทรงสูง) ขยายความสูงพอดีกับคอลัมน์ขวา (ชุดปุ่มคำสั่งและแถบสถานะ 3 แถว) อย่างสมดุลและไร้ปัญหาข้อความตกขอบ
+
+\begin{codebox}[title={โครงสร้างเลย์เอาต์ 2 คอลัมน์และการ์ดโลโก้ใน StatusHeader.dart}]
 \begin{lstlisting}[language=Java]
-Widget _buildUnifiedBrandLogo(BuildContext context) {
-  final isSim = (status == UsbConnectionStatus.simulating);
-  return Material(
-    color: Colors.transparent,
-    child: InkWell(
-      onTap: onSimulationTap, // แตะเพื่อสลับโหมดทดลอง
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.28),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSim ? Colors.amberAccent : Colors.cyanAccent.withOpacity(0.45),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+// 1. โครงสร้างหลัก 2 คอลัมน์ (IntrinsicHeight + Row)
+IntrinsicHeight(
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      // คอลัมน์ซ้าย: การ์ดโลโก้กรอบเขียวนีออนทรงสูง
+      _buildTallLogoCard(context),
+      const SizedBox(width: 8),
+      // คอลัมน์ขวา: ชุดปุ่มและแถบสถานะ 3 แถว
+      Expanded(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // คอลัมน์ซ้าย: JC AI Badge เกรเดียนท์สีน้ำเงิน-ฟ้า
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isSim 
-                    ? [Color(0xFFFF8F00), Color(0xFFFFD54F)]
-                    : [Color(0xFF0D47A1), Color(0xFF00B0FF)],
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(children: [
-                Text('JC', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
-                SizedBox(width: 3.5),
-                Text('AI', style: TextStyle(fontSize: 9.5, color: Colors.cyanAccent)),
-              ]),
-            ),
-            // เส้นแบ่งมิติแสงแนวตั้ง
-            Container(margin: EdgeInsets.symmetric(horizontal: 8), width: 1.5, height: 26, color: Colors.cyanAccent),
-            // คอลัมน์ขวา: บรรทัดบน SOIL / บรรทัดล่าง AI ANALYZER
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(children: [
-                  Text('SOIL', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
-                  SizedBox(width: 4),
-                  CircleAvatar(radius: 2.5, backgroundColor: Color(0xFF00E676)), // จุดเขียวมรกต
-                ]),
-                Text('AI ANALYZER', style: TextStyle(fontSize: 9.5, color: Color(0xFF64FFDA))),
-              ],
-            ),
+            _buildTopActionsRow(context),   // แถว 1: [กล้อง] [ภาพ] [ภาษา] [Settings Circle]
+            const SizedBox(height: 5),
+            _buildStatusBadgesRow(context), // แถว 2: [การเชื่อมต่อ] [การสอบเทียบ AI]
+            const SizedBox(height: 5),
+            _buildLocationRow(context),     // แถว 3: [พิกัดดาวเทียม Lat Long Alt]
           ],
         ),
+      ),
+    ],
+  ),
+)
+
+// 2. การ์ดโลโก้ทรงสูงกรอบเขียวนีออน (_buildTallLogoCard)
+Widget _buildTallLogoCard(BuildContext context) {
+  final isSim = (status == UsbConnectionStatus.simulating);
+  const borderColor = Color(0xFF00E676); // สีเขียวนีออนมรกต
+  return Container(
+    width: 114,
+    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+    decoration: BoxDecoration(
+      color: Colors.black.withOpacity(0.32),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: isSim ? Colors.amberAccent : borderColor, width: 1.6),
+      boxShadow: [
+        BoxShadow(color: (isSim ? Colors.amber : borderColor).withOpacity(0.22), blurRadius: 8),
+      ],
+    ),
+    child: FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildJcAiEmblem(isSim),           // แบดจ์ JC AI เกรเดียนท์
+          _buildLuminousDivider(isSim),      // เส้นคั่นเรืองแสงแนวนอน
+          _buildSoilTextWithEmeraldDot(),    // SOIL + จุดมรกต
+          _buildAiAnalyzerSubtitle(isSim),   // AI ANALYZER
+        ],
       ),
     ),
   );
@@ -368,6 +368,43 @@ Future<void> _downloadOrSharePdfManual({bool shareImmediately = false}) async {
     setState(() => _isExportingPdf = false);
   }
 }
+\end{lstlisting}
+\end{codebox}
+
+\section{ระบบประเมินปฐพีวิทยาและหน้าต่างผลวิเคราะห์ป้องกันข้อมูลล้นจอ (AgronomicAssessment \& Sheet)}
+
+เพื่อแก้ปัญหาข้อความและแถบสีเคมีล้นจอ ระบบได้พัฒนาโมเดลวิเคราะห์เชิงลึก \texttt{AgronomicAssessment} ควบคู่กับแผ่นป๊อปอัป \texttt{AgronomicSummarySheet} ในรูปแบบ 2 แท็บ (Dual-Tab) พร้อมคำนวณดัชนีสุขภาพดิน (Soil Health Score 0--100) ตามเกณฑ์กรมพัฒนาที่ดินและ FAO
+
+\begin{codebox}[title={โมเดลคำแนะนำเชิงปฐพีวิทยาและโครงสร้าง 2 แท็บ}]
+\begin{lstlisting}[language=Java]
+// โมเดลคำแนะนำเชิงปริมาณเฉพาะด้าน
+class AgronomicAdviceItem {
+  final String category;       // เช่น "ความเป็นกรด-ด่าง (pH)", "การให้น้ำ"
+  final String title;          // สรุปประเด็นหลัก
+  final String detail;         // รายละเอียดเชิงวิทยาศาสตร์
+  final String actionDose;      // ปริมาณ/สูตรที่ต้องใช้ต่อไร่
+  final AgronomicPriority priority; // urgent (วิกฤต), warning, optimal, info
+}
+
+// โครงสร้างหน้าต่างแสดงผล 2 แท็บ ป้องกันปัญหาข้อมูลล้นจอ
+DefaultTabController(
+  length: 2,
+  child: Column(
+    children: [
+      _buildSoilHealthScoreCard(assessment), // การ์ดดัชนีสุขภาพดิน 0-100 + ชิปสรุป 2x2
+      TabBar(tabs: [
+        Tab(text: 'ข้อเสนอแนะ & แผนปรับปรุงดิน'),
+        Tab(text: 'แถบสีเคมี LDD/FAO'),
+      ]),
+      Expanded(
+        child: TabBarView(children: [
+          _buildActionPlanTab(assessment),     // รายการคำแนะนำพร้อมอัตราการใส่ปุ๋ย/ปูน
+          _buildColorimetricScalesTab(reading),// แถบสีเคมี 4 การทดสอบแบบ Anti-Overflow
+        ]),
+      ),
+    ],
+  ),
+)
 \end{lstlisting}
 \end{codebox}
 

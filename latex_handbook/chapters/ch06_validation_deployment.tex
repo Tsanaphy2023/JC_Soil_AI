@@ -168,13 +168,22 @@ adb shell am start -n com.agriphysics.soil_app/com.agriphysics.soil_app.MainActi
 \label{fig:app_ui_screen}
 \end{figure}
 
-\section{อัตลักษณ์แบรนด์ไฮเทคและการออกแบบส่วนต่อประสานผู้ใช้}
+\section{สถาปัตยกรรมแถบสถานะส่วนหัว 2 คอลัมน์ และระบบปฐพีวิทยาไร้การล้นจอ}
 
-แถบหัวเรื่องของแอปพลิเคชัน (\texttt{StatusHeader}) ได้รับการปรับปรุงเป็นโครงสร้างโลโก้แบรนด์ไฮเทคแบบ 2 คอลัมน์ (Two-Column Unified Badge) สไตล์ Cyber-Glassmorphic:
+แถบหัวเรื่องของแอปพลิเคชัน (\texttt{StatusHeader}) และแผ่นสรุปผลปฐพีวิทยา (\texttt{AgronomicSummarySheet}) ได้รับการปรับปรุงโครงสร้างสถาปัตยกรรมใหม่เพื่อแก้ปัญหาข้อมูลล้นจอและจัดระเบียบการใช้งาน:
 \begin{enumerate}
-    \item \textbf{คอลัมน์ซ้าย (JC AI Emblem Badge):} แบดจ์ทรงมนเคลือบเกรเดียนท์สีน้ำเงินสดสู่ฟ้าเทคโนโลยี (\texttt{\#0D47A1} ถึง \texttt{\#00B0FF}) และเปลี่ยนเป็นสีทองอำพันเรืองแสงเมื่ออยู่ในโหมดจำลอง (Simulation Mode) พร้อมชิปแท็ก \textbf{AI} เรืองแสง
-    \item \textbf{เส้นแบ่งมิติแสง (Luminous Cyber Divider):} เส้นแบ่งแนวตั้งไล่เฉดแสงสีฟ้า Cyan สไตล์ Cyber-optics
-    \item \textbf{คอลัมน์ขวา (Two-Line Typography):} บรรทัดบนแสดงคำว่า \textbf{SOIL} สีขาวหนาพิเศษพร้อมจุดประกายสีเขียวมรกตเรืองแสง (Emerald Nature Dot) และบรรทัดล่างแสดงคำว่า \textbf{AI ANALYZER} สีเขียวน้ำทะเลนีออน (\texttt{\#64FFDA})
+    \item \textbf{โครงสร้างแถบสถานะส่วนหัว 2 คอลัมน์ (Two-Column StatusHeader):}
+    \begin{itemize}
+        \item \textbf{คอลัมน์ซ้าย:} การ์ดโลโก้ทรงสูงกรอบเขียวนีออน (\texttt{\#00E676}) จัดวางแนวตั้ง ประกอบด้วย แบดจ์แบรนด์ \textbf{JC AI}, เส้นแบ่งเรืองแสง, ข้อความ \textbf{SOIL} พร้อมจุดมรกต และคำบรรยาย \textbf{AI ANALYZER} โดยยืดความสูงเต็มพื้นที่คอลัมน์ขวาด้วย \texttt{IntrinsicHeight}
+        \item \textbf{คอลัมน์ขวา (3 แถว):} แถวที่ 1 รวมปุ่มเครื่องมือ [กล้อง], [คลังภาพ], [ปุ่มสลับภาษา TH/EN/ZH] และ [ปุ่มวงกลมการตั้งค่าสี Dark Teal \texttt{\#0B556A}] / แถวที่ 2 รวมการ์ดสถานะการเชื่อมต่อ USB และการสอบเทียบ AI / แถวที่ 3 แถบพิกัดดาวเทียม (Lat. Long. Alt.) เต็มความกว้าง
+    \end{itemize}
+    \item \textbf{ระบบประเมินปฐพีวิทยาและโครงสร้าง 2 แท็บ (Dual-Tab Soil Diagnostics):}
+    \begin{itemize}
+        \item \textbf{ดัชนีสุขภาพดิน (Composite Soil Health Score 0--100):} แสดงคะแนนภาพรวมของแปลงดินพร้อมวงกลมสถานะและตาราง Mini Status Chips 4 มิติ
+        \item \textbf{แท็บ 1 (ข้อเสนอแนะ \& แผนปรับปรุงดิน):} คำแนะนำเชิงปริมาณเฉพาะทาง ได้แก่ อัตราปูนโดโลไมต์ปรับค่า pH (200--300 กก./ไร่), รอบการให้น้ำ (20--30 นาที), ใบสั่งสูตรปุ๋ยเฉพาะแปลง (15-15-15, ยูเรีย, DAP, โพแทช), การชะล้างความเค็ม (EC) และการใช้เชื้อราไตรโคเดอร์มา
+        \item \textbf{แท็บ 2 (แถบสีเคมี LDD/FAO):} แถบสีเคมี 4 การทดสอบแบบ Anti-Overflow Cards พร้อม Cursor Pointer ชี้ค่าจริง ไร้ปัญหาข้อความตกขอบ 100\%
+        \item \textbf{ปุ่มคัดลอกข้อเสนอแนะ (One-Click Copy):} ส่งออกสรุปรายงานไปยังแอปพลิเคชันสื่อสารได้ทันที
+    \end{itemize}
 \end{enumerate}
 
 \section{ระบบสามภาษา Tri-Lingual Localization และการสลับภาษาแบบเรียลไทม์}
