@@ -29,6 +29,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
   bool _isRecordingVideo = false;
   int _recordingSeconds = 0;
   Timer? _recordingTimer;
+  bool _isAudioEnabled = true;
 
   int _savedDatasetCount = 0;
   String? _lastSavedNotice;
@@ -71,7 +72,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
     final controller = CameraController(
       camera,
       ResolutionPreset.high,
-      enableAudio: true,
+      enableAudio: _isAudioEnabled,
     );
 
     try {
@@ -84,6 +85,54 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
       }
     } catch (e) {
       debugPrint('[SoilCameraScreen] Camera setup error: $e');
+    }
+  }
+
+  Future<void> _toggleAudio() async {
+    if (_isRecordingVideo) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: Text('กรุณาหยุดบันทึกวิดีโอก่อนเปลี่ยนโหมดเสียง'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isAudioEnabled = !_isAudioEnabled;
+      _isCameraInitialized = false;
+    });
+
+    if (_cameras.isNotEmpty) {
+      await _setupCameraController(_cameras[_selectedCameraIndex]);
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: _isAudioEnabled ? Colors.teal.shade900 : Colors.blueGrey.shade900,
+          content: Row(
+            children: [
+              Icon(
+                _isAudioEnabled ? Icons.mic : Icons.mic_off,
+                color: _isAudioEnabled ? Colors.greenAccent : Colors.orangeAccent,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  _isAudioEnabled
+                      ? 'เปิดไมโครโฟน: บันทึกวิดีโอพร้อมเสียงบรรยายและเสียงรอบข้าง'
+                      : 'ปิดไมโครโฟน: ตัดเสียงรบกวนภายนอก 100% (Silent Video)',
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 
@@ -104,6 +153,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
         photo: photo,
         rawReading: vm.rawReading,
         calibrated: vm.calibrationResult,
+        location: vm.currentLocation,
       );
 
       await _refreshDatasetCount();
@@ -168,6 +218,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
           rawReading: vm.rawReading,
           calibrated: vm.calibrationResult,
           durationSeconds: duration,
+          location: vm.currentLocation,
         );
 
         await _refreshDatasetCount();
@@ -296,7 +347,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
               ),
             ),
 
-            // 3. Top HUD: Back Button, GPS Coordinates, and Probe Status
+            // 3. Top HUD: Back Button, GPS Coordinates, Audio Toggle, and Probe Status
             Positioned(
               top: MediaQuery.of(context).padding.top + 8,
               left: 12,
@@ -327,12 +378,15 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                             children: [
                               const Icon(Icons.location_on, color: Colors.amberAccent, size: 14),
                               const SizedBox(width: 4),
-                              Text(
-                                location?.formattedCoordinates ?? 'GPS กำลังระบุพิกัด...',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.bold,
+                              Expanded(
+                                child: Text(
+                                  location?.formattedCoordinates ?? 'GPS กำลังระบุพิกัด...',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
@@ -370,6 +424,20 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  // Audio Toggle Button (Mic On / External Noise Suppression)
+                  CircleAvatar(
+                    backgroundColor: _isAudioEnabled ? Colors.black54 : Colors.redAccent.withValues(alpha: 0.85),
+                    child: IconButton(
+                      tooltip: _isAudioEnabled ? 'ไมโครโฟนเปิดอยู่ (แตะเพื่อตัดเสียงรบกวน)' : 'ตัดเสียงรบกวนภายนอกอยู่ (แตะเพื่อเปิดไมค์)',
+                      icon: Icon(
+                        _isAudioEnabled ? Icons.mic : Icons.mic_off,
+                        color: _isAudioEnabled ? Colors.greenAccent : Colors.white,
+                        size: 20,
+                      ),
+                      onPressed: _toggleAudio,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -382,10 +450,17 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                 right: 0,
                 child: Center(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.8),
+                      color: Colors.red.withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -395,6 +470,27 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                         Text(
                           'REC ${_recordingSeconds.toString().padLeft(2, '0')}s',
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          width: 1,
+                          height: 12,
+                          color: Colors.white38,
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          _isAudioEnabled ? Icons.mic : Icons.mic_off,
+                          color: _isAudioEnabled ? Colors.greenAccent : Colors.yellowAccent,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _isAudioEnabled ? 'MIC ON' : 'ตัดเสียงรบกวน',
+                          style: TextStyle(
+                            color: _isAudioEnabled ? Colors.white : Colors.yellowAccent,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -491,7 +587,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                           _refreshDatasetCount();
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                           decoration: BoxDecoration(
                             color: Colors.black87,
                             borderRadius: BorderRadius.circular(20),
@@ -506,13 +602,47 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.photo_library, color: Colors.cyanAccent, size: 18),
-                              const SizedBox(width: 5),
+                              const Icon(Icons.photo_library, color: Colors.cyanAccent, size: 17),
+                              const SizedBox(width: 4),
                               Text(
-                                '$_savedDatasetCount รายการ',
+                                '$_savedDatasetCount',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Audio Mode Quick Toggle (Cut Ambient Noise / Voice Mic)
+                      GestureDetector(
+                        onTap: _toggleAudio,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _isAudioEnabled ? Colors.black87 : Colors.red.shade900.withValues(alpha: 0.8),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: _isAudioEnabled ? Colors.greenAccent.withValues(alpha: 0.7) : Colors.orangeAccent,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _isAudioEnabled ? Icons.mic : Icons.mic_off,
+                                color: _isAudioEnabled ? Colors.greenAccent : Colors.orangeAccent,
+                                size: 17,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _isAudioEnabled ? 'เสียงเปิด' : 'ตัดเสียง',
+                                style: TextStyle(
+                                  color: _isAudioEnabled ? Colors.greenAccent : Colors.orangeAccent,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -561,7 +691,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
 
                       // Switch Camera Button
                       IconButton(
-                        icon: const Icon(Icons.flip_camera_android, color: Colors.white70, size: 28),
+                        icon: const Icon(Icons.flip_camera_android, color: Colors.white70, size: 26),
                         onPressed: _switchCamera,
                       ),
                     ],

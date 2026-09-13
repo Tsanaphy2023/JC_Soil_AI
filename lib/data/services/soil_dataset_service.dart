@@ -5,9 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../models/geo_location_data.dart';
 import '../models/soil_reading.dart';
 import '../models/soil_dataset_item.dart';
 import '../../domain/models/deep_learning_calibrator.dart';
+import 'soil_telemetry_overlay_service.dart';
 
 /// Service for managing AI Dataset storage (images, videos, and labeled ground-truth metadata)
 /// and providing smartphone retrieval, inspection, and sharing capabilities.
@@ -64,16 +66,33 @@ class SoilDatasetService {
     required XFile photo,
     required SoilReading rawReading,
     required CalibratedSoilResult calibrated,
+    GeoLocationData? location,
   }) async {
     final imgDir = await getImagesDirectory();
     final now = DateTime.now();
     final timeStr = now.toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
-    final lat = rawReading.latitude?.toStringAsFixed(4) ?? '0.0';
-    final lon = rawReading.longitude?.toStringAsFixed(4) ?? '0.0';
+    final latVal = location?.latitude ?? rawReading.latitude;
+    final lonVal = location?.longitude ?? rawReading.longitude;
+    final altVal = location?.altitude ?? rawReading.altitude ?? 0.0;
+    final lat = latVal?.toStringAsFixed(4) ?? '0.0';
+    final lon = lonVal?.toStringAsFixed(4) ?? '0.0';
     final fileName = 'SOIL_IMG_${timeStr}_LAT${lat}_LON${lon}.jpg';
     final savedFile = File('${imgDir.path}/$fileName');
 
-    await photo.saveTo(savedFile.path);
+    // Burn real-time HUD telemetry, GPS, and targeting reticle onto the photo
+    try {
+      final rawBytes = await photo.readAsBytes();
+      final compositedBytes = await SoilTelemetryOverlayService.burnTelemetryOverlay(
+        imageBytes: rawBytes,
+        rawReading: rawReading,
+        calibrated: calibrated,
+        location: location,
+      );
+      await savedFile.writeAsBytes(compositedBytes);
+    } catch (e) {
+      debugPrint('[SoilDatasetService] Overlay burn-in fallback to raw photo: $e');
+      await photo.saveTo(savedFile.path);
+    }
 
     final item = SoilDatasetItem(
       sampleId: 'SAMPLE_${now.millisecondsSinceEpoch}',
@@ -81,9 +100,9 @@ class SoilDatasetService {
       mediaType: 'image',
       filePath: savedFile.path,
       fileName: fileName,
-      latitude: rawReading.latitude ?? 0.0,
-      longitude: rawReading.longitude ?? 0.0,
-      altitude: rawReading.altitude ?? 0.0,
+      latitude: latVal ?? 0.0,
+      longitude: lonVal ?? 0.0,
+      altitude: altVal,
       temperature: rawReading.temperature,
       moisture: rawReading.moisture,
       conductivity: rawReading.conductivity,
@@ -102,7 +121,7 @@ class SoilDatasetService {
     );
 
     await _appendManifest(item.toJson());
-    debugPrint('[SoilDatasetService] Saved training photo: ${savedFile.path}');
+    debugPrint('[SoilDatasetService] Saved training photo with HUD overlay: ${savedFile.path}');
     return savedFile.path;
   }
 
@@ -112,12 +131,16 @@ class SoilDatasetService {
     required SoilReading rawReading,
     required CalibratedSoilResult calibrated,
     required int durationSeconds,
+    GeoLocationData? location,
   }) async {
     final vidDir = await getVideosDirectory();
     final now = DateTime.now();
     final timeStr = now.toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
-    final lat = rawReading.latitude?.toStringAsFixed(4) ?? '0.0';
-    final lon = rawReading.longitude?.toStringAsFixed(4) ?? '0.0';
+    final latVal = location?.latitude ?? rawReading.latitude;
+    final lonVal = location?.longitude ?? rawReading.longitude;
+    final altVal = location?.altitude ?? rawReading.altitude ?? 0.0;
+    final lat = latVal?.toStringAsFixed(4) ?? '0.0';
+    final lon = lonVal?.toStringAsFixed(4) ?? '0.0';
     final fileName = 'SOIL_VID_${timeStr}_LAT${lat}_LON${lon}.mp4';
     final savedFile = File('${vidDir.path}/$fileName');
 
@@ -129,9 +152,9 @@ class SoilDatasetService {
       mediaType: 'video',
       filePath: savedFile.path,
       fileName: fileName,
-      latitude: rawReading.latitude ?? 0.0,
-      longitude: rawReading.longitude ?? 0.0,
-      altitude: rawReading.altitude ?? 0.0,
+      latitude: latVal ?? 0.0,
+      longitude: lonVal ?? 0.0,
+      altitude: altVal,
       durationSeconds: durationSeconds,
       temperature: rawReading.temperature,
       moisture: rawReading.moisture,
@@ -144,6 +167,9 @@ class SoilDatasetService {
       aiMoisture: calibrated.calibratedReading.moisture,
       aiConductivity: calibrated.calibratedReading.conductivity,
       aiPh: calibrated.calibratedReading.ph,
+      aiNitrogen: calibrated.calibratedReading.nitrogen,
+      aiPhosphorus: calibrated.calibratedReading.phosphorus,
+      aiPotassium: calibrated.calibratedReading.potassium,
       aiConfidenceScore: calibrated.confidenceScore,
     );
 
