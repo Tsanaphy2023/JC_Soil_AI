@@ -90,6 +90,8 @@ class SoilReading {
     };
   }
 
+  Map<String, dynamic> toJson() => toMap();
+
   static List<String> get csvHeaders => [
         'Timestamp',
         'Temperature (°C)',

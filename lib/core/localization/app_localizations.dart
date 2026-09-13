@@ -523,6 +523,56 @@ class AppLocalizations {
       AppLanguage.english: 'GPS Location Acquired',
       AppLanguage.chinese: '已获取当前GPS坐标',
     },
+    'googleDriveSyncTitle': {
+      AppLanguage.thai: 'ซิงค์และสำรองข้อมูล Google Drive',
+      AppLanguage.english: 'Google Drive Sync & Backup',
+      AppLanguage.chinese: 'Google Drive 云同步与备份',
+    },
+    'googleDriveSyncSubtitle': {
+      AppLanguage.thai: 'สำรองไฟล์ข้อมูล CSV, JSON Manifest และภาพ/วิดีโอแปลงดินขึ้นคลาวด์',
+      AppLanguage.english: 'Backup CSV logs, JSON manifests, and photos/videos to Google Drive',
+      AppLanguage.chinese: '将CSV数据、JSON清单及实地照片/视频备份至Google云端硬盘',
+    },
+    'syncAllDatasetsToDrive': {
+      AppLanguage.thai: 'สำรองฐานข้อมูลทั้งหมดไปยัง Google Drive',
+      AppLanguage.english: 'Sync All Datasets to Google Drive',
+      AppLanguage.chinese: '同步全部数据集至Google云端硬盘',
+    },
+    'syncMediaToDrive': {
+      AppLanguage.thai: 'ซิงค์คลังภาพและวิดีโอแปลงดิน',
+      AppLanguage.english: 'Sync Field Photos & Videos',
+      AppLanguage.chinese: '同步实地照片与视频',
+    },
+    'googleDriveWebhookUrl': {
+      AppLanguage.thai: 'Google Apps Script Webhook URL (ไม่บังคับ)',
+      AppLanguage.english: 'Google Apps Script Webhook URL (Optional)',
+      AppLanguage.chinese: 'Google Apps Script Webhook URL (可选)',
+    },
+    'syncNow': {
+      AppLanguage.thai: 'ซิงค์ทันที (Direct Cloud Sync)',
+      AppLanguage.english: 'Sync Now',
+      AppLanguage.chinese: '立即同步',
+    },
+    'lastSyncTime': {
+      AppLanguage.thai: 'การซิงค์ล่าสุด',
+      AppLanguage.english: 'Last Sync',
+      AppLanguage.chinese: '上次同步',
+    },
+    'neverSynced': {
+      AppLanguage.thai: 'ยังไม่มีการซิงค์',
+      AppLanguage.english: 'Never',
+      AppLanguage.chinese: '从未同步',
+    },
+    'syncSuccess': {
+      AppLanguage.thai: 'ซิงค์ข้อมูลไปยัง Google Drive เรียบร้อยแล้ว',
+      AppLanguage.english: 'Successfully synced to Google Drive',
+      AppLanguage.chinese: '已成功同步至Google云端硬盘',
+    },
+    'directDriveBackupTip': {
+      AppLanguage.thai: 'เมื่อกดปุ่ม ให้เลือก "บันทึกไปยังไดรฟ์ (Save to Drive)" เพื่อจัดเก็บลงในโฟลเดอร์ Google Drive ของคุณ',
+      AppLanguage.english: 'When tapped, select "Save to Drive" to store directly in your Google Drive folder.',
+      AppLanguage.chinese: '点击后选择"保存至云端硬盘"，即可直接保存至您的Google Drive文件夹。',
+    },
   };
 
   String t(String key) {

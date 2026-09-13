@@ -11,6 +11,7 @@ import '../../core/localization/language_provider.dart';
 import '../../data/services/usb_sensor_service.dart';
 import '../viewmodels/soil_sensor_viewmodel.dart';
 import '../widgets/ai_model_details_sheet.dart';
+import '../../data/services/google_drive_sync_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -28,12 +29,120 @@ class _SettingsScreenState extends State<SettingsScreen> {
   List<UsbDevice> _detectedDevices = [];
   bool _isScanningUsb = false;
 
+  // Google Drive Cloud Sync state
+  GoogleDriveSyncStatus? _driveSyncStatus;
+  bool _isSyncingDrive = false;
+  final TextEditingController _webhookUrlController = TextEditingController();
+  bool _showWebhookConfig = false;
+
   @override
   void initState() {
     super.initState();
     final vm = context.read<SoilSensorViewModel>();
     _selectedBaud = vm.baudRate;
     _scanUsbHardware();
+    _loadDriveSyncStatus();
+  }
+
+  @override
+  void dispose() {
+    _webhookUrlController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadDriveSyncStatus() async {
+    final status = await GoogleDriveSyncService.getSyncStatus();
+    if (mounted) {
+      setState(() {
+        _driveSyncStatus = status;
+        if (_webhookUrlController.text.isEmpty && status.webhookUrl.isNotEmpty) {
+          _webhookUrlController.text = status.webhookUrl;
+        }
+      });
+    }
+  }
+
+  Future<void> _performGoogleDriveBackup(SoilSensorViewModel vm, LanguageProvider lang) async {
+    setState(() => _isSyncingDrive = true);
+    final success = await GoogleDriveSyncService.backupAllDatasetsToDrive(currentReadings: vm.history);
+    await _loadDriveSyncStatus();
+    if (mounted) {
+      setState(() => _isSyncingDrive = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFF0F766E),
+          duration: const Duration(seconds: 4),
+          content: Row(
+            children: [
+              const Icon(Icons.cloud_done, color: Colors.greenAccent, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  success
+                      ? '${lang.t('syncSuccess')} (โปรดเลือก "บันทึกไปยังไดรฟ์" ในหน้าต่างแชร์)'
+                      : 'เตรียมชุดข้อมูล Google Drive เรียบร้อย',
+                  style: const TextStyle(color: Colors.white, fontSize: 12.5),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _performMediaSync(LanguageProvider lang) async {
+    setState(() => _isSyncingDrive = true);
+    final success = await GoogleDriveSyncService.syncMediaGalleryToDrive();
+    await _loadDriveSyncStatus();
+    if (mounted) {
+      setState(() => _isSyncingDrive = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: success ? const Color(0xFF0F766E) : const Color(0xFF334155),
+          duration: const Duration(seconds: 4),
+          content: Text(
+            success
+                ? '${lang.t('syncSuccess')} (ภาพ/วิดีโอแปลงดิน)'
+                : 'ไม่พบไฟล์ภาพหรือวิดีโอในคลังสำหรับสำรองข้อมูล',
+            style: const TextStyle(color: Colors.white, fontSize: 12.5),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _performWebhookSync(SoilSensorViewModel vm, LanguageProvider lang) async {
+    final url = _webhookUrlController.text.trim();
+    if (url.isEmpty || !url.startsWith('http')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.amber,
+          content: Text('กรุณาระบุ URL ของ Google Apps Script Webhook ที่ถูกต้อง', style: TextStyle(color: Colors.black)),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSyncingDrive = true);
+    await GoogleDriveSyncService.saveConfig(webhookUrl: url);
+    final success = await GoogleDriveSyncService.syncViaWebhook(
+      webhookUrl: url,
+      history: vm.history,
+    );
+    await _loadDriveSyncStatus();
+    if (mounted) {
+      setState(() => _isSyncingDrive = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: success ? const Color(0xFF0F766E) : Colors.redAccent.shade700,
+          content: Text(
+            success ? 'ยิงข้อมูลเข้าสู่ Google Drive Webhook สำเร็จแล้ว!' : 'การเชื่อมต่อ Webhook ล้มเหลว กรุณาตรวจสอบ URL',
+            style: const TextStyle(color: Colors.white, fontSize: 12.5),
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _scanUsbHardware() async {
@@ -253,14 +362,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 20),
 
               // =========================================================
-              // 7. USER MANUAL PDF DOWNLOAD & HANDBOOK SECTION
+              // 7. GOOGLE DRIVE CLOUD SYNC & AUTO-BACKUP
+              // =========================================================
+              _buildGoogleDriveSyncCard(vm, lang),
+
+              const SizedBox(height: 20),
+
+              // =========================================================
+              // 8. USER MANUAL PDF DOWNLOAD & HANDBOOK SECTION
               // =========================================================
               _buildPdfHandbookCard(lang),
 
               const SizedBox(height: 20),
 
               // =========================================================
-              // 8. OPTIMIZATION & PINOUT REFERENCE
+              // 9. OPTIMIZATION & PINOUT REFERENCE
               // =========================================================
               _buildPinoutAndOptimizationGuide(),
 
@@ -1210,7 +1326,265 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   // -------------------------------------------------------------
-  // 7. User Manual PDF Download & Academic Handbook Card
+  // 7. Google Drive Cloud Sync & Auto-Backup Card
+  // -------------------------------------------------------------
+  Widget _buildGoogleDriveSyncCard(SoilSensorViewModel vm, LanguageProvider lang) {
+    final lastSync = _driveSyncStatus?.lastSyncTime;
+    final lastSyncStr = lastSync != null
+        ? '${lastSync.year}-${lastSync.month.toString().padLeft(2, '0')}-${lastSync.day.toString().padLeft(2, '0')} ${lastSync.hour.toString().padLeft(2, '0')}:${lastSync.minute.toString().padLeft(2, '0')}'
+        : lang.t('neverSynced');
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF0F2338),
+            Color(0xFF0A1926),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.4), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.cyanAccent.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row: Icon + Title & Sync Status
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: Colors.cyanAccent.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.cloud_sync, color: Colors.cyanAccent, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      lang.t('googleDriveSyncTitle'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      lang.t('googleDriveSyncSubtitle'),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11.5,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Status Badge Row
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+            decoration: BoxDecoration(
+              color: const Color(0xFF131D28),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _driveSyncStatus?.lastSyncSuccess == true
+                      ? Icons.check_circle
+                      : Icons.history,
+                  color: _driveSyncStatus?.lastSyncSuccess == true
+                      ? Colors.greenAccent
+                      : Colors.white38,
+                  size: 15,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '${lang.t('lastSyncTime')}: ',
+                  style: const TextStyle(color: Colors.white60, fontSize: 11.5),
+                ),
+                Expanded(
+                  child: Text(
+                    lastSyncStr,
+                    style: TextStyle(
+                      color: _driveSyncStatus?.lastSyncSuccess == true
+                          ? Colors.greenAccent
+                          : Colors.white70,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if (_isSyncingDrive)
+                  const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.cyanAccent,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // Primary Button: Sync All Datasets to Drive (CSV & Manifest)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0284C7),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                elevation: 3,
+              ),
+              icon: const Icon(Icons.drive_folder_upload, size: 20),
+              label: Text(
+                lang.t('syncAllDatasetsToDrive'),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              onPressed: _isSyncingDrive ? null : () => _performGoogleDriveBackup(vm, lang),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // Secondary Button: Sync Photos & Videos
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.tealAccent,
+                side: const BorderSide(color: Colors.tealAccent, width: 1.1),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              icon: const Icon(Icons.photo_library_outlined, size: 19),
+              label: Text(
+                lang.t('syncMediaToDrive'),
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5),
+              ),
+              onPressed: _isSyncingDrive ? null : () => _performMediaSync(lang),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Tip box with guidance
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.cyan.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.cyan.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.lightbulb_outline, color: Colors.amberAccent, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    lang.t('directDriveBackupTip'),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Collapsible Webhook Config
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                foregroundColor: Colors.cyanAccent.shade100,
+              ),
+              icon: Icon(
+                _showWebhookConfig ? Icons.expand_less : Icons.expand_more,
+                size: 16,
+              ),
+              label: Text(
+                _showWebhookConfig ? 'ซ่อนการตั้งค่า Webhook' : 'ตั้งค่า Webhook URL (ทางเลือก)',
+                style: const TextStyle(fontSize: 11),
+              ),
+              onPressed: () => setState(() => _showWebhookConfig = !_showWebhookConfig),
+            ),
+          ),
+
+          if (_showWebhookConfig) ...[
+            const SizedBox(height: 6),
+            TextField(
+              controller: _webhookUrlController,
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+              decoration: InputDecoration(
+                labelText: lang.t('googleDriveWebhookUrl'),
+                labelStyle: const TextStyle(color: Colors.white60, fontSize: 11),
+                hintText: 'https://script.google.com/macros/s/.../exec',
+                hintStyle: const TextStyle(color: Colors.white24, fontSize: 11),
+                filled: true,
+                fillColor: const Color(0xFF131D28),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0F766E),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                icon: const Icon(Icons.send_rounded, size: 16),
+                label: Text(
+                  lang.t('syncNow'),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                onPressed: _isSyncingDrive ? null : () => _performWebhookSync(vm, lang),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------
+  // 8. User Manual PDF Download & Academic Handbook Card
   // -------------------------------------------------------------
   Widget _buildPdfHandbookCard(LanguageProvider lang) {
     return Column(
