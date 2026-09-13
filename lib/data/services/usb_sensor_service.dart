@@ -19,8 +19,10 @@ enum UsbConnectionStatus {
 class UsbSensorService {
   UsbPort? _port;
   StreamSubscription<Uint8List>? _serialSubscription;
+  StreamSubscription<UsbEvent>? _usbEventSubscription;
   Timer? _pollingTimer;
   Timer? _simulationTimer;
+  Timer? _autoConnectWatchdogTimer;
 
   final List<int> _rxBuffer = [];
   final Random _random = Random();
@@ -41,6 +43,16 @@ class UsbSensorService {
 
   bool _isSimulationMode = false;
   bool get isSimulationMode => _isSimulationMode;
+
+  bool _autoConnectEnabled = true;
+  bool get isAutoConnectEnabled => _autoConnectEnabled;
+
+  bool _isConnecting = false;
+
+  int _pollingIntervalMs = SensorConstants.defaultPollingIntervalMs;
+  int get pollingIntervalMs => _pollingIntervalMs;
+
+  int _optimalRegisterCount = 7;
 
   // Real-time Hardware Diagnostics
   int _txCount = 0;
@@ -74,6 +86,14 @@ class UsbSensorService {
   int _simK = 184;
   int _simFert = 350;
 
+  UsbSensorService({bool autoConnect = true}) : _autoConnectEnabled = autoConnect {
+    _initUsbEventListener();
+    _startAutoConnectWatchdog();
+    if (_autoConnectEnabled) {
+      Future.microtask(() => autoConnectNow());
+    }
+  }
+
   void _setStatus(UsbConnectionStatus status) {
     _currentStatus = status;
     if (!_statusController.isClosed) {
@@ -87,8 +107,93 @@ class UsbSensorService {
     }
   }
 
+  /// Listen to Android OS USB Attached / Detached Broadcasts (Hotplug)
+  void _initUsbEventListener() {
+    try {
+      _usbEventSubscription = UsbSerial.usbEventStream?.listen((UsbEvent event) {
+        if (event.event == UsbEvent.ACTION_USB_ATTACHED) {
+          debugPrint('[UsbSensorService] OTG Hotplug: USB Attached detected.');
+          if (_autoConnectEnabled &&
+              _currentStatus != UsbConnectionStatus.connected &&
+              !_isSimulationMode) {
+            connect();
+          }
+        } else if (event.event == UsbEvent.ACTION_USB_DETACHED) {
+          debugPrint('[UsbSensorService] OTG Hotplug: USB Detached detected.');
+          if (_currentStatus == UsbConnectionStatus.connected) {
+            disconnect();
+          }
+        }
+      });
+    } catch (e) {
+      debugPrint('[UsbSensorService] usbEventStream init error: $e');
+    }
+  }
+
+  /// Watchdog timer to auto-connect if probe is plugged in or OTG is activated
+  void _startAutoConnectWatchdog() {
+    _autoConnectWatchdogTimer?.cancel();
+    _autoConnectWatchdogTimer = Timer.periodic(const Duration(milliseconds: 2000), (_) async {
+      if (!_autoConnectEnabled ||
+          _isSimulationMode ||
+          _isConnecting ||
+          _currentStatus == UsbConnectionStatus.connected) {
+        return;
+      }
+      try {
+        final devices = await UsbSerial.listDevices();
+        if (devices.isNotEmpty) {
+          debugPrint('[UsbSensorService] Auto-connect watchdog found ${devices.length} device(s), connecting...');
+          await connect();
+        }
+      } catch (_) {}
+    });
+  }
+
+  /// Immediate auto-connect trigger for app startup
+  Future<bool> autoConnectNow() async {
+    if (!_autoConnectEnabled ||
+        _isSimulationMode ||
+        _isConnecting ||
+        _currentStatus == UsbConnectionStatus.connected) {
+      return true;
+    }
+    try {
+      final devices = await UsbSerial.listDevices();
+      if (devices.isNotEmpty) {
+        debugPrint('[UsbSensorService] Auto-connecting to sensor on launch...');
+        return await connect();
+      }
+    } catch (e) {
+      debugPrint('[UsbSensorService] autoConnectNow error: $e');
+    }
+    return false;
+  }
+
+  void toggleAutoConnect([bool? enable]) {
+    _autoConnectEnabled = enable ?? !_autoConnectEnabled;
+    if (_autoConnectEnabled && _currentStatus == UsbConnectionStatus.disconnected) {
+      autoConnectNow();
+    }
+    _notifyTelemetry();
+  }
+
+  void setPollingInterval(int ms) {
+    if (ms >= 100 && ms <= 5000) {
+      _pollingIntervalMs = ms;
+      if (_currentStatus == UsbConnectionStatus.connected) {
+        _startPolling();
+      }
+      _notifyTelemetry();
+    }
+  }
+
   /// Initialize and attempt to connect to physical USB-to-Serial soil probe
   Future<bool> connect({int? baudRate}) async {
+    if (_isConnecting) return false;
+    if (_currentStatus == UsbConnectionStatus.connected && baudRate == null) return true;
+
+    _isConnecting = true;
     if (baudRate != null) _baudRate = baudRate;
     _setStatus(UsbConnectionStatus.connecting);
     _consecutiveEmptyPolls = 0;
@@ -132,9 +237,10 @@ class UsbSensorService {
       );
 
       _rxBuffer.clear();
+      await _serialSubscription?.cancel();
       _serialSubscription = _port!.inputStream?.listen(_onDataReceived);
 
-      // Start periodic Modbus polling
+      // Start periodic high-speed Modbus polling
       _startPolling();
       _setStatus(UsbConnectionStatus.connected);
       _notifyTelemetry();
@@ -143,6 +249,8 @@ class UsbSensorService {
       debugPrint('[UsbSensorService] USB Connection error: $e');
       _setStatus(UsbConnectionStatus.error);
       return false;
+    } finally {
+      _isConnecting = false;
     }
   }
 
@@ -175,7 +283,7 @@ class UsbSensorService {
   void _startPolling() {
     _pollingTimer?.cancel();
     _pollingTimer = Timer.periodic(
-      const Duration(milliseconds: SensorConstants.pollingIntervalMs),
+      Duration(milliseconds: _pollingIntervalMs),
       (_) => _sendModbusQuery(),
     );
   }
@@ -183,10 +291,10 @@ class UsbSensorService {
   Future<void> _sendModbusQuery() async {
     if (_port == null || _currentStatus != UsbConnectionStatus.connected) return;
     try {
-      // Alternate or select query:
-      // Query 7 registers (Moist, Temp, EC, pH, N, P, K) - Works on BOTH 7-in-1 and 8-in-1 probes
-      // If valid reading confirmed, keep optimal register count
-      final regCount = (_hasReceivedValidReading || (_queryCycle % 2 == 0)) ? 7 : 8;
+      // If valid reading confirmed, query optimal register count (7 or 8) directly for maximum throughput
+      final regCount = _hasReceivedValidReading
+          ? _optimalRegisterCount
+          : ((_queryCycle % 2 == 0) ? 7 : 8);
       _queryCycle++;
 
       final query = ModbusParser.buildReadRequest(
@@ -201,14 +309,13 @@ class UsbSensorService {
       await _port!.write(query);
       _notifyTelemetry();
 
-      // Auto-baud detection check
+      // Fast Auto-baud detection: switch after 2 unanswered polls (~800ms) for sub-second lock
       if (!_hasReceivedValidReading && _isAutoBaudActive) {
         _consecutiveEmptyPolls++;
-        // If 4 consecutive queries (~6s) receive 0 responses, automatically switch baud rate (4800 <-> 9600)
-        if (_consecutiveEmptyPolls >= 4) {
+        if (_consecutiveEmptyPolls >= 2) {
           _consecutiveEmptyPolls = 0;
           final nextBaud = (_baudRate == 4800) ? 9600 : 4800;
-          debugPrint('[UsbSensorService] Auto-Baud scanning: trying $nextBaud bps...');
+          debugPrint('[UsbSensorService] Auto-Baud scanning: fast-trying $nextBaud bps...');
           await switchBaudRate(nextBaud);
         }
       }
@@ -239,6 +346,15 @@ class UsbSensorService {
 
     if (reading != null) {
       _hasReceivedValidReading = true;
+      // Lock register count based on sensor payload length (14 data bytes -> 7 regs, 16 data bytes -> 8 regs)
+      for (int i = 0; i <= _rxBuffer.length - 3; i++) {
+        if (_rxBuffer[i] == SensorConstants.defaultSlaveId && _rxBuffer[i + 1] == 0x03) {
+          final byteLen = _rxBuffer[i + 2];
+          if (byteLen == 14) _optimalRegisterCount = 7;
+          if (byteLen == 16) _optimalRegisterCount = 8;
+          break;
+        }
+      }
       _readingController.add(reading);
       _rxBuffer.clear();
       _notifyTelemetry();
@@ -253,7 +369,7 @@ class UsbSensorService {
 
     _simulationTimer?.cancel();
     _simulationTimer = Timer.periodic(
-      const Duration(milliseconds: SensorConstants.pollingIntervalMs),
+      Duration(milliseconds: _pollingIntervalMs),
       (_) {
         // Natural micro-fluctuations
         _simTemp += (_random.nextDouble() - 0.5) * 0.2;
@@ -296,6 +412,7 @@ class UsbSensorService {
     _pollingTimer?.cancel();
     _simulationTimer?.cancel();
     await _serialSubscription?.cancel();
+    _serialSubscription = null;
     await _port?.close();
     _port = null;
     _rxBuffer.clear();
@@ -306,6 +423,8 @@ class UsbSensorService {
   }
 
   void dispose() {
+    _autoConnectWatchdogTimer?.cancel();
+    _usbEventSubscription?.cancel();
     _pollingTimer?.cancel();
     _simulationTimer?.cancel();
     _serialSubscription?.cancel();

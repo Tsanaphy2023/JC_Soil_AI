@@ -129,16 +129,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         title: const Text(
+                          'Auto-Connect OTG (เชื่อมต่ออัตโนมัติ)',
+                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: const Text(
+                          'เชื่อมต่อเซนเซอร์ทันทีเมื่อเปิดแอป หรือเมื่อเสียบสาย USB OTG (Hotplug)',
+                          style: TextStyle(color: Colors.white60, fontSize: 12),
+                        ),
+                        value: vm.isAutoConnectEnabled,
+                        activeColor: Colors.greenAccent,
+                        onChanged: (val) => vm.toggleAutoConnect(val),
+                      ),
+                      const Divider(color: Colors.white10),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text(
                           'Auto-Baud Rate Detection',
                           style: TextStyle(color: Colors.white, fontSize: 14),
                         ),
                         subtitle: const Text(
-                          'สลับค้นหาความเร็ว 4800 / 9600 อัตโนมัติเมื่อไม่พบข้อมูล',
+                          'สลับค้นหาความเร็ว 4800 / 9600 อัตโนมัติใน 0.8 วินาทีเมื่อไม่พบข้อมูล',
                           style: TextStyle(color: Colors.white60, fontSize: 12),
                         ),
                         value: vm.isAutoBaudActive,
                         activeColor: Colors.cyanAccent,
                         onChanged: (val) => vm.toggleAutoBaud(val),
+                      ),
+                      const Divider(color: Colors.white10),
+                      const Text(
+                        'ความถี่การอ่านค่าเรียลไทม์ (Polling Rate):',
+                        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: vm.pollingIntervalMs == 350 ? Colors.cyanAccent.withValues(alpha: 0.2) : Colors.transparent,
+                                side: BorderSide(color: vm.pollingIntervalMs == 350 ? Colors.cyanAccent : Colors.white24),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                              ),
+                              onPressed: () => vm.setPollingInterval(350),
+                              child: const Text('350 ms\n(Turbo ~2.8Hz)', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: Colors.white)),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: vm.pollingIntervalMs == 400 ? Colors.cyanAccent.withValues(alpha: 0.2) : Colors.transparent,
+                                side: BorderSide(color: vm.pollingIntervalMs == 400 ? Colors.cyanAccent : Colors.white24),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                              ),
+                              onPressed: () => vm.setPollingInterval(400),
+                              child: const Text('400 ms\n(Fast ~2.5Hz)', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: Colors.white)),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: vm.pollingIntervalMs == 1000 ? Colors.cyanAccent.withValues(alpha: 0.2) : Colors.transparent,
+                                side: BorderSide(color: vm.pollingIntervalMs == 1000 ? Colors.cyanAccent : Colors.white24),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                              ),
+                              onPressed: () => vm.setPollingInterval(1000),
+                              child: const Text('1000 ms\n(Standard 1Hz)', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: Colors.white)),
+                            ),
+                          ),
+                        ],
                       ),
                       const Divider(color: Colors.white10),
                       Row(
@@ -348,9 +408,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               const SizedBox(height: 20),
 
-              // Section 5: Troubleshooting Guide for Real Sensor Hardware
+              // Section 5: Optimization & Troubleshooting Guide
               const Text(
-                'ข้อแนะนำในการเชื่อมต่อเซนเซอร์จริง (Troubleshooting)',
+                'เทคนิคการเชื่อมต่อและการปรับความเร็วเรียลไทม์ (Optimization Guide)',
                 style: TextStyle(
                   color: Colors.amberAccent,
                   fontSize: 14,
@@ -366,16 +426,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   border: Border.all(color: Colors.amberAccent.withValues(alpha: 0.3)),
                 ),
                 child: const Text(
-                  '1. เปิดใช้งาน OTG บนสมาร์ตโฟน:\n'
-                  '   มือถือระบบ Android (เช่น Oppo, Vivo, Realme, Xiaomi) ต้องเข้าไปที่การตั้งค่า (Settings) -> การตั้งค่าเพิ่มเติม (Additional Settings) -> เปิด "การเชื่อมต่อ OTG" (OTG Connection: ON)\n\n'
-                  '2. ตรวจสอบความเร็ว Baud Rate:\n'
-                  '   หัววัดคุณภาพดิน 7-in-1 / 8-in-1 ส่วนใหญ่ถูกโปรแกรมมาจากโรงงานด้วยความเร็ว 4800 bps หรือ 9600 bps หากค่าไม่ขึ้น ให้กดปุ่ม [9600 bps] ด้านบน\n\n'
-                  '3. การเชื่อมต่อสายสัญญาณ RS485:\n'
+                  '1. ระบบเชื่อมต่ออัตโนมัติ (Instant Auto-Connect & Hotplug):\n'
+                  '   แอปได้รับการตั้งค่าระบบ Auto-Connect และ Hotplug Listener ไว้ล่วงหน้า เมื่อเปิดแอป หรือเมื่อเสียบหัววัด Type-C เข้ากับสมาร์ตโฟน ระบบจะค้นหาพอร์ต USB และเชื่อมต่อทันทีโดยอัตโนมัติโดยไม่ต้องกดปุ่มใดๆ\n\n'
+                  '2. การอนุญาต USB ถาวร (Bypass Permission Dialog):\n'
+                  '   เมื่อ Android แสดงหน้าต่าง "Allow SOIL AI ANALYZER to access USB device?" ให้ทำเครื่องหมายถูกที่ช่อง [Always open / Always allow...] เพื่อให้ระบบจดจำหัววัดและเชื่อมต่อในเสี้ยววินาทีทุกครั้งที่เสียบสาย\n\n'
+                  '3. เปิดใช้งาน OTG บนสมาร์ตโฟน (สำหรับแบรนด์ Oppo, Vivo, Realme, Xiaomi):\n'
+                  '   สมาร์ตโฟนบางรุ่นปิดไฟเลี้ยงพอร์ต OTG อัตโนมัติ ให้ไปที่ การตั้งค่า (Settings) -> การตั้งค่าเพิ่มเติม (System/Additional) -> เปิด "OTG Connection" ให้เป็น ON\n\n'
+                  '4. เทคนิคความเร็วและการแสดงผลแบบเรียลไทม์ (Real-Time Optimization):\n'
+                  '   • ปรับ Polling Rate เป็น 350 ms หรือ 400 ms เพื่อให้อัตราอัปเดตหน้าจออยู่ที่ ~2.5 - 2.8 ครั้งต่อวินาที\n'
+                  '   • ระบบ Fast Auto-Baud จะค้นหาและจับคู่ความเร็ว 4800 bps / 9600 bps ให้อัตโนมัติภายในเวลาไม่ถึง 1 วินาที\n'
+                  '   • ไบต์ข้อมูล Modbus RTU จะถูกถอดรหัสผ่าน Sliding Window CRC-16 ในระดับ Stream Buffer โดยไม่มี delay ที่เปล่าประโยชน์\n\n'
+                  '5. การต่อสายสัญญาณ RS485 เข้ากับหัววัด 7-in-1 / 8-in-1:\n'
                   '   • สายสีน้ำตาล (VCC): ไฟเลี้ยง +5V ถึง +12V DC\n'
                   '   • สายสีดำ (GND): กราวด์ 0V\n'
                   '   • สายสีเหลือง (A+ / 485+): สัญญาณข้อมูล A\n'
-                  '   • สายสีน้ำเงิน (B- / 485-): สัญญาณข้อมูล B\n\n'
-                  '4. ปักหัววัดลงในดินที่มีความชื้น เพื่อให้เซนเซอร์วัดค่าได้ครบทุกพารามิเตอร์',
+                  '   • สายสีน้ำเงิน (B- / 485-): สัญญาณข้อมูล B',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 12.5,

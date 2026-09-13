@@ -40,10 +40,15 @@ class SoilSensorRepository {
   String get lastTxHex => _sensorService.lastTxHex;
   bool get hasReceivedValidReading => _sensorService.hasReceivedValidReading;
   bool get isAutoBaudActive => _sensorService.isAutoBaudActive;
+  bool get isAutoConnectEnabled => _sensorService.isAutoConnectEnabled;
+  int get pollingIntervalMs => _sensorService.pollingIntervalMs;
 
   Future<bool> connect({int? baudRate}) => _sensorService.connect(baudRate: baudRate);
+  Future<bool> autoConnectNow() => _sensorService.autoConnectNow();
   Future<void> switchBaudRate(int baud) => _sensorService.switchBaudRate(baud);
   void toggleAutoBaud([bool? enable]) => _sensorService.toggleAutoBaud(enable);
+  void toggleAutoConnect([bool? enable]) => _sensorService.toggleAutoConnect(enable);
+  void setPollingInterval(int ms) => _sensorService.setPollingInterval(ms);
 
   Future<void> disconnect() => _sensorService.disconnect();
 

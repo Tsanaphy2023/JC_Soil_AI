@@ -6,7 +6,12 @@ class SensorConstants {
   static const int defaultBaudRate = 4800;
   static const List<int> supportedBaudRates = [2400, 4800, 9600, 19200, 115200];
   static const int defaultSlaveId = 0x01;
-  static const int pollingIntervalMs = 1500;
+
+  // Real-time Polling Rates (milliseconds)
+  static const int fastPollingIntervalMs = 350;      // 2.85 Hz ultra-responsive real-time
+  static const int defaultPollingIntervalMs = 400;   // 2.50 Hz optimal real-time
+  static const int standardPollingIntervalMs = 1000; // 1.00 Hz standard rate
+  static const int pollingIntervalMs = defaultPollingIntervalMs;
 
   // Modbus RTU Request Commands
   // 01 03 00 00 00 08 44 0C -> Read 8 registers starting at 0x0000

@@ -51,6 +51,8 @@ class SoilSensorViewModel extends ChangeNotifier {
   String get lastTxHex => _repository.lastTxHex;
   bool get hasReceivedValidReading => _repository.hasReceivedValidReading;
   bool get isAutoBaudActive => _repository.isAutoBaudActive;
+  bool get isAutoConnectEnabled => _repository.isAutoConnectEnabled;
+  int get pollingIntervalMs => _repository.pollingIntervalMs;
 
   SoilSensorViewModel({SoilSensorRepository? repository})
       : _repository = repository ?? SoilSensorRepository() {
@@ -72,6 +74,11 @@ class SoilSensorViewModel extends ChangeNotifier {
     _telemetrySub = _repository.telemetryStream.listen((_) {
       notifyListeners();
     });
+
+    // Auto-connect to USB OTG sensor immediately on app startup
+    if (_repository.isAutoConnectEnabled && _status != UsbConnectionStatus.connected) {
+      unawaited(connectUsb());
+    }
   }
 
   void _processNewReading(SoilReading raw) {
@@ -98,6 +105,16 @@ class SoilSensorViewModel extends ChangeNotifier {
 
   void toggleAutoBaud([bool? enable]) {
     _repository.toggleAutoBaud(enable);
+    notifyListeners();
+  }
+
+  void toggleAutoConnect([bool? enable]) {
+    _repository.toggleAutoConnect(enable);
+    notifyListeners();
+  }
+
+  void setPollingInterval(int ms) {
+    _repository.setPollingInterval(ms);
     notifyListeners();
   }
 
