@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../domain/models/soil_color_scale.dart';
 
 class ParameterCard extends StatelessWidget {
   final String title;
@@ -9,6 +10,7 @@ class ParameterCard extends StatelessWidget {
   final String? statusHint;
   final String? aiDelta;
   final bool isAiCalibrated;
+  final SoilColorMetric? colorMetric;
   final VoidCallback? onTap;
 
   const ParameterCard({
@@ -21,6 +23,7 @@ class ParameterCard extends StatelessWidget {
     this.statusHint,
     this.aiDelta,
     this.isAiCalibrated = false,
+    this.colorMetric,
     this.onTap,
   });
 
@@ -114,65 +117,143 @@ class ParameterCard extends StatelessWidget {
                 ),
               ),
 
-              // Bottom Row: AI Delta Badge (Left) + Status Hint (Right)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Bottom Section: Colorimetric Scale Badge & AI Delta & Status Hint
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (isAiCalibrated && aiDelta != null && aiDelta!.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.35),
-                        borderRadius: BorderRadius.circular(3),
-                        border: Border.all(
-                          color: Colors.cyanAccent.withValues(alpha: 0.6),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.auto_awesome, color: Colors.cyanAccent, size: 8),
-                          const SizedBox(width: 2),
-                          Text(
-                            'Δ $aiDelta',
-                            style: const TextStyle(
-                              color: Colors.cyanAccent,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
+                  // Optional: Colorimetric Gauge Bar (for pH, N, P, K)
+                  if (colorMetric != null) ...[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(2),
+                      child: Container(
+                        height: 3,
+                        color: Colors.black.withValues(alpha: 0.3),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: (colorMetric!.normalized * 100).toInt().clamp(5, 100),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: colorMetric!.color,
+                                  borderRadius: BorderRadius.circular(2),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: colorMetric!.color.withValues(alpha: 0.8),
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else if (isAiCalibrated)
-                    const Text(
-                      'AI PINN',
-                      style: TextStyle(
-                        color: Colors.cyanAccent,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  else
-                    const SizedBox.shrink(),
-
-                  if (statusHint != null && statusHint!.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                      child: Text(
-                        statusHint!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w500,
+                            Expanded(
+                              flex: (100 - (colorMetric!.normalized * 100).toInt()).clamp(0, 95),
+                              child: const SizedBox.shrink(),
+                            ),
+                          ],
                         ),
                       ),
                     ),
+                    const SizedBox(height: 3),
+                  ],
+
+                  // Badges Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Left Badge: AI Delta or Color Chip
+                      if (isAiCalibrated && aiDelta != null && aiDelta!.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            borderRadius: BorderRadius.circular(3),
+                            border: Border.all(
+                              color: Colors.cyanAccent.withValues(alpha: 0.6),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.auto_awesome, color: Colors.cyanAccent, size: 8),
+                              const SizedBox(width: 2),
+                              Text(
+                                'Δ $aiDelta',
+                                style: const TextStyle(
+                                  color: Colors.cyanAccent,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (colorMetric != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(3),
+                            border: Border.all(
+                              color: colorMetric!.color,
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: colorMetric!.color,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                colorMetric!.labelThai.split(' ')[0], // e.g. "ปานกลาง", "เป็นกลาง", "ต่ำ"
+                                style: TextStyle(
+                                  color: colorMetric!.color,
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (isAiCalibrated)
+                        const Text(
+                          'AI PINN',
+                          style: TextStyle(
+                            color: Colors.cyanAccent,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      else
+                        const SizedBox.shrink(),
+
+                      // Right Badge: Status Hint
+                      if (statusHint != null && statusHint!.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.25),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          child: Text(
+                            statusHint!,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ],

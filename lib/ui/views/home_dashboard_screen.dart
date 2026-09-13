@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/sensor_constants.dart';
 import '../../data/services/usb_sensor_service.dart';
+import '../../domain/models/soil_color_scale.dart';
 import '../viewmodels/soil_sensor_viewmodel.dart';
 import '../widgets/agronomic_summary_sheet.dart';
 import '../widgets/ai_model_details_sheet.dart';
@@ -22,6 +23,13 @@ class HomeDashboardScreen extends StatelessWidget {
     final calResult = vm.calibrationResult;
     final isOffline = (vm.status == UsbConnectionStatus.disconnected ||
         vm.status == UsbConnectionStatus.error);
+    final hasActiveReading = !isOffline || vm.isSimulationMode;
+
+    // Soil Colorimetric Evaluations (LDD Thailand / FAO Standards)
+    final phMetric = hasActiveReading ? SoilColorScale.evaluatePh(reading.ph) : null;
+    final nMetric = hasActiveReading ? SoilColorScale.evaluateNitrogen(reading.nitrogen) : null;
+    final pMetric = hasActiveReading ? SoilColorScale.evaluatePhosphorus(reading.phosphorus) : null;
+    final kMetric = hasActiveReading ? SoilColorScale.evaluatePotassium(reading.potassium) : null;
 
     // Format display string: if offline and not simulating show '***', if waiting for probe show '---'
     String fmtVal(num val, {int decimals = 1}) {
@@ -107,7 +115,7 @@ class HomeDashboardScreen extends StatelessWidget {
                               isAiCalibrated: vm.isAiCalibrationEnabled && !isOffline,
                               aiDelta: '${calResult.temperatureDelta > 0 ? '+' : ''}${calResult.temperatureDelta}°C',
                               statusHint: isOffline ? null : 'ดินเขตร้อน',
-                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment),
+                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment, reading: reading),
                             ),
 
                             // 2. Moisture (%) - Blue
@@ -120,7 +128,7 @@ class HomeDashboardScreen extends StatelessWidget {
                               isAiCalibrated: vm.isAiCalibrationEnabled && !isOffline,
                               aiDelta: '${calResult.moistureDelta > 0 ? '+' : ''}${calResult.moistureDelta}%',
                               statusHint: isOffline ? null : vm.assessment.moistureStatus.name,
-                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment),
+                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment, reading: reading),
                             ),
 
                             // 3. Conductivity(EC) us/cm - Purple
@@ -135,7 +143,7 @@ class HomeDashboardScreen extends StatelessWidget {
                               isAiCalibrated: vm.isAiCalibrationEnabled && !isOffline,
                               aiDelta: '${calResult.ecDelta > 0 ? '+' : ''}${calResult.ecDelta}µS',
                               statusHint: isOffline ? null : vm.assessment.salinityStatus.name,
-                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment),
+                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment, reading: reading),
                             ),
 
                             // 4. pH - Orange
@@ -147,8 +155,9 @@ class HomeDashboardScreen extends StatelessWidget {
                               icon: Icons.science_outlined,
                               isAiCalibrated: vm.isAiCalibrationEnabled && !isOffline,
                               aiDelta: '${calResult.phDelta > 0 ? '+' : ''}${calResult.phDelta}',
-                              statusHint: isOffline ? null : vm.assessment.phStatus.name,
-                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment),
+                              colorMetric: phMetric,
+                              statusHint: isOffline ? null : phMetric?.labelThai.split(' ')[0],
+                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment, reading: reading),
                             ),
 
                             // 5. (N) Nitrogen - Magenta / Pink
@@ -160,8 +169,9 @@ class HomeDashboardScreen extends StatelessWidget {
                                   : reading.nitrogen.toString(),
                               backgroundColor: AppColors.nitrogen,
                               icon: Icons.grass_outlined,
-                              statusHint: isOffline ? null : 'Available N',
-                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment),
+                              colorMetric: nMetric,
+                              statusHint: isOffline ? null : nMetric?.labelThai.split(' ')[0],
+                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment, reading: reading),
                             ),
 
                             // 6. (P) Phosphorus - Cyan / Light Blue
@@ -173,8 +183,9 @@ class HomeDashboardScreen extends StatelessWidget {
                                   : reading.phosphorus.toString(),
                               backgroundColor: AppColors.phosphorus,
                               icon: Icons.filter_vintage_outlined,
-                              statusHint: isOffline ? null : 'Available P',
-                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment),
+                              colorMetric: pMetric,
+                              statusHint: isOffline ? null : pMetric?.labelThai.split(' ')[0],
+                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment, reading: reading),
                             ),
 
                             // 7. (K) Potassium - Teal
@@ -186,8 +197,9 @@ class HomeDashboardScreen extends StatelessWidget {
                                   : reading.potassium.toString(),
                               backgroundColor: AppColors.potassium,
                               icon: Icons.grain_outlined,
-                              statusHint: isOffline ? null : 'Available K',
-                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment),
+                              colorMetric: kMetric,
+                              statusHint: isOffline ? null : kMetric?.labelThai.split(' ')[0],
+                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment, reading: reading),
                             ),
 
                             // 8. Fertility - Coral / Salmon
@@ -200,7 +212,7 @@ class HomeDashboardScreen extends StatelessWidget {
                               backgroundColor: AppColors.fertility,
                               icon: Icons.shield_outlined,
                               statusHint: isOffline ? null : 'Index Score',
-                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment),
+                              onTap: () => AgronomicSummarySheet.show(context, vm.assessment, reading: reading),
                             ),
                           ],
                         ),
