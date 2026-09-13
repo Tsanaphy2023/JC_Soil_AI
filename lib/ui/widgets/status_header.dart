@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../data/services/usb_sensor_service.dart';
 
+import '../../data/models/geo_location_data.dart';
+
 class StatusHeader extends StatelessWidget {
   final UsbConnectionStatus status;
   final bool isAiCalibrated;
@@ -9,11 +11,13 @@ class StatusHeader extends StatelessWidget {
   final int txCount;
   final int rxByteCount;
   final bool hasValidReading;
+  final GeoLocationData? location;
   final VoidCallback? onConnectTap;
   final VoidCallback? onSettingsTap;
   final VoidCallback? onSimulationTap;
   final VoidCallback? onAiTap;
   final VoidCallback? onSwitchBaudTap;
+  final VoidCallback? onCameraTap;
 
   const StatusHeader({
     super.key,
@@ -23,11 +27,13 @@ class StatusHeader extends StatelessWidget {
     this.txCount = 0,
     this.rxByteCount = 0,
     this.hasValidReading = false,
+    this.location,
     this.onConnectTap,
     this.onSettingsTap,
     this.onSimulationTap,
     this.onAiTap,
     this.onSwitchBaudTap,
+    this.onCameraTap,
   });
 
   String get _statusLabel {
@@ -184,6 +190,13 @@ class StatusHeader extends StatelessWidget {
                 ),
               ),
 
+              // AI Vision Camera icon
+              IconButton(
+                icon: const Icon(Icons.camera_alt, color: Colors.cyanAccent),
+                tooltip: 'AI Camera / Record Data',
+                onPressed: onCameraTap,
+              ),
+
               // Settings icon
               IconButton(
                 icon: const Icon(Icons.settings, color: Colors.white),
@@ -194,7 +207,7 @@ class StatusHeader extends StatelessWidget {
           ),
           const SizedBox(height: 4),
 
-          // Badges Row: USB Status + AI Calibration Status
+          // Badges Row: USB Status + AI Calibration Status + GPS Geotag
           Wrap(
             spacing: 8,
             runSpacing: 4,
@@ -273,6 +286,31 @@ class StatusHeader extends StatelessWidget {
                       ),
                     ],
                   ),
+                ),
+              ),
+
+              // 3. GPS Geotag Badge (Lat, Lon, Alt)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.amberAccent.withValues(alpha: 0.6)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.location_on, color: Colors.amberAccent, size: 12),
+                    const SizedBox(width: 4),
+                    Text(
+                      location?.summary ?? 'GPS: กำลังค้นหาพิกัด...',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

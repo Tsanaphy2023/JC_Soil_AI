@@ -12,6 +12,7 @@ import '../widgets/parameter_card.dart';
 import '../widgets/status_header.dart';
 import 'historical_data_screen.dart';
 import 'settings_screen.dart';
+import 'soil_camera_screen.dart';
 
 class HomeDashboardScreen extends StatelessWidget {
   const HomeDashboardScreen({super.key});
@@ -53,9 +54,16 @@ class HomeDashboardScreen extends StatelessWidget {
               txCount: vm.txCount,
               rxByteCount: vm.rxByteCount,
               hasValidReading: vm.hasReceivedValidReading,
+              location: vm.currentLocation,
               onConnectTap: () => vm.connectUsb(),
               onSimulationTap: () => vm.toggleSimulation(),
               onSwitchBaudTap: () => vm.switchBaudRate(vm.baudRate == 4800 ? 9600 : 4800),
+              onCameraTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SoilCameraScreen()),
+                );
+              },
               onAiTap: () {
                 AiModelDetailsSheet.show(
                   context,
@@ -347,6 +355,22 @@ class HomeDashboardScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.teal.shade900,
+        foregroundColor: Colors.white,
+        elevation: 6,
+        icon: const Icon(Icons.camera_alt, color: Colors.cyanAccent),
+        label: const Text(
+          'AI Vision & GPS',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
+        ),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SoilCameraScreen()),
+          );
+        },
       ),
     );
   }

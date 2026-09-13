@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../data/models/geo_location_data.dart';
 import '../../data/models/soil_reading.dart';
 import '../../data/repositories/soil_sensor_repository.dart';
 import '../../data/services/export_service.dart';
@@ -12,6 +13,7 @@ class SoilSensorViewModel extends ChangeNotifier {
   StreamSubscription<SoilReading>? _readingSub;
   StreamSubscription<UsbConnectionStatus>? _statusSub;
   StreamSubscription<void>? _telemetrySub;
+  StreamSubscription<GeoLocationData>? _locationSub;
 
   SoilReading _rawReading = SoilReading.initial();
   SoilReading get rawReading => _rawReading;
@@ -53,6 +55,7 @@ class SoilSensorViewModel extends ChangeNotifier {
   bool get isAutoBaudActive => _repository.isAutoBaudActive;
   bool get isAutoConnectEnabled => _repository.isAutoConnectEnabled;
   int get pollingIntervalMs => _repository.pollingIntervalMs;
+  GeoLocationData get currentLocation => _repository.currentLocation;
 
   SoilSensorViewModel({SoilSensorRepository? repository})
       : _repository = repository ?? SoilSensorRepository() {
@@ -72,6 +75,10 @@ class SoilSensorViewModel extends ChangeNotifier {
     });
 
     _telemetrySub = _repository.telemetryStream.listen((_) {
+      notifyListeners();
+    });
+
+    _locationSub = _repository.locationStream.listen((_) {
       notifyListeners();
     });
 
@@ -164,6 +171,7 @@ class SoilSensorViewModel extends ChangeNotifier {
     _readingSub?.cancel();
     _statusSub?.cancel();
     _telemetrySub?.cancel();
+    _locationSub?.cancel();
     _repository.dispose();
     super.dispose();
   }

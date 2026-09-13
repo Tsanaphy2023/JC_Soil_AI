@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'geo_location_data.dart';
 
 /// Clean immutable model representing a complete 8-parameter soil sensor measurement
 class SoilReading {
@@ -11,6 +12,7 @@ class SoilReading {
   final int potassium;
   final int fertility;
   final DateTime timestamp;
+  final GeoLocationData? location;
 
   const SoilReading({
     required this.temperature,
@@ -22,7 +24,12 @@ class SoilReading {
     required this.potassium,
     required this.fertility,
     required this.timestamp,
+    this.location,
   });
+
+  double? get latitude => location?.latitude;
+  double? get longitude => location?.longitude;
+  double? get altitude => location?.altitude;
 
   /// Initial placeholder or disconnected state
   factory SoilReading.initial() {
@@ -77,6 +84,9 @@ class SoilReading {
       'phosphorus': phosphorus,
       'potassium': potassium,
       'fertility': fertility,
+      'latitude': latitude,
+      'longitude': longitude,
+      'altitude': altitude,
     };
   }
 
@@ -90,6 +100,9 @@ class SoilReading {
         'Phosphorus P (mg/kg)',
         'Potassium K (mg/kg)',
         'Fertility (mg/kg)',
+        'Latitude',
+        'Longitude',
+        'Altitude (m)',
       ];
 
   List<dynamic> toCsvRow() => [
@@ -102,5 +115,34 @@ class SoilReading {
         phosphorus,
         potassium,
         fertility,
+        location != null ? location!.latitude.toStringAsFixed(6) : '-',
+        location != null ? location!.longitude.toStringAsFixed(6) : '-',
+        location != null ? location!.altitude.toStringAsFixed(1) : '-',
       ];
+
+  SoilReading copyWith({
+    double? temperature,
+    double? moisture,
+    int? conductivity,
+    double? ph,
+    int? nitrogen,
+    int? phosphorus,
+    int? potassium,
+    int? fertility,
+    DateTime? timestamp,
+    GeoLocationData? location,
+  }) {
+    return SoilReading(
+      temperature: temperature ?? this.temperature,
+      moisture: moisture ?? this.moisture,
+      conductivity: conductivity ?? this.conductivity,
+      ph: ph ?? this.ph,
+      nitrogen: nitrogen ?? this.nitrogen,
+      phosphorus: phosphorus ?? this.phosphorus,
+      potassium: potassium ?? this.potassium,
+      fertility: fertility ?? this.fertility,
+      timestamp: timestamp ?? this.timestamp,
+      location: location ?? this.location,
+    );
+  }
 }

@@ -1,10 +1,12 @@
-import 'dart:async';
+import '../models/geo_location_data.dart';
 import '../models/soil_reading.dart';
 import '../services/export_service.dart';
+import '../services/geo_location_service.dart';
 import '../services/usb_sensor_service.dart';
 
 class SoilSensorRepository {
   final UsbSensorService _sensorService;
+  final GeoLocationService _locationService;
   final List<SoilReading> _history = [];
   final int maxHistorySize;
 
@@ -13,13 +15,19 @@ class SoilSensorRepository {
 
   List<SoilReading> get history => List.unmodifiable(_history);
 
+  GeoLocationData get currentLocation => _locationService.currentLocation;
+  Stream<GeoLocationData> get locationStream => _locationService.locationStream;
+
   SoilSensorRepository({
     UsbSensorService? sensorService,
+    GeoLocationService? locationService,
     this.maxHistorySize = 1000,
-  }) : _sensorService = sensorService ?? UsbSensorService() {
+  })  : _sensorService = sensorService ?? UsbSensorService(),
+        _locationService = locationService ?? GeoLocationService() {
     _sensorService.readingStream.listen((reading) {
-      _currentReading = reading;
-      _history.add(reading);
+      final geotagged = reading.copyWith(location: _locationService.currentLocation);
+      _currentReading = geotagged;
+      _history.add(geotagged);
       if (_history.length > maxHistorySize) {
         _history.removeAt(0);
       }
@@ -64,5 +72,6 @@ class SoilSensorRepository {
 
   void dispose() {
     _sensorService.dispose();
+    _locationService.dispose();
   }
 }
