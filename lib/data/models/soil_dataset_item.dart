@@ -62,6 +62,10 @@ class SoilDatasetItem {
 
   bool get isImage => mediaType == 'image';
   bool get isVideo => mediaType == 'video';
+  bool get hasGps => latitude != 0.0 || longitude != 0.0;
+  int get ec => conductivity;
+  int get salinity => conductivity;
+  String? get soilColorHex => null;
 
   bool get fileExists => File(filePath).existsSync();
 

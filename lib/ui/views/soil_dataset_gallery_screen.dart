@@ -7,9 +7,11 @@ import '../../core/localization/app_localizations.dart';
 import '../../core/localization/language_provider.dart';
 import '../../data/models/soil_dataset_item.dart';
 import '../../data/services/soil_dataset_service.dart';
+import '../../data/services/soil_report_service.dart';
 import '../viewmodels/soil_sensor_viewmodel.dart';
 import '../widgets/soil_video_player_viewer.dart';
 import 'historical_data_screen.dart';
+import 'soil_gis_map_screen.dart';
 
 enum GalleryFilter { all, images, videos, csv }
 
@@ -364,6 +366,16 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                     tooltip: lang.t('selectFiles'),
                     onPressed: () => setState(() => _isSelectionMode = true),
                   ),
+                IconButton(
+                  icon: const Icon(Icons.map_outlined, color: Colors.greenAccent),
+                  tooltip: lang.t('gisMapTitle'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SoilGisMapScreen()),
+                    );
+                  },
+                ),
                 IconButton(
                   icon: const Icon(Icons.share_outlined, color: Colors.cyanAccent),
                   tooltip: lang.t('shareDataset'),
@@ -903,6 +915,14 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                         ),
                         Row(
                           children: [
+                            IconButton(
+                              icon: const Icon(Icons.description, color: Colors.greenAccent),
+                              tooltip: lang.t('generateCertificate'),
+                              onPressed: () async {
+                                final reportService = SoilReportService();
+                                await reportService.generateAndShareCertificate(item);
+                              },
+                            ),
                             IconButton(
                               icon: const Icon(Icons.share, color: Colors.cyanAccent),
                               tooltip: 'แชร์ตัวอย่างนี้',

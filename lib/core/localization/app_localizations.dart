@@ -366,6 +366,83 @@ class AppLocalizations {
       AppLanguage.english: 'Language changed to English',
       AppLanguage.chinese: '语言已切换为 中文',
     },
+
+    // GIS Spatial Map & Certificate Extensions
+    'gisMapTitle': {
+      AppLanguage.thai: 'แผนที่แปลงดิน GIS & Heatmap',
+      AppLanguage.english: 'GIS Soil Spatial Map & Heatmap',
+      AppLanguage.chinese: 'GIS土壤空间分布与热力图',
+    },
+    'generateCertificate': {
+      AppLanguage.thai: 'พิมพ์ใบรายงานผลตรวจดิน A4',
+      AppLanguage.english: 'Generate Soil Certificate (A4)',
+      AppLanguage.chinese: '生成土壤诊断报告书 (A4)',
+    },
+    'generatingCertificate': {
+      AppLanguage.thai: 'กำลังสร้างใบรับรองคุณภาพดิน A4...',
+      AppLanguage.english: 'Generating Soil Certificate A4...',
+      AppLanguage.chinese: '正在生成A4土壤品质认证报告...',
+    },
+    'certificateGenerated': {
+      AppLanguage.thai: 'สร้างใบรับรองผลตรวจดิน A4 สำเร็จ',
+      AppLanguage.english: 'Soil Certificate A4 Generated Successfully',
+      AppLanguage.chinese: '已成功生成A4土壤诊断证书',
+    },
+    'exportGeoJson': {
+      AppLanguage.thai: 'ส่งออก GeoJSON (QGIS/GIS)',
+      AppLanguage.english: 'Export GeoJSON (QGIS/GIS)',
+      AppLanguage.chinese: '导出 GeoJSON (QGIS/GIS)',
+    },
+    'exportKml': {
+      AppLanguage.thai: 'ส่งออก KML (Google Earth)',
+      AppLanguage.english: 'Export KML (Google Earth)',
+      AppLanguage.chinese: '导出 KML (Google Earth)',
+    },
+    'layerHealthScore': {
+      AppLanguage.thai: '🟢 สุขภาพดินรวม (Health Score)',
+      AppLanguage.english: '🟢 Soil Health Score',
+      AppLanguage.chinese: '🟢 土壤综合健康度',
+    },
+    'layerPh': {
+      AppLanguage.thai: '🧪 กรด-ด่าง (pH)',
+      AppLanguage.english: '🧪 Soil pH',
+      AppLanguage.chinese: '🧪 酸碱度 (pH)',
+    },
+    'layerMoisture': {
+      AppLanguage.thai: '💧 ความชื้นในดิน (%)',
+      AppLanguage.english: '💧 Moisture (%)',
+      AppLanguage.chinese: '💧 土壤水分 (%)',
+    },
+    'layerEc': {
+      AppLanguage.thai: '⚡ สภาพนำไฟฟ้า EC',
+      AppLanguage.english: '⚡ Conductivity (EC)',
+      AppLanguage.chinese: '⚡ 电导率 (EC)',
+    },
+    'layerNpk': {
+      AppLanguage.thai: '🌿 ธาตุอาหาร N-P-K',
+      AppLanguage.english: '🌿 N-P-K Nutrients',
+      AppLanguage.chinese: '🌿 氮磷钾养分',
+    },
+    'openInGoogleMaps': {
+      AppLanguage.thai: 'เปิดนำทางด้วย Google Maps',
+      AppLanguage.english: 'Navigate via Google Maps',
+      AppLanguage.chinese: '使用谷歌地图导航',
+    },
+    'totalSamplePoints': {
+      AppLanguage.thai: 'จำนวนจุดสำรวจดิน',
+      AppLanguage.english: 'Survey Sample Points',
+      AppLanguage.chinese: '土壤采样测点总数',
+    },
+    'noGpsData': {
+      AppLanguage.thai: 'ไม่พบพิกัด GPS ในตัวอย่างดินที่เลือก',
+      AppLanguage.english: 'No GPS coordinates found in dataset',
+      AppLanguage.chinese: '当前数据集中未检测到有效GPS坐标',
+    },
+    'selectPinToView': {
+      AppLanguage.thai: 'แตะที่หมุดพิกัดเพื่อดูรายงานและค่าที่วัดได้',
+      AppLanguage.english: 'Tap any coordinate pin to view sample telemetry',
+      AppLanguage.chinese: '点击图钉查看该采样点遥测参数',
+    },
   };
 
   String t(String key) {
