@@ -493,6 +493,36 @@ class AppLocalizations {
       AppLanguage.english: 'Reset North',
       AppLanguage.chinese: '重置正北',
     },
+    'selectGpsLocation': {
+      AppLanguage.thai: 'เลือกตำแหน่งซูมพิกัด GPS',
+      AppLanguage.english: 'Select Location to Zoom (GPS)',
+      AppLanguage.chinese: '选择GPS位置进行缩放',
+    },
+    'currentDeviceGps': {
+      AppLanguage.thai: 'พิกัด GPS ปัจจุบันของฉัน (Live GPS)',
+      AppLanguage.english: 'My Current Live GPS',
+      AppLanguage.chinese: '我的当前实时GPS位置',
+    },
+    'centerAllPlots': {
+      AppLanguage.thai: 'กึ่งกลางแปลงสำรวจทั้งหมด',
+      AppLanguage.english: 'Center All Sample Points',
+      AppLanguage.chinese: '全部采样点中心',
+    },
+    'soilSamplePoints': {
+      AppLanguage.thai: 'เลือกซูมไปยังจุดตรวจวัดดิน',
+      AppLanguage.english: 'Zoom to Soil Sample Pin',
+      AppLanguage.chinese: '缩放至土壤采样点',
+    },
+    'fetchingGps': {
+      AppLanguage.thai: 'กำลังค้นหาสัญญาณดาวเทียม GPS...',
+      AppLanguage.english: 'Acquiring GPS Satellite Signal...',
+      AppLanguage.chinese: '正在搜索GPS卫星信号...',
+    },
+    'gpsAcquired': {
+      AppLanguage.thai: 'พบพิกัด GPS ปัจจุบันแล้ว',
+      AppLanguage.english: 'GPS Location Acquired',
+      AppLanguage.chinese: '已获取当前GPS坐标',
+    },
   };
 
   String t(String key) {

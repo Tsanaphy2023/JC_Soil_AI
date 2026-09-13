@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import '../../core/localization/language_provider.dart';
@@ -36,6 +37,10 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
   double _minLat = 0.0, _maxLat = 0.0;
   double _minLng = 0.0, _maxLng = 0.0;
   LatLng _centerPoint = const LatLng(12.6500, 102.1100);
+
+  // Live GPS tracking
+  LatLng? _userLiveLocation;
+  bool _isLocatingLiveGps = false;
 
   // Cached Contour computation
   SoilContourResult? _contourResult;
@@ -180,6 +185,308 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
   void _resetNorth() {
     _mapController.rotate(0);
     setState(() => _rotation = 0.0);
+  }
+
+  Future<void> _fetchAndZoomToLiveGps() async {
+    final lang = Provider.of<LanguageProvider>(context, listen: false);
+    setState(() => _isLocatingLiveGps = true);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF0F766E),
+        duration: const Duration(seconds: 2),
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.cyanAccent),
+            ),
+            const SizedBox(width: 10),
+            Text(lang.t('fetchingGps')),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception('Location service disabled');
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 8),
+      );
+
+      final livePoint = LatLng(pos.latitude, pos.longitude);
+      setState(() {
+        _userLiveLocation = livePoint;
+        _isLocatingLiveGps = false;
+      });
+
+      _mapController.move(livePoint, 18.5);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFF059669),
+          content: Text(
+            '${lang.t('gpsAcquired')}: ${pos.latitude.toStringAsFixed(6)}, ${pos.longitude.toStringAsFixed(6)} (±${pos.accuracy.toStringAsFixed(1)}m)',
+          ),
+        ),
+      );
+    } catch (e) {
+      setState(() => _isLocatingLiveGps = false);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: Text('GPS Error: $e'),
+        ),
+      );
+    }
+  }
+
+  void _showGpsLocationSelector() {
+    final lang = Provider.of<LanguageProvider>(context, listen: false);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF0F172A),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.58,
+          minChildSize: 0.35,
+          maxChildSize: 0.88,
+          expand: false,
+          builder: (_, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
+              child: ListView(
+                controller: scrollController,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      const Icon(Icons.explore, color: Colors.cyanAccent, size: 22),
+                      const SizedBox(width: 8),
+                      Text(
+                        lang.t('selectGpsLocation'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Option 1: Live Device GPS
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _fetchAndZoomToLiveGps();
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFF0284C7).withValues(alpha: 0.25),
+                            const Color(0xFF0369A1).withValues(alpha: 0.15),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.5)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF0284C7),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.my_location, color: Colors.white, size: 20),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  lang.t('currentDeviceGps'),
+                                  style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _userLiveLocation != null
+                                      ? '${_userLiveLocation!.latitude.toStringAsFixed(6)}, ${_userLiveLocation!.longitude.toStringAsFixed(6)}'
+                                      : 'ค้นหาและซูมไปยังตำแหน่งดาวเทียมที่ยืนอยู่จริง',
+                                  style: const TextStyle(color: Colors.white70, fontSize: 11),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.arrow_forward_ios, color: Colors.cyanAccent, size: 14),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Option 2: Center All Plots
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _mapController.move(_centerPoint, 16.5);
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B).withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF059669),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.filter_center_focus, color: Colors.white, size: 20),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  lang.t('centerAllPlots'),
+                                  style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'กึ่งกลางพิกัดเฉลี่ย: ${_centerPoint.latitude.toStringAsFixed(6)}, ${_centerPoint.longitude.toStringAsFixed(6)}',
+                                  style: const TextStyle(color: Colors.white60, fontSize: 11),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.arrow_forward_ios, color: Colors.white38, size: 14),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+                  Text(
+                    '${lang.t('soilSamplePoints')} (${_geotaggedItems.length})',
+                    style: const TextStyle(color: Colors.cyanAccent, fontSize: 12.5, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Option 3: List of All Geotagged Soil Points
+                  ..._geotaggedItems.map((item) {
+                    final color = _getItemColor(item);
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          final pos = LatLng(item.latitude, item.longitude);
+                          _mapController.move(pos, 18.5);
+                          setState(() => _selectedItem = item);
+                          _showSampleDetailSheet(item);
+                        },
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E293B).withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: color.withValues(alpha: 0.35)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(color: color.withValues(alpha: 0.8), blurRadius: 4),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.sampleId,
+                                      style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      '📍 ${item.latitude.toStringAsFixed(6)}, ${item.longitude.toStringAsFixed(6)} (Alt: ${item.altitude.toStringAsFixed(1)}m)',
+                                      style: const TextStyle(color: Colors.white60, fontSize: 10.5),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: color.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'pH ${item.ph.toStringAsFixed(1)} | ${item.moisture.toStringAsFixed(0)}%',
+                                  style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _exportGeoJson() async {
@@ -476,6 +783,46 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
       );
     }).toList();
 
+    // Add Live User Location Marker if available
+    if (_userLiveLocation != null) {
+      markers.add(
+        Marker(
+          point: _userLiveLocation!,
+          width: 44,
+          height: 44,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent.withValues(alpha: 0.35),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0284C7),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blueAccent.withValues(alpha: 0.8),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF070E17),
       appBar: AppBar(
@@ -713,7 +1060,7 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
                             ),
                           ),
 
-                          // Zoom In / Zoom Out Floating Controls
+                          // Zoom In / Zoom Out / GPS Coordinate Selector Floating Controls
                           Positioned(
                             right: 14,
                             bottom: 60,
@@ -742,14 +1089,20 @@ class _SoilGisMapScreenState extends State<SoilGisMapScreen> with SingleTickerPr
                                   child: const Icon(Icons.remove, size: 20),
                                 ),
                                 const SizedBox(height: 8),
+                                // Circle GPS Coordinate Selector Button
                                 FloatingActionButton.small(
                                   heroTag: 'recenter',
                                   backgroundColor: const Color(0xFF0F172A).withValues(alpha: 0.85),
                                   foregroundColor: Colors.greenAccent,
-                                  onPressed: () {
-                                    _mapController.move(_centerPoint, 16.5);
-                                  },
-                                  child: const Icon(Icons.my_location, size: 18),
+                                  tooltip: lang.t('selectGpsLocation'),
+                                  onPressed: _showGpsLocationSelector,
+                                  child: _isLocatingLiveGps
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.greenAccent),
+                                        )
+                                      : const Icon(Icons.my_location, size: 18),
                                 ),
                               ],
                             ),
