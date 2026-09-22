@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../data/models/soil_dataset_item.dart';
+import '../../data/models/soil_reading.dart';
+import '../../data/services/multi_color_space_service.dart';
 import '../../data/services/soil_dataset_service.dart';
+import '../../domain/models/soil_multimodal_deep_model.dart';
 
 /// In-App Video Player with Real-Time Synchronized Telemetry HUD Overlay
 /// Displays soil research video samples with live GPS, 8-in-1 sensor metrics,
@@ -30,6 +33,7 @@ class _SoilVideoPlayerViewerState extends State<SoilVideoPlayerViewer> {
   bool _showHud = true;
   bool _showControls = true;
   bool _isMuted = false;
+  bool _showAiMultimodalView = false;
 
   @override
   void initState() {
@@ -380,13 +384,30 @@ class _SoilVideoPlayerViewerState extends State<SoilVideoPlayerViewer> {
   Widget _buildBottomTelemetryHud() {
     final item = widget.item;
 
+    final sensorReading = SoilReading(
+      temperature: item.temperature,
+      moisture: item.moisture,
+      conductivity: item.conductivity,
+      ph: item.ph,
+      nitrogen: item.nitrogen,
+      phosphorus: item.phosphorus,
+      potassium: item.potassium,
+      fertility: item.fertility,
+      timestamp: item.timestamp,
+    );
+    final baselineVisionMetric = MultiColorSpaceService.fromRgb(125, 90, 65);
+    final aiInference = SoilMultimodalDeepModel.infer(
+      visionMetric: baselineVisionMetric,
+      sensorReading: sensorReading,
+    );
+
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: const Color(0xE00C1017),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: const Color(0x6600FFFF),
+          color: _showAiMultimodalView ? aiInference.statusColor.withValues(alpha: 0.8) : const Color(0x6600FFFF),
           width: 1.0,
         ),
         boxShadow: [
@@ -400,6 +421,103 @@ class _SoilVideoPlayerViewerState extends State<SoilVideoPlayerViewer> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Title Bar with Mode Toggle
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    _showAiMultimodalView ? Icons.psychology_rounded : Icons.sensors_rounded,
+                    size: 14,
+                    color: _showAiMultimodalView ? Colors.cyanAccent : Colors.greenAccent,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _showAiMultimodalView ? 'AI MULTIMODAL DEEP LEARNING' : 'TELEMETRY HUD (8-IN-1)',
+                    style: const TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              InkWell(
+                onTap: () => setState(() => _showAiMultimodalView = !_showAiMultimodalView),
+                borderRadius: BorderRadius.circular(4),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white12,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.5), width: 0.8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _showAiMultimodalView ? 'ดูเซนเซอร์ 8-in-1' : 'ดู AI ฟิวชัน',
+                        style: const TextStyle(fontSize: 8.5, color: Colors.cyanAccent, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: 2),
+                      const Icon(Icons.swap_horiz, size: 11, color: Colors.cyanAccent),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          if (_showAiMultimodalView) ...[
+            // Multimodal View
+            Row(
+              children: [
+                _buildParamTile('Sensor pH', item.ph.toStringAsFixed(2), const Color(0xFFFFA726)),
+                _buildParamTile('Vision pH', aiInference.visionPh.toStringAsFixed(2), aiInference.statusColor),
+                _buildParamTile('อินทรียวัตถุ SOM', '${aiInference.soilOrganicMatterPct.toStringAsFixed(1)}%', const Color(0xFF00E5FF)),
+                _buildParamTile('ความชื้น VWC', '${item.moisture.toStringAsFixed(1)}%', const Color(0xFF29B6F6)),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                _buildParamTile('AI Nitrogen', '${aiInference.predictedNitrogen} mg/kg', const Color(0xFFFF7043)),
+                _buildParamTile('AI Phosphorus', '${aiInference.predictedPhosphorus} mg/kg', const Color(0xFF42A5F5)),
+                _buildParamTile('AI Potassium', '${aiInference.predictedPotassium} mg/kg', const Color(0xFFAB47BC)),
+                _buildParamTile('ความสอดคล้อง', '${(aiInference.consistencyScore * 100).toStringAsFixed(0)}%', aiInference.statusColor),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+              decoration: BoxDecoration(
+                color: const Color(0xCC002B36),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: aiInference.statusColor.withValues(alpha: 0.4), width: 0.7),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.verified_rounded, color: aiInference.statusColor, size: 13),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      aiInference.agreementStatus,
+                      style: TextStyle(
+                        color: aiInference.statusColor,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.3,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
           // Row 1: Temp, Moisture, EC, pH
           Row(
             children: [
@@ -451,6 +569,7 @@ class _SoilVideoPlayerViewerState extends State<SoilVideoPlayerViewer> {
               ],
             ),
           ),
+          ],
         ],
       ),
     );
