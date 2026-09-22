@@ -490,11 +490,18 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                     ),
             ),
 
-            // 2. Interactive Multi-Shape ROI Targeting Overlay (Rectangle, Circle, Freehand Polygon)
+            // 2. Interactive Multi-Shape ROI Targeting Overlay (Rectangle, Circle, Freehand Polygon) พร้อมแถบเกณฑ์เฉดสีตามคู่มือวิชาการ
             Positioned.fill(
               child: InteractiveRoiSelector(
                 currentShape: _currentRoiShape,
                 isRecording: _isRecordingVideo,
+                livePh: aiResult?.visionPh ?? reading.ph,
+                liveSom: aiResult?.soilOrganicMatterPct,
+                liveNitrogen: aiResult?.predictedNitrogen ?? reading.nitrogen,
+                livePhosphorus: aiResult?.predictedPhosphorus ?? reading.phosphorus,
+                livePotassium: aiResult?.predictedPotassium ?? reading.potassium,
+                liveColorMetric: _currentVisionMetric,
+                liveStatusLabel: aiResult?.agronomicInsight,
                 onShapeChanged: (shape) => setState(() => _currentRoiShape = shape),
                 onRoiUpdated: (data) => _currentRoiData = data,
               ),

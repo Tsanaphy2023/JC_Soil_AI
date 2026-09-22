@@ -108,10 +108,18 @@
     justification=centering
 }
 
+\renewcommand{\contentsname}{สารบัญ}
+\renewcommand{\listtablename}{สารบัญตาราง}
+\renewcommand{\listfigurename}{สารบัญภาพ}
+\renewcommand{\bibname}{บรรณานุกรม}
 \renewcommand{\figurename}{\mbox{ภาพที่}}
 \renewcommand{\tablename}{\mbox{ตารางที่}}
 
 \AtBeginDocument{
+    \gdef\contentsname{สารบัญ}
+    \gdef\listtablename{สารบัญตาราง}
+    \gdef\listfigurename{สารบัญภาพ}
+    \gdef\bibname{บรรณานุกรม}
     \gdef\figurename{\mbox{ภาพที่}}
     \gdef\tablename{\mbox{ตารางที่}}
     \captionsetup[figure]{name={\mbox{ภาพที่}}}
@@ -242,14 +250,15 @@
         enhanced,
         width=\textwidth,
         colback=rbruNavy,
-        interior style={left color=rbruNavy!98!black, right color=rbruNavy!85!rbruSlate},
-        borderline east={4pt}{0pt}{rbruGold},
+        interior style={left color=rbruNavy!96!black, right color=rbruNavy!88!rbruSlate},
+        borderline north={2.5pt}{0pt}{rbruGold},
+        borderline south={2.5pt}{0pt}{rbruGold},
         boxrule=0pt,
-        arc=0mm,
+        arc=2mm,
         top=14pt, bottom=14pt, left=16pt, right=16pt,
-        halign=right
+        halign=center
     ]
-        {\fontsize{24}{30}\selectfont\bfseries\color{white}#1}
+        {\centering\fontsize{24}{30}\selectfont\bfseries\color{white}#1\par}
     \end{tcolorbox}
 }
 

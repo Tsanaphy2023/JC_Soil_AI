@@ -361,11 +361,14 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
               child: CircularProgressIndicator(color: PhColors.neonGreen),
             ),
 
-          // 2. ตัวเลือกพื้นที่วิเคราะห์ ROI (Interactive Multi-Shape ROI Overlay)
+          // 2. ตัวเลือกพื้นที่วิเคราะห์ ROI (Interactive Multi-Shape ROI Overlay) พร้อมแถบเกณฑ์เฉดสีทางวิชาการ
           Positioned.fill(
             child: InteractiveRoiSelector(
               currentShape: _currentRoiShape,
               activeColor: comparison != null ? comparison.statusColor : PhColors.neonCyan,
+              livePh: comparison?.visionPh ?? result.phCalibrated,
+              liveColorMetric: _liveColorMetric,
+              liveStatusLabel: comparison?.agreementStatus ?? PhColors.getLabelForPh(result.phCalibrated),
               onShapeChanged: (shape) {
                 setState(() => _currentRoiShape = shape);
               },
