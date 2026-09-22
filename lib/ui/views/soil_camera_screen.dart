@@ -1,3 +1,4 @@
+import "../widgets/interactive_roi_selector.dart";
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,8 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
   bool _isAudioEnabled = true;
 
   int _savedDatasetCount = 0;
+  RoiShape _currentRoiShape = RoiShape.rectangle;
+  Map<String, dynamic> _currentRoiData = {};
 
   @override
   void initState() {
@@ -151,6 +154,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
 
     final lang = context.read<LanguageProvider>();
     setState(() => _isProcessingCapture = true);
+    debugPrint('[SoilCameraScreen] Targeted ROI Geometry: $_currentRoiData');
     try {
       final photo = await _cameraController!.takePicture();
       final savedPath = await SoilDatasetService.savePhotoSample(
@@ -317,43 +321,13 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                     ),
             ),
 
-            // 2. Targeting HUD Crosshair Overlay
-            Center(
-              child: Container(
-                width: 240,
-                height: 240,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: _isRecordingVideo ? Colors.redAccent.withValues(alpha: 0.8) : Colors.cyanAccent.withValues(alpha: 0.6),
-                    width: 1.5,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Stack(
-                  children: [
-                    // Corner accents
-                    Positioned(
-                      top: 4,
-                      left: 8,
-                      child: Text(
-                        lang.t('soilTargetZone'),
-                        style: TextStyle(
-                          color: _isRecordingVideo ? Colors.redAccent : Colors.cyanAccent,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ),
-                    Center(
-                      child: Icon(
-                        Icons.filter_center_focus,
-                        size: 40,
-                        color: (_isRecordingVideo ? Colors.redAccent : Colors.cyanAccent).withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ],
-                ),
+            // 2. Interactive Multi-Shape ROI Targeting Overlay (Rectangle, Circle, Freehand Polygon)
+            Positioned.fill(
+              child: InteractiveRoiSelector(
+                currentShape: _currentRoiShape,
+                isRecording: _isRecordingVideo,
+                onShapeChanged: (shape) => setState(() => _currentRoiShape = shape),
+                onRoiUpdated: (data) => _currentRoiData = data,
               ),
             ),
 
