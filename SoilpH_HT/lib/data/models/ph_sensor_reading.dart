@@ -6,6 +6,7 @@ class SoilPhReading {
   final double temperature; // °C
   final double moisture;    // % VWC
   final int conductivity;   // µS/cm (EC)
+  final double sensorVoltageMv; // Sensor Electrode Potential (mV)
   final DateTime timestamp;
 
   const SoilPhReading({
@@ -13,8 +14,22 @@ class SoilPhReading {
     required this.temperature,
     required this.moisture,
     required this.conductivity,
+    double? sensorVoltageMv,
     required this.timestamp,
-  });
+  }) : sensorVoltageMv = sensorVoltageMv ?? -((0.1984 * (273.15 + temperature)) * (phRaw - 7.0));
+
+  /// Calculates Nernst theoretical slope: S(T) = 2.3026 * R * T / F (mV / pH)
+  static double nernstSlope(double tempC) {
+    return 0.198414 * (273.15 + tempC);
+  }
+
+  /// Calculates electrode potential (mV) from pH and temperature
+  static double calculateVoltageMv(double ph, double tempC) {
+    final slope = nernstSlope(tempC);
+    // At pH 7.0, E = 0 mV (isopotential reference)
+    // E(T, pH) = -S(T) * (pH - 7.0)
+    return -slope * (ph - 7.0);
+  }
 
   factory SoilPhReading.initial() {
     return SoilPhReading(
@@ -22,6 +37,7 @@ class SoilPhReading {
       temperature: 25.0,
       moisture: 50.0,
       conductivity: 600,
+      sensorVoltageMv: 29.58, // -59.16 * (6.50 - 7.00) = +29.58 mV
       timestamp: DateTime.now(),
     );
   }
@@ -59,11 +75,16 @@ class SoilPhReading {
     }
     ph = ph.clamp(3.0, 10.0);
 
+    final double phRounded = double.parse(ph.toStringAsFixed(2));
+    final double tempRounded = double.parse(temperature.toStringAsFixed(1));
+    final double vMv = double.parse(calculateVoltageMv(phRounded, tempRounded).toStringAsFixed(1));
+
     return SoilPhReading(
-      phRaw: double.parse(ph.toStringAsFixed(2)),
-      temperature: double.parse(temperature.toStringAsFixed(1)),
+      phRaw: phRounded,
+      temperature: tempRounded,
       moisture: double.parse(moisture.toStringAsFixed(1)),
       conductivity: conductivity,
+      sensorVoltageMv: vMv,
       timestamp: DateTime.now(),
     );
   }
@@ -74,6 +95,7 @@ class SoilPhReading {
       'temperature': temperature,
       'moisture': moisture,
       'conductivity': conductivity,
+      'voltage_mv': sensorVoltageMv,
       'timestamp': timestamp.toIso8601String(),
     };
   }
@@ -85,8 +107,12 @@ class CalibratedPhResult {
   final double phCalibrated;
   final double deltaPhTotal;
   final double deltaPhTemperature;
+  final double deltaPhNonLinear;
   final double deltaPhMoisture;
   final double deltaPhPinn;
+  final double atcPh;
+  final double sensorVoltageMv;
+  final double? standardPhRef;
   final double confidenceScore;
   final double uncertainty;
   final String physicalInterpretation;
@@ -98,12 +124,16 @@ class CalibratedPhResult {
     required this.phCalibrated,
     required this.deltaPhTotal,
     required this.deltaPhTemperature,
+    required this.deltaPhNonLinear,
     required this.deltaPhMoisture,
     required this.deltaPhPinn,
+    required this.atcPh,
+    required this.sensorVoltageMv,
+    this.standardPhRef,
     required this.confidenceScore,
     required this.uncertainty,
     required this.physicalInterpretation,
-    this.modelName = 'PINN-SoilPhNet-v2.5',
+    this.modelName = 'PINN-SoilPhNet-v2.6',
     required this.timestamp,
   });
 
@@ -113,8 +143,11 @@ class CalibratedPhResult {
       phCalibrated: raw.phRaw,
       deltaPhTotal: 0.0,
       deltaPhTemperature: 0.0,
+      deltaPhNonLinear: 0.0,
       deltaPhMoisture: 0.0,
       deltaPhPinn: 0.0,
+      atcPh: raw.phRaw,
+      sensorVoltageMv: raw.sensorVoltageMv,
       confidenceScore: 0.95,
       uncertainty: 0.05,
       physicalInterpretation: 'สภาวะใกล้เคียงมาตรฐาน 25°C 50%VWC (Zero Drift Reference)',
@@ -128,8 +161,12 @@ class CalibratedPhResult {
       'ph_calibrated': phCalibrated,
       'delta_ph_total': deltaPhTotal,
       'delta_ph_temp': deltaPhTemperature,
+      'delta_ph_nonlinear': deltaPhNonLinear,
       'delta_ph_moist': deltaPhMoisture,
       'delta_ph_pinn': deltaPhPinn,
+      'ph_atc': atcPh,
+      'voltage_mv': sensorVoltageMv,
+      'standard_ph_ref': standardPhRef,
       'temperature': rawReading.temperature,
       'moisture': rawReading.moisture,
       'ec': rawReading.conductivity,

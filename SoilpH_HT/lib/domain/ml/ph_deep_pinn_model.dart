@@ -93,21 +93,37 @@ class PhDeepPinnModel {
       return CalibratedPhResult.fallback(raw);
     }
 
-    // 1. PHYSICAL FORMULATION: Temperature Nernst Slope Compensation
+    // 1. PHYSICAL FORMULATION: Temperature Nernst Slope & Solvent Effect
     // Standard reference: T_ref = 25.0 °C (298.15 K)
     // S_25 = 59.16 mV/pH, S(T) = 59.16 * (273.15 + T) / 298.15
-    // Delta_T = (pH_raw - 7.0) * (1 - 298.15 / (273.15 + T))
+    // Conventional Linear ATC compensation:
+    // Delta_Nernst = (pH_raw - 7.0) * (1 - 298.15 / (273.15 + T))
     final double kelvin = (273.15 + temp).clamp(240.0, 360.0);
     final double nernstRatio = 298.15 / kelvin;
     final double deltaNernst = (rawPh - 7.00) * (1.0 - nernstRatio);
 
-    // Intrinsic soil solution acid dissociation temperature shift
+    // Intrinsic soil solution acid dissociation temperature shift (Kw and soil buffer shift)
     final double tempDiff = temp - 25.0;
     final double deltaSolutionDissoc = -0.0065 * tempDiff;
     final double deltaPhTemperature = deltaNernst + deltaSolutionDissoc;
 
-    // 2. PHYSICAL FORMULATION: Soil Moisture Impedance & Dilution
-    // Dry soil (< 30% VWC) produces high contact impedance & salt concentration
+    // Conventional ATC reading (baseline for ablation benchmark)
+    final double atcPh = double.parse((rawPh + deltaNernst).clamp(3.0, 10.0).toStringAsFixed(2));
+
+    // 2. SENSOR NON-LINEARITY FORMULATION: Sub-Nernstian & Asymmetry Potential Error
+    // Glass/metal-oxide sensors suffer from sub-Nernstian slope degradation in strongly acidic
+    // (pH < 4.8) and alkaline (pH > 7.5) regions, as well as membrane aging asymmetry.
+    double deltaSubNernstian = 0.0;
+    if (rawPh < 5.0) {
+      // Acidic sub-Nernstian deviation (sensor underestimates acid intensity)
+      deltaSubNernstian = -0.035 * pow(5.0 - rawPh, 1.25);
+    } else if (rawPh > 7.5) {
+      // Alkaline error (alkali metal cation interference)
+      deltaSubNernstian = 0.025 * pow(rawPh - 7.5, 1.2);
+    }
+
+    // 3. PHYSICAL FORMULATION: Soil Moisture Impedance & Dilution
+    // Dry soil (< 30% VWC) produces high contact impedance & liquid-junction potential
     double deltaMoistImpedance = 0.0;
     if (moist < 30.0) {
       final double dryDeficit = (30.0 - moist).clamp(0.0, 30.0);
@@ -124,7 +140,7 @@ class PhDeepPinnModel {
     }
     final double deltaPhMoisture = deltaMoistImpedance + deltaMoistDilution;
 
-    // 3. DEEP LEARNING PINN RESIDUAL MLP (High-Order Cross Coupling)
+    // 4. DEEP LEARNING PINN RESIDUAL MLP (High-Order Non-linear Cross Coupling)
     final double normT = ((temp - 25.0) / 12.0).clamp(-4.0, 4.0);
     final double normM = ((moist - 50.0) / 25.0).clamp(-3.0, 3.0);
     final double normEc = ((ec - 600.0) / 500.0).clamp(-2.0, 8.0);
@@ -169,27 +185,31 @@ class PhDeepPinnModel {
     final double deltaPhPinn = (out[0] * 0.12).clamp(-0.45, 0.45);
     final double rawUncertainty = (0.02 + _swish(out[1]) * 0.08).clamp(0.02, 0.25);
 
-    // Total Error Compensation: Delta = Delta_T + Delta_M + Delta_PINN
-    final double deltaPhTotal = deltaPhTemperature + deltaPhMoisture + deltaPhPinn;
+    // Total Non-Linearity Compensation = Sub-Nernstian curve + PINN residual
+    final double deltaPhNonLinear = deltaSubNernstian + deltaPhPinn;
+
+    // Total Error Compensation: Delta = Delta_T + Delta_NonLinear + Delta_M
+    final double deltaPhTotal = deltaPhTemperature + deltaPhNonLinear + deltaPhMoisture;
     final double calibratedPh = (rawPh + deltaPhTotal).clamp(3.00, 10.00);
 
     // AI Confidence Score based on parameter plausibility
     double confidence = 0.985 - (normT.abs() * 0.015 + (moist < 20 ? 0.08 : 0.0) + (ec > 3000 ? 0.05 : 0.0));
     confidence = confidence.clamp(0.75, 0.995);
 
-    // 4. EXPLAINABLE AI (XAI) DIAGNOSTIC INTERPRETATION
+    // 5. EXPLAINABLE AI (XAI) DIAGNOSTIC INTERPRETATION
     final List<String> reasons = [];
-    if (tempDiff.abs() > 3.0) {
+    if (deltaPhTemperature.abs() > 0.02) {
       final signStr = deltaPhTemperature > 0 ? '+' : '';
-      reasons.add('ชดเชยอุณหภูมิ Nernst ($signStr${deltaPhTemperature.toStringAsFixed(2)} pH จาก ${temp.toStringAsFixed(1)}°C)');
+      reasons.add('ชดเชยอุณหภูมิ Temperature Effect ($signStr${deltaPhTemperature.toStringAsFixed(2)} pH ที่ ${temp.toStringAsFixed(1)}°C)');
+    }
+    if (deltaPhNonLinear.abs() > 0.02) {
+      final signStr = deltaPhNonLinear > 0 ? '+' : '';
+      reasons.add('ชดเชยความไม่เป็นเชิงเส้น Non-linearity ($signStr${deltaPhNonLinear.toStringAsFixed(2)} pH)');
     }
     if (moist < 25.0) {
-      reasons.add('แก้ไขค่าความต้านทานรอยต่อดินแห้ง (${deltaPhMoisture.toStringAsFixed(2)} pH ที่ความชื้น ${moist.toStringAsFixed(1)}%)');
+      reasons.add('แก้ไขความต้านทานรอยต่อดินแห้ง (${deltaPhMoisture.toStringAsFixed(2)} pH ที่ความชื้น ${moist.toStringAsFixed(1)}%)');
     } else if (moist > 70.0) {
-      reasons.add('ชดเชยผลการเจือจางน้ำขัง (${deltaPhMoisture.toStringAsFixed(2)} pH ที่ความชื้น ${moist.toStringAsFixed(1)}%)');
-    }
-    if (ec > 1500) {
-      reasons.add('ปรับเสถียรภาพผลกระทบอิเล็กโทรไลต์เกลือ EC $ec µS/cm');
+      reasons.add('ชดเชยผลเจือจางน้ำขัง (${deltaPhMoisture.toStringAsFixed(2)} pH ที่ความชื้น ${moist.toStringAsFixed(1)}%)');
     }
     if (reasons.isEmpty) {
       reasons.add('สภาวะแวดล้อมใกล้เคียงมาตรฐานอ้างอิง 25°C 50%VWC การชดเชยระดับไมโคร');
@@ -200,8 +220,11 @@ class PhDeepPinnModel {
       phCalibrated: double.parse(calibratedPh.toStringAsFixed(2)),
       deltaPhTotal: double.parse(deltaPhTotal.toStringAsFixed(2)),
       deltaPhTemperature: double.parse(deltaPhTemperature.toStringAsFixed(2)),
+      deltaPhNonLinear: double.parse(deltaPhNonLinear.toStringAsFixed(2)),
       deltaPhMoisture: double.parse(deltaPhMoisture.toStringAsFixed(2)),
       deltaPhPinn: double.parse(deltaPhPinn.toStringAsFixed(2)),
+      atcPh: atcPh,
+      sensorVoltageMv: raw.sensorVoltageMv,
       confidenceScore: double.parse(confidence.toStringAsFixed(3)),
       uncertainty: double.parse(rawUncertainty.toStringAsFixed(3)),
       physicalInterpretation: reasons.join(' • '),

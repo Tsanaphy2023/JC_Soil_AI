@@ -6,6 +6,7 @@ import '../viewmodels/ph_monitor_viewmodel.dart';
 import '../widgets/ht_compensation_card.dart';
 import '../widgets/ph_circular_gauge.dart';
 import '../widgets/status_app_bar.dart';
+import 'field_validation_screen.dart';
 import 'ph_analytics_screen.dart';
 import 'ph_history_screen.dart';
 import 'ph_settings_screen.dart';
@@ -188,7 +189,48 @@ class PhDashboardScreen extends StatelessWidget {
               deltaPh: result.deltaPhTotal,
             ),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 10),
+
+            // Calibration Mode Selector Chips (Objective 2: Ablation comparison)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: PhColors.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: PhColors.cardBorder),
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: PhCalibrationMode.values.map((mode) {
+                    final isSelected = vm.calibrationMode == mode;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: ChoiceChip(
+                        label: Text(
+                          mode == PhCalibrationMode.fullAiPinn
+                              ? 'AI PINN (สมบูรณ์)'
+                              : mode == PhCalibrationMode.conventionalAtc
+                                  ? 'ATC (อุณหภูมิเดิม)'
+                                  : 'Raw (ค่าดิบ)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            color: isSelected ? Colors.black : Colors.white70,
+                          ),
+                        ),
+                        selected: isSelected,
+                        selectedColor: PhColors.neonGreen,
+                        backgroundColor: PhColors.background,
+                        onSelected: (_) => vm.setCalibrationMode(mode),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
 
             // Deep Learning HT Error Compensation Card
             HtCompensationCard(
@@ -197,6 +239,43 @@ class PhDashboardScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 14),
+
+            // Objective 3 & 1: Field Validation & AI Training Dataset Prominent Button
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PhColors.neonCyan.withOpacity(0.15),
+                  foregroundColor: PhColors.neonCyan,
+                  side: const BorderSide(color: PhColors.neonCyan, width: 1.2),
+                  padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.verified_outlined, size: 20),
+                label: const Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'ทดสอบภาคสนาม (จันทบุรี/ตราด) & AI Dataset',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Icon(Icons.arrow_forward_ios, size: 13),
+                  ],
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const FieldValidationScreen()),
+                  );
+                },
+              ),
+            ),
 
             // Action Buttons Grid (Camera AI Vision, Analytics, History)
             LayoutBuilder(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/ph_colors.dart';
 import '../../data/models/ph_sensor_reading.dart';
 
-/// Deep Learning PINN H-T Error Compensation Breakdown Card
+/// Deep Learning PINN H-T & Non-Linearity Error Compensation Breakdown Card
 class HtCompensationCard extends StatelessWidget {
   final CalibratedPhResult result;
   final bool isAiActive;
@@ -44,17 +44,18 @@ class HtCompensationCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'การชดเชยค่าความคลาดเคลื่อน HT',
+                        'การชดเชยค่าความคลาดเคลื่อน HT & Non-Linearity',
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        'Deep Learning PINN Physics Engine',
+                        'Physics-Informed Neural Network (PINN)',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: Colors.white.withOpacity(0.5),
                         ),
                       ),
@@ -63,7 +64,7 @@ class HtCompensationCard extends StatelessWidget {
                 ),
                 // AI Confidence Chip
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                   decoration: BoxDecoration(
                     color: PhColors.neonGreen.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
@@ -72,12 +73,12 @@ class HtCompensationCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.verified, size: 14, color: PhColors.neonGreen),
+                      const Icon(Icons.verified, size: 13, color: PhColors.neonGreen),
                       const SizedBox(width: 4),
                       Text(
                         '${(result.confidenceScore * 100).toStringAsFixed(1)}%',
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: PhColors.neonGreen,
                         ),
@@ -87,9 +88,40 @@ class HtCompensationCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             const Divider(),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
+
+            // Sensor Voltage Banner (Objective 1)
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: PhColors.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: PhColors.neonPurple.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.electric_bolt, size: 16, color: PhColors.neonPurple),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'ศักย์ไฟฟ้าเซนเซอร์ (Electrode Potential E):',
+                      style: TextStyle(fontSize: 11, color: Colors.white70),
+                    ),
+                  ),
+                  Text(
+                    '${result.sensorVoltageMv > 0 ? '+' : ''}${result.sensorVoltageMv.toStringAsFixed(1)} mV',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: PhColors.neonPurple,
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
             // Metrics Grid: Temperature, Moisture, EC
             Row(
@@ -101,13 +133,13 @@ class HtCompensationCard extends StatelessWidget {
                     iconColor: PhColors.neonAmber,
                     label: 'อุณหภูมิดิน (T)',
                     value: '${raw.temperature.toStringAsFixed(1)}°C',
-                    deltaLabel: 'Nernst: ${result.deltaPhTemperature > 0 ? '+' : ''}${result.deltaPhTemperature.toStringAsFixed(2)} pH',
+                    deltaLabel: 'Temp: ${result.deltaPhTemperature > 0 ? '+' : ''}${result.deltaPhTemperature.toStringAsFixed(2)} pH',
                     deltaColor: result.deltaPhTemperature.abs() > 0.05
                         ? PhColors.neonAmber
                         : Colors.white60,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 // Moisture Box
                 Expanded(
                   child: _MetricBox(
@@ -115,13 +147,13 @@ class HtCompensationCard extends StatelessWidget {
                     iconColor: PhColors.neonCyan,
                     label: 'ความชื้นดิน (H)',
                     value: '${raw.moisture.toStringAsFixed(1)}%',
-                    deltaLabel: 'Impedance: ${result.deltaPhMoisture > 0 ? '+' : ''}${result.deltaPhMoisture.toStringAsFixed(2)} pH',
+                    deltaLabel: 'Imped: ${result.deltaPhMoisture > 0 ? '+' : ''}${result.deltaPhMoisture.toStringAsFixed(2)} pH',
                     deltaColor: result.deltaPhMoisture.abs() > 0.05
                         ? PhColors.neonCyan
                         : Colors.white60,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 // EC Box
                 Expanded(
                   child: _MetricBox(
@@ -136,7 +168,80 @@ class HtCompensationCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+
+            // Objective 2: Decoupled Compensation Breakdown & Ablation Comparison
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: PhColors.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: PhColors.cardBorder),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'การแจกแจงค่าชดเชย AI (Error Decoupling Breakdown)',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white70,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _decoupleChip(
+                        '1. ผลของอุณหภูมิ (Temp Effect)',
+                        '${result.deltaPhTemperature > 0 ? '+' : ''}${result.deltaPhTemperature.toStringAsFixed(2)}',
+                        PhColors.neonAmber,
+                      ),
+                      _decoupleChip(
+                        '2. ความไม่เป็นเชิงเส้น (Non-Linearity)',
+                        '${result.deltaPhNonLinear > 0 ? '+' : ''}${result.deltaPhNonLinear.toStringAsFixed(2)}',
+                        PhColors.neonCyan,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _decoupleChip(
+                        '3. รอยต่อดินแห้ง/น้ำขัง (Matrix H)',
+                        '${result.deltaPhMoisture > 0 ? '+' : ''}${result.deltaPhMoisture.toStringAsFixed(2)}',
+                        Colors.blueAccent,
+                      ),
+                      _decoupleChip(
+                        'รวมชดเชยทั้งระบบ (ΔpH Total)',
+                        '${result.deltaPhTotal > 0 ? '+' : ''}${result.deltaPhTotal.toStringAsFixed(2)}',
+                        PhColors.neonGreen,
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 16),
+                  // Comparison of Conventional ATC vs AI PINN
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'เทียบ Conventional ATC: ${result.atcPh.toStringAsFixed(2)} pH  •  AI PINN: ${result.phCalibrated.toStringAsFixed(2)} pH',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withOpacity(0.85),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
 
             // Explainable AI (XAI) Interpretation Text
             Container(
@@ -171,13 +276,42 @@ class HtCompensationCard extends StatelessWidget {
                   Text(
                     result.physicalInterpretation,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       height: 1.4,
                       color: isAiActive ? Colors.white : Colors.white60,
                     ),
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _decoupleChip(String label, String value, Color color) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: PhColors.background,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(fontSize: 9, color: Colors.white60),
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
             ),
           ],
         ),
@@ -206,10 +340,10 @@ class _MetricBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         color: PhColors.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: PhColors.cardBorder),
       ),
       child: Column(
@@ -217,13 +351,13 @@ class _MetricBox extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: iconColor),
+              Icon(icon, size: 14, color: iconColor),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   label,
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 9.5,
                     color: Colors.white.withOpacity(0.7),
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -238,7 +372,7 @@ class _MetricBox extends StatelessWidget {
             child: Text(
               value,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -248,7 +382,7 @@ class _MetricBox extends StatelessWidget {
           Text(
             deltaLabel,
             style: TextStyle(
-              fontSize: 9,
+              fontSize: 8.5,
               fontWeight: FontWeight.w600,
               color: deltaColor,
             ),

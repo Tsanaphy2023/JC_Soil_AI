@@ -202,6 +202,60 @@ class PhSettingsScreen extends StatelessWidget {
 
           const SizedBox(height: 16),
 
+          // Calibration Mode Section (Objective 2: Ablation Analysis)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.tune, color: PhColors.neonGreen),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'การเลือกโหมดชดเชยความคลาดเคลื่อน (Ablation)',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'เปรียบเทียบผลการวัดระหว่างค่าดิบ, ชดเชยอุณหภูมิเดิม (ATC), และโมเดล AI PINN',
+                    style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.6)),
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  ...PhCalibrationMode.values.map((mode) {
+                    return RadioListTile<PhCalibrationMode>(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        mode.label,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: vm.calibrationMode == mode ? FontWeight.bold : FontWeight.normal,
+                          color: vm.calibrationMode == mode ? PhColors.neonGreen : Colors.white,
+                        ),
+                      ),
+                      value: mode,
+                      groupValue: vm.calibrationMode,
+                      activeColor: PhColors.neonGreen,
+                      onChanged: (m) {
+                        if (m != null) vm.setCalibrationMode(m);
+                      },
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
           // Deep Learning PINN Architecture Specs
           Card(
             child: Padding(
@@ -226,9 +280,10 @@ class PhSettingsScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   _specRow('เวอร์ชันโมเดล', PhDeepPinnModel.modelVersion),
                   _specRow('สถาปัตยกรรม', 'Physics-Informed Neural Network (PINN) 3-Layer MLP'),
-                  _specRow('ฟังก์ชันกระตุ้น (Activation)', 'Swish / GELU / LeakyReLU'),
-                  _specRow('สมการฟิสิกส์กำกับ (Physics Loss)', 'Nernst Slope (T) + Liquid Junction Impedance (H)'),
-                  _specRow('ค่าอ้างอิงมาตรฐาน', '25.0°C, 50.0% VWC, 600 µS/cm EC'),
+                  _specRow('การชดเชยวัตถุประสงค์ 1', 'ศักย์ไฟฟ้า E (mV) vs อุณหภูมิ T vs pH มาตรฐาน (NIST)'),
+                  _specRow('การชดเชยวัตถุประสงค์ 2', 'Decoupled: Temperature Effect (Nernst+pKw) & Sensor Non-linearity'),
+                  _specRow('การทดสอบวัตถุประสงค์ 3', 'Field Validated ในสวนทุเรียน จ.จันทบุรี และ จ.ตราด เทียบ Benchtop Ref'),
+                  _specRow('เกณฑ์ความคลาดเคลื่อน', 'EURACHEM Guide (%Bias < 1.0%, RMSE < 0.10 pH)'),
                   _specRow('สภาพการทำงาน', 'On-Device Edge AI 100% Offline (Zero Latency)'),
                 ],
               ),
