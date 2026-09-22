@@ -1,0 +1,83 @@
+\chapter{ซอร์สโค้ดการเลือกพื้นที่วิเคราะห์และเรขาคณิตสัมผัสหน้าจอ}
+\label{app:roi_code}
+
+\section{คำอธิบายสถาปัตยกรรมซอฟต์แวร์}
+
+ภาคผนวกนี้รวบรวมซอร์สโค้ดภาษาดาร์ต (Dart) สำหรับการพัฒนาคอมโพเนนต์การเลือกพื้นที่วิเคราะห์เชิงโต้ตอบบนหน้าจอสัมผัส (Interactive ROI Selector) ซึ่งทำงานร่วมกับวิดีโอสตรีมสดของกล้องถ่ายภาพบนเฟรมเวิร์กฟลัตเตอร์ (Flutter) ครอบคลุมการคำนวณพื้นที่สี่เหลี่ยม วงกลมช่องมองภาพ และอัลกอริทึมการยิงรังสี (Ray Casting Algorithm) สำหรับรูปทรงหลายเหลี่ยมอิสระ
+
+\section{โค้ดการตรวจจับจุดตัดรังสีและคลาสจัดการเรขาคณิต}
+
+\begin{lstlisting}[language=Java, caption={การคำนวณ Ray Casting Algorithm สำหรับรูปทรงหลายเหลี่ยมอิสระ}]
+// Ray Casting Algorithm ตรวจสอบว่าพิกเซล (px, py) อยู่ในโพลีกอนหรือไม่
+bool isPointInsidePolygon(Offset point, List<Offset> polygon) {
+  if (polygon.length < 3) return false;
+  bool inside = false;
+  int j = polygon.length - 1;
+
+  for (int i = 0; i < polygon.length; i++) {
+    final pi = polygon[i];
+    final pj = polygon[j];
+
+    // ตรวจสอบว่าเส้นรังสีแนวนอนตัดผ่านส่วนของเส้นตรงขอบรูปทรงหรือไม่
+    final intersect = ((pi.dy > point.dy) != (pj.dy > point.dy)) &&
+        (point.dx < (pj.dx - pi.dx) * (point.dy - pi.dy) / (pj.dy - pi.dy) + pi.dx);
+
+    if (intersect) {
+      inside = !inside;
+    }
+    j = i;
+  }
+  return inside;
+}
+\end{lstlisting}
+
+\section{โค้ดคอมโพเนนต์แสดงผลส่วนต่อประสานผู้ใช้ HUD Reticle}
+
+\begin{lstlisting}[language=Java, caption={คอมโพเนนต์ CustomPainter สำหรับการวาดเส้นเล็งและพื้นที่ ROI บนหน้าจอสัมผัส}]
+class RoiPainter extends CustomPainter {
+  final RoiMode mode;
+  final Rect? rectRoi;
+  final Offset? circleCenter;
+  final double circleRadius;
+  final List<Offset> polygonPoints;
+
+  RoiPainter({
+    required this.mode,
+    this.rectRoi,
+    this.circleCenter,
+    this.circleRadius = 0.0,
+    required this.polygonPoints,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final strokePaint = Paint()
+      ..color = const Color(0xFF00E5FF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+
+    final fillPaint = Paint()
+      ..color = const Color(0x3300E5FF)
+      ..style = PaintingStyle.fill;
+
+    if (mode == RoiMode.rectangle && rectRoi != null) {
+      canvas.drawRect(rectRoi!, fillPaint);
+      canvas.drawRect(rectRoi!, strokePaint);
+    } else if (mode == RoiMode.circle && circleCenter != null) {
+      canvas.drawCircle(circleCenter!, circleRadius, fillPaint);
+      canvas.drawCircle(circleCenter!, circleRadius, strokePaint);
+    } else if (mode == RoiMode.polygon && polygonPoints.length >= 3) {
+      final path = Path()..moveTo(polygonPoints[0].dx, polygonPoints[0].dy);
+      for (int i = 1; i < polygonPoints.length; i++) {
+        path.lineTo(polygonPoints[i].dx, polygonPoints[i].dy);
+      }
+      path.close();
+      canvas.drawPath(path, fillPaint);
+      canvas.drawPath(path, strokePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant RoiPainter oldDelegate) => true;
+}
+\end{lstlisting}

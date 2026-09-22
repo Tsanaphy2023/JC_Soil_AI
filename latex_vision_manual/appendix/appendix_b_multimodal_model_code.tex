@@ -1,0 +1,62 @@
+\chapter{ซอร์สโค้ดโมเดลการเรียนรู้เชิงลึกฟิวชันภาพถ่ายและเซนเซอร์}
+\label{app:multimodal_model_code}
+
+\section{คำอธิบายโครงสร้างโมเดลบนอุปกรณ์ Edge}
+
+ภาคผนวกนี้แสดงโค้ดภาษาดาร์ตสำหรับการอนุมานผลลัพธ์ของโครงข่ายประสาทเทียมแบบฟิวชันหลากมิติ 16 ตัวแปรนำเข้าสู่ 5 ตัวแปรทำนายคุณสมบัติดิน ซึ่งทำงานได้โดยตรงบนสมาร์ทโฟนโดยไม่จำเป็นต้องเชื่อมต่ออินเทอร์เน็ตหรือคลาวด์เซิร์ฟเวอร์
+
+\begin{lstlisting}[language=Java, caption={คลาสโมเดลการเรียนรู้เชิงลึกฟิวชัน 16 มิติในภาษา Dart}]
+class SoilMultimodalDeepModel {
+  // ฟังก์ชันกระตุ้น LeakyReLU
+  static double leakyRelu(double x, [double alpha = 0.1]) {
+    return x > 0 ? x : alpha * x;
+  }
+
+  // ฟังก์ชันกระตุ้น Sigmoid
+  static double sigmoid(double x) {
+    return 1.0 / (1.0 + math.exp(-x));
+  }
+
+  // เวกเตอร์อินพุต 16 มิติ (9 วิทัศน์ + 7 เซนเซอร์)
+  static Map<String, dynamic> predict({
+    required List<double> vision9D,   // [R, G, B, H, S, V, L*, a*, b*]
+    required List<double> sensor7D,   // [Moist, Temp, EC, pH, N, P, K]
+  }) {
+    // 1. รวมคุณลักษณะเป็นเวกเตอร์ 16 มิติ
+    final List<double> input16 = [...vision9D, ...sensor7D];
+
+    // 2. ส่งผ่าน Hidden Layer (12 นิวรอน)
+    List<double> hidden = List.filled(12, 0.0);
+    for (int j = 0; j < 12; j++) {
+      double sum = biasLayer1[j];
+      for (int i = 0; i < 16; i++) {
+        sum += input16[i] * weightLayer1[j][i];
+      }
+      hidden[j] = leakyRelu(sum, 0.1);
+    }
+
+    // 3. คำนวณ Output Heads
+    double somRaw = biasSom;
+    double phRaw = biasPh;
+    for (int j = 0; j < 12; j++) {
+      somRaw += hidden[j] * weightsSom[j];
+      phRaw += hidden[j] * weightsPh[j];
+    }
+
+    // ปรับสเกลผลลัพธ์สู่หน่วยวัดจริง
+    final double somPercent = sigmoid(somRaw) * 10.0;
+    final double opticalPh = 3.5 + 6.0 * sigmoid(phRaw);
+
+    // ตรวจสอบความสอดคล้องกับเซนเซอร์ภาคสนาม
+    final double rawSensorPh = sensor7D[3] * 14.0;
+    final double deltaPh = (rawSensorPh - opticalPh).abs();
+
+    return {
+      'somPercent': somPercent,
+      'opticalPh': opticalPh,
+      'deltaPh': deltaPh,
+      'isConsistent': deltaPh <= 0.5,
+    };
+  }
+}
+\end{lstlisting}

@@ -1,0 +1,82 @@
+% ==============================================================================
+% หน้าปกหนังสือวิชาการระดับ Masterclass สไตล์ Modern Minimalist Luxury
+% ปราศจากตารางกริด (No Grid / No Table) เน้นความเรียบหรู ทันสมัย และมีพลัง
+% ==============================================================================
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay]
+    % 1. พื้นหลังไล่ระดับสีน้ำเงินเข้มหรูหรา (Smooth Deep Midnight Navy Gradient)
+    \fill[left color=rbruNavy!98!black, right color=rbruNavy!75!black] 
+        (current page.south west) rectangle (current page.north east);
+
+    % 2. วงรัศมีแสงเรืองรองนุ่มนวลด้านหลัง (Soft Ambient Luminous Glows)
+    % รัศมีแสงสีฟ้าไซเบอร์และสีเขียวมรกต สื่อถึง AI คอมพิวเตอร์วิทัศน์และสเปกโตรโฟโตเมทรี
+    \fill[cyan!20, opacity=0.18] ($(current page.center) + (0, -0.6cm)$) circle (4.8cm);
+    \fill[cyan!30, opacity=0.25] ($(current page.center) + (0, -0.6cm)$) circle (3.8cm);
+    \fill[green!20, opacity=0.15] ($(current page.center) + (1.8cm, 0.8cm)$) circle (3.4cm);
+
+    % 3. เส้นสายคลื่นพลังงานและชั้นดินแบบอินทรีย์ นุ่มนวล ไร้เส้นตาราง (Flowing Organic Curves)
+    \draw[color=cyan!35, line width=1.4pt, opacity=0.45]
+        ($(current page.west) + (0, 5.5)$) 
+        to[out=15, in=195] ($(current page.center) + (0, 6.6)$)
+        to[out=15, in=165] ($(current page.east) + (0, 5.2)$);
+
+    \draw[color=rbruGold!35, line width=1.2pt, opacity=0.45]
+        ($(current page.west) + (0, -5.8)$) 
+        to[out=-10, in=200] ($(current page.center) + (0, -4.8)$)
+        to[out=20, in=190] ($(current page.east) + (0, -6.0)$);
+
+    % 4. เส้นขลิบริมสันปกสีทองหรูหราแนบชิดขอบซ้าย (Subtle Royal Gold Edge Accent)
+    \fill[color=rbruGold] 
+        ($(current page.north west) + (0.45cm, 0)$) rectangle ($(current page.south west) + (0.58cm, 0)$);
+    \fill[color=cyan!80!blue] 
+        ($(current page.north west) + (0.64cm, 0)$) rectangle ($(current page.south west) + (0.70cm, 0)$);
+
+    % 5. ชุดตำราวิชาการด้านบน (Top Series Label)
+    \node[anchor=north, align=center, text=white] at ($(current page.north) + (0, -1.8cm)$) {
+        {\fontsize{10}{13}\selectfont\bfseries\color{rbruGold} RBRU DIGITAL AGRIPHYSICS \& EMBEDDED AI MONOGRAPH SERIES}\\[3pt]
+        {\fontsize{9.5}{12}\selectfont\color{cyan!80!white} ชุดตำราวิชาการฟิสิกส์เกษตรดิจิทัลและปัญญาประดิษฐ์ฝังตัว ลำดับที่ 2}
+    };
+
+    % 6. ชื่อหนังสือวิชาการหลัก (Volume 2: คอมพิวเตอร์วิทัศน์และโมเดลการเรียนรู้เชิงลึกหลากมิติ)
+    \node[anchor=north, align=center] at ($(current page.north) + (0, -3.5cm)$) {
+        {\fontsize{14}{19}\selectfont\bfseries\color{rbruGold} ฟิสิกส์เกษตรดิจิทัลและปัญญาประดิษฐ์หลากมิติ}\\[6pt]
+        {\fontsize{17.5}{23}\selectfont\bfseries\color{white} การพัฒนาแอปพลิเคชันวิเคราะห์ดินด้วยคอมพิวเตอร์วิทัศน์}\\[5pt]
+        {\fontsize{14}{19}\selectfont\bfseries\color{cyan!90!white} และการเรียนรู้เชิงลึกฟิวชันภาพถ่ายร่วมกับเซนเซอร์ภาคสนาม}\\[9pt]
+        {\color{rbruGold}\rule{0.45\textwidth}{1.2pt}}\\[8pt]
+        {\fontsize{10}{14}\selectfont\color{white!85} (Digital Agriphysics \& Multimodal Deep Learning: Soil Vision Analysis \& Sensor Fusion)}
+    };
+
+    % 7. ตราสัญลักษณ์กลางเล่ม ออร่าเรืองแสงทรงกลม ไร้ขอบเหลี่ยม (Seamless Circular AI Emblem)
+    \node[anchor=center] at ($(current page.center) + (0, -0.6cm)$) {
+        \begin{tikzpicture}
+            % วงแหวนออร่านีออนแบบฟุ้งกระจาย
+            \draw[color=cyan!70, line width=2.5pt, opacity=0.8] (0,0) circle (2.85cm);
+            \draw[color=rbruGold, line width=1.5pt, opacity=0.9] (0,0) circle (3.02cm);
+            % วงกลมตัดภาพโลโก้ให้มนกลมสนิทไร้ขอบสี่เหลี่ยม
+            \begin{scope}
+                \clip (0,0) circle (2.82cm);
+                \node[inner sep=0pt] at (0,0) {
+                    \includegraphics[width=6.0cm, height=6.0cm, keepaspectratio]{figures/logo.jpg}
+                };
+            \end{scope}
+        \end{tikzpicture}
+    };
+
+    % 8. ป้ายแสดงจุดเด่นทางเทคโนโลยี แบบแคปซูลมนเรียบหรู (Organic Floating Feature Pills)
+    \node[anchor=center, align=center] at ($(current page.center) + (0, -4.6cm)$) {
+        \begin{tikzpicture}
+            \node[fill=cyan!90!black, rounded corners=3.5mm, text=white, inner sep=6.5pt, font=\bfseries\footnotesize, drop shadow={shadow xshift=0pt, shadow yshift=-2pt, opacity=0.4}] (b1) {Interactive ROI};
+            \node[fill=rbruGold!85!black, rounded corners=3.5mm, text=white, inner sep=6.5pt, font=\bfseries\footnotesize, right=9pt of b1, drop shadow={shadow xshift=0pt, shadow yshift=-2pt, opacity=0.4}] (b2) {CIE $L^*a^*b^*$ D65};
+            \node[fill=green!70!black, rounded corners=3.5mm, text=white, inner sep=6.5pt, font=\bfseries\footnotesize, right=9pt of b2, drop shadow={shadow xshift=0pt, shadow yshift=-2pt, opacity=0.4}] (b3) {Multimodal MLP};
+            \node[fill=orange!80!black, rounded corners=3.5mm, text=white, inner sep=6.5pt, font=\bfseries\footnotesize, right=9pt of b3, drop shadow={shadow xshift=0pt, shadow yshift=-2pt, opacity=0.4}] (b4) {Live Stream 60 FPS};
+        \end{tikzpicture}
+    };
+
+    % 9. แถบข้อมูลผู้เขียนและสังกัดด้านล่างสุด แบบมินิมอลทรงพลัง (Bottom Author Typography)
+    \node[anchor=south, align=center] at ($(current page.south) + (0, 1.8cm)$) {
+        {\fontsize{18}{23}\selectfont\bfseries\color{white} ผู้ช่วยศาสตราจารย์ ดร.ชีวะ ทัศนา}\\[6pt]
+        {\fontsize{13.5}{17}\selectfont\color{rbruGold} สาขาวิชาฟิสิกส์ คณะวิทยาศาสตร์และเทคโนโลยี}\\[3pt]
+        {\fontsize{12}{16}\selectfont\color{white!80} มหาวิทยาลัยราชภัฏรำไพพรรณี}
+    };
+\end{tikzpicture}
+\clearpage
