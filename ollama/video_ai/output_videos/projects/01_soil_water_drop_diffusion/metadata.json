@@ -1,0 +1,14 @@
+{
+  "project_name": "01_soil_water_drop_diffusion",
+  "title": "AI Video Diffusion: Water Absorption in Soil",
+  "theme": "การซึมซับของหยดน้ำเข้าสู่ชั้นดินเพื่อการเกษตร",
+  "model": "ali-vilab/text-to-video-ms-1.7b",
+  "director_model": "video-director (Ollama)",
+  "prompt": "A serene morning scene with dew-kissed grass and a gentle water droplet falling onto the moist soil, captured in the soft warm light of dawn.",
+  "camera_movement": "Slow cinematic drone forward, orbital pan with gentle zoom-in",
+  "duration_seconds": 2.0,
+  "frames": 16,
+  "fps": 8,
+  "resolution": "256x256",
+  "created_at": "2026-09-19 17:29:00"
+}

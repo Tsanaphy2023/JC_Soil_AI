@@ -1,0 +1,15 @@
+{
+  "project_name": "06_thai_farmer_rice_planting_diffusion_2s",
+  "type": "text-to-video",
+  "model": "ali-vilab/text-to-video-ms-1.7b",
+  "director_model": "video-director (Ollama)",
+  "positive_prompt": "A slow cinematic drone flies forward over a serene paddy field at dawn, as a Thai farmer tenderly plants green rice seedlings amidst the murky waters. The scene is bathed in warm golden hour light, with volumetric rays illuminating the lush vegetation and delicate water droplets. Highly detailed realistic documentary style.",
+  "negative_prompt": "artificial textures, pixelation, motion blur, blurry, low quality",
+  "camera_movement": "slow cinematic drone forward, orbital pan",
+  "duration_seconds": 2.0,
+  "frames": 16,
+  "fps": 8,
+  "resolution": "256x256",
+  "render_engine": "Apple Silicon Metal MPS (Neural Diffusion Latents)",
+  "created_at": "2026-09-19 18:00:32"
+}

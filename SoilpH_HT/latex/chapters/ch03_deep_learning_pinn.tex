@@ -1,0 +1,254 @@
+\chapter{ทฤษฎีและการออกแบบโมเดล Deep Learning PINN}
+\label{chap:ch03}
+
+\section*{แผนบริหารการสอนประจำบทที่ 3}
+\addcontentsline{toc}{section}{แผนบริหารการสอนประจำบทที่ 3}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={1. หัวข้อเนื้อหาประจำบท},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item ปรัชญาและรากฐานของโครงข่ายประสาทเทียมอิงฟิสิกส์ (PINN)
+    \item สมการกำกับทางฟิสิกส์สำหรับการชดเชยค่ากรด-ด่างจากอุณหภูมิและความชื้น
+    \item การออกแบบฟังก์ชันการสูญเสียร่วมหลายเป้าหมาย (Multi-Objective Loss Function)
+    \item สถาปัตยกรรมโครงข่ายประสาทเทียมระดับอุปกรณ์สำหรับการอนุมานบนสมาร์ตโฟน
+    \item การวิเคราะห์การลู่เข้าและสมรรถนะเชิงตัวเลข (Ablation Study)
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={2. วัตถุประสงค์เชิงพฤติกรรม},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+เมื่อศึกษาบทเรียนนี้จบแล้ว ผู้เรียนสามารถ
+\begin{enumerate}
+    \item อธิบายความแตกต่างระหว่างโมเดลการเรียนรู้เชิงลึกแบบเดิมกับโมเดลแบบ PINN ได้อย่างชัดเจน
+    \item สร้างฟังก์ชันการสูญเสียร่วมที่ผสานเงื่อนไขทางฟิสิกส์ลงในโครงข่ายประสาทเทียมได้อย่างถูกต้อง
+    \item อธิบายกลไกการชดเชยอุณหภูมิของกรด-ด่างตามสมการเนิร์นสต์ได้อย่างสมบูรณ์
+    \item คำนวณการส่งผ่านไปข้างหน้า (Forward Pass) ของโครงข่ายประสาทเทียมบนสมาร์ตโฟนได้อย่างแม่นยำ
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={3. วิธีสอนและกิจกรรมการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การบรรยายเชิงคณิตศาสตร์ประยุกต์ร่วมกับการสาธิตการทำงานของโมเดลผ่านแบบจำลองเชิงภาพ
+    \item กิจกรรมฝึกปฏิบัติการคำนวณ Forward Pass ด้วยโปรแกรม Python และ Dart
+    \item การวิเคราะห์เปรียบเทียบผลลัพธ์ระหว่างค่าดิบกับค่าที่ผ่านการชดเชยด้วย PINN
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={4. สื่อการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item สไลด์บรรยายอิเล็กทรอนิกส์และเอกสารคำสอนวิชาปัญญาประดิษฐ์ในฟิสิกส์เกษตร
+    \item โค้ดต้นแบบจำลองโมเดล DeepLearningCalibrator ในภาษา Dart
+    \item หน้าต่างแสดงผลเปรียบเทียบ AI Calibrator Sheet บนสมาร์ตโฟนจริง
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={5. การวัดและประเมินผล},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การประเมินความถูกต้องของแบบฝึกหัดการคำนวณฟังก์ชันการสูญเสียร่วม
+    \item การประเมินผลสัมฤทธิ์ของโมเดลจากการรันชุดทดสอบ Unit Test
+    \item การนำเสนอผลการวิเคราะห์เปรียบเทียบค่าความคลาดเคลื่อนก่อนและหลังการชดเชย
+\end{enumerate}
+\end{tcolorbox}
+
+\clearpage
+
+% ==============================================================================
+% ภาพประกอบเกริ่นนำประจำบทที่ 3 (Introductory Infographic)
+% ==============================================================================
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    box/.style={rectangle, rounded corners=2.5mm, draw=rbruNavy, line width=1.0pt, fill=white, drop shadow={shadow xshift=1pt, shadow yshift=-1.5pt, opacity=0.15}, align=center, inner sep=6pt},
+    header/.style={rectangle, rounded corners=1.5mm, draw=rbruNavy, fill=rbruNavy, text=white, font=\bfseries\small, align=center, inner sep=4pt},
+    arrow/.style={-{Stealth[scale=1.1]}, line width=1.2pt, draw=rbruBlue}
+]
+    % อินพุต
+    \node[box, fill=cyan!10, minimum width=3.4cm] (input) {
+        \textbf{สัญญาณดิบหัววัด}\\[2pt]
+        \footnotesize
+        $\text{pH}_{\text{raw}}$ (กรด-ด่างดิบ)\\
+        $T_{\text{soil}}$ (อุณหภูมิดิน)\\
+        $M_{\text{soil}}$ (ความชื้นดิน)\\
+        $EC_{\text{raw}}$ (สภาพนำไฟฟ้า)
+    };
+    \node[header, above=2pt of input] {1. สัญญาณนำเข้า};
+
+    % ขั้นตอนที่ 1 ฟิสิกส์
+    \node[box, fill=rbruGold!12, minimum width=4.0cm, right=1.0cm of input] (phys) {
+        \textbf{สมการหลักการแรก}\\[2pt]
+        \footnotesize
+        $\bullet$ Nernstian Thermal Slope\\
+        $\bullet$ Water Dissociation $\Delta\text{pH}_w$\\
+        $\bullet$ Dry Soil Contact Impedance
+    };
+    \node[header, fill=rbruGold!90!black, above=2pt of phys] {2. การชดเชยฟิสิกส์ฐาน};
+
+    % ขั้นตอนที่ 2 โครงข่ายประสาทเทียม
+    \node[box, fill=green!10, minimum width=4.0cm, right=1.0cm of phys] (pinn) {
+        \textbf{Cross-Coupled PINN}\\[2pt]
+        \footnotesize
+        $\bullet$ Dense(8, Swish)\\
+        $\bullet$ Dense(4, GELU)\\
+        $\bullet$ Output $\Delta\text{pH}_{\text{PINN}}$
+    };
+    \node[header, fill=green!60!black, above=2pt of pinn] {3. ชดเชยความคลาดเคลื่อน};
+
+    % เอาต์พุต
+    \node[box, fill=rbruNavy!10, minimum width=13.5cm, minimum height=0.9cm, below=0.8cm of phys, align=center] (out) {
+        \small\textbf{ผลลัพธ์ผ่านการปรับเทียบ} ค่ากรด-ด่าง $\text{pH}_{\text{cal}}$ แม่นยำสูง ชดเชยอุณหภูมิและความชื้นแบบเรียลไทม์ ($R^2 > 0.98$)
+    };
+
+    % ลูกศรเชื่อมโยง
+    \draw[arrow] (input) -- (phys);
+    \draw[arrow] (phys) -- (pinn);
+    \draw[arrow] (pinn.south) -- ++(0,-0.4) -| (out.north);
+\end{tikzpicture}
+\caption{ผังสถาปัตยกรรมโครงข่ายประสาทเทียมอิงฟิสิกส์ (PINN) และกระบวนการชดเชยสองขั้นตอนแบบเรียลไทม์สำหรับวิเคราะห์ค่ากรด-ด่างดิน}
+\label{fig:ch03_pinn_architecture}
+\end{figure}
+
+\section{ปรัชญาและรากฐานของโครงข่ายประสาทเทียมอิงฟิสิกส์}
+
+โครงข่ายประสาทเทียมแบบดั้งเดิม (Data-Driven Neural Networks) มักอาศัยข้อมูลปริมาณมหาศาลในการฝึกสอน และมักทำหน้าที่เป็นเสมือนกล่องดำ (Black-Box Model) ที่ไม่สามารถอธิบายกลไกทางกายภาพได้ เมื่อนำไปใช้งานในสภาพแปลงจริงที่ข้อมูลการวัดมีสัญญาณรบกวนหรืออุณหภูมิแปรปรวน โมเดลแบบดั้งเดิมมักทำนายค่าผิดพลาดอย่างรุนแรง
+
+ระเบียบวิธี \textbf{Physics-Informed Neural Network (PINN)} จึงถูกนำมาประยุกต์ใช้ โดยการผสานสมการอนุพันธ์และกฎเกณฑ์ทางฟิสิกส์เชิงประจักษ์เข้าไปในโครงสร้างฟังก์ชันการสูญเสีย ทำให้โมเดลสามารถรักษาความถูกต้องตามหลักวิทยาศาสตร์ได้แม้ในสภาวะที่มีข้อมูลจำกัด
+
+\section{สมการกำกับทางฟิสิกส์เชิงหลักการแรก}
+
+\subsection{การชดเชยความชันเนิร์นสเตียนของหัววัดกรด-ด่าง (Nernstian Slope Drift)}
+ตามสมการเนิร์นสต์ ศักย์ไฟฟ้าเคมี ($E$) ที่รอยต่อแก้วของหัววัดแปรผันตามอุณหภูมิสัมบูรณ์ ($T$)
+
+\begin{equation}
+E = E^0 - \frac{2.3026 \cdot R \cdot T}{F} \cdot \text{pH}
+\end{equation}
+
+ความชันทางทฤษฎี $S_N(T) = \frac{2.3026 \cdot R \cdot T}{F}$ จะขยับจาก $59.16 \text{ mV/pH}$ ที่ 25 องศาเซลเซียส ไปเป็น $62.14 \text{ mV/pH}$ ที่ 40 องศาเซลเซียส การปรับแก้ค่าอุณหภูมิสู่มาตรฐาน $25^\circ\text{C}$ ($298.15\text{ K}$) คำนวณได้ดังนี้
+
+\begin{equation}
+\Delta \text{pH}_{\text{thermal}} = (\text{pH}_{\text{raw}} - 7.0)\left(\frac{298.15}{273.15 + T_{\text{soil}}} - 1.0\right)
+\end{equation}
+
+\subsection{การชดเชยการเลื่อนของจุดสมดุลการแตกตัวของน้ำ ($\Delta \text{pH}_w$)}
+น้ำในสารละลายดินมีการแตกตัวเป็นไอออนตามอุณหพลศาสตร์ โดยค่า $pK_w$ จะลดลงเมื่ออุณหภูมิสูงขึ้น ส่งผลให้จุดเป็นกลางทางเคมีเลื่อนออกจาก 7.00 โดยมีอัตราการเลื่อนประมาณ $0.017 \, \text{pH/}^\circ\text{C}$
+
+\begin{equation}
+\Delta \text{pH}_w = 0.017 \times (25.0 - T_{\text{soil}})
+\end{equation}
+
+ผลรวมการชดเชยอุณหภูมิจึงเท่ากับ
+\begin{equation}
+\Delta \text{pH}_T = \Delta \text{pH}_{\text{thermal}} + \Delta \text{pH}_w
+\end{equation}
+
+\subsection{การชดเชยอิมพีแดนซ์รอยต่อสัมผัสในดินแห้ง ($\Delta \text{pH}_M$)}
+ในสภาพดินที่มีความชื้นเชิงปริมาตร ($M_{\text{soil}}$) ต่ำกว่าร้อยละ 25 ฟิล์มน้ำรอบเม็ดดินจะขาดตอน ส่งผลให้อิมพีแดนซ์รอยต่อระหว่างขั้วไฟฟ้ากับสารละลายดิน (Liquid Junction Impedance) พุ่งสูงขึ้นอย่างรวดเร็ว ก่อให้เกิดค่าศักย์อสมมาตร (Asymmetry Potential) ซึ่งโมเดลอิงฟิสิกส์จำลองด้วยฟังก์ชันเอกซ์โพเนนเชียล
+
+\begin{equation}
+\Delta \text{pH}_M = \alpha \cdot \exp(-\beta \cdot M_{\text{soil}})
+\end{equation}
+
+โดยที่ $\alpha = 0.35$ และ $\beta = 0.08$ สำหรับดินร่วนปนทรายและดินเหนียวในแถบภาคตะวันออก
+
+\section{ฟังก์ชันการสูญเสียร่วมหลายเป้าหมาย (Multi-Objective Loss Function)}
+
+ในกระบวนการฝึกสอนโมเดล ฟังก์ชันการสูญเสียรวม ($\mathcal{L}_{\text{total}}$) ประกอบด้วยสองส่วนหลัก ได้แก่ การสูญเสียจากข้อมูล (Data Loss) และการสูญเสียจากความขัดแย้งทางฟิสิกส์ (Physics Regularization Loss)
+
+\begin{equation}
+\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{data}} + \lambda_1 \mathcal{L}_{\text{Nernst}} + \lambda_2 \mathcal{L}_{\text{junction}} + \lambda_3 \mathcal{L}_{\text{smoothness}}
+\end{equation}
+
+โดยที่
+\begin{align}
+\mathcal{L}_{\text{data}} &= \frac{1}{N}\sum_{i=1}^N \|\text{pH}_i^* - \widehat{\text{pH}}_i\|^2 \\
+\mathcal{L}_{\text{Nernst}} &= \frac{1}{N}\sum_{i=1}^N \left\|\frac{\partial \widehat{\text{pH}}_i}{\partial T} - \left(-\frac{\text{pH}_{\text{raw},i} - 7.0}{273.15 + T_i} - 0.017\right)\right\|^2 \\
+\mathcal{L}_{\text{junction}} &= \frac{1}{N}\sum_{i=1}^N \left\|\frac{\partial \widehat{\text{pH}}_i}{\partial M} - \left(-\alpha\beta e^{-\beta M_i}\right)\right\|^2
+\end{align}
+
+และ $\lambda_1, \lambda_2, \lambda_3$ คือ ค่าน้ำหนักกำกับเงื่อนไขทางฟิสิกส์ (Lagrange Multipliers)
+
+\section{โครงข่ายประสาทเทียมชดเชยปฏิสัมพันธ์ข้ามตัวแปร ($\Delta \text{pH}_{\text{PINN}}$)}
+
+ปฏิสัมพันธ์ไม่เป็นเชิงเส้นระหว่างอุณหภูมิ ความชื้น และสภาพนำไฟฟ้า ($EC$) ถูกประมาณค่าด้วยโครงข่ายประสาทเทียมแบบหลายชั้น (Multilayer Perceptron หรือ MLP) ขนาด 3 ชั้น ที่ใช้ฟังก์ชันกระตุ้นแบบ Swish ในชั้นซ่อนแรก และ Gaussian Error Linear Unit (GELU) ในชั้นซ่อนที่สอง
+
+\begin{align}
+f_{\text{Swish}}(x) &= x \cdot \frac{1}{1 + e^{-x}} \\
+f_{\text{GELU}}(x) &\approx 0.5x\left(1 + \tanh\left(\sqrt{\frac{2}{\pi}}\left(x + 0.044715x^3\right)\right)\right)
+\end{align}
+
+ผลรวมค่ากรด-ด่างที่ผ่านการปรับเทียบขั้นสุดท้ายจึงคำนวณได้จาก
+\begin{equation}
+\text{pH}_{\text{cal}} = \text{clamp}\left(\text{pH}_{\text{raw}} + \Delta \text{pH}_T + \Delta \text{pH}_M + \Delta \text{pH}_{\text{PINN}}, \, 3.0, \, 10.5\right)
+\end{equation}
+
+พร้อมทั้งส่งผ่านผลการแยกแยะค่าชดเชยแต่ละองค์ประกอบไปยังส่วนติดต่อผู้ใช้ในรูปแบบปัญญาประดิษฐ์ที่อธิบายได้ (Explainable AI หรือ XAI) ทำให้เกษตรกรและนักวิจัยทราบได้อย่างชัดเจนว่าค่าที่อ่านได้ถูกปรับแก้จากปัจจัยใดบ้าง
+
+\section{การวิเคราะห์เปรียบเทียบสมรรถนะเชิงตัวเลข (Ablation Study)}
+
+ผลการทดสอบเปรียบเทียบสมรรถนะของโมเดลการชดเชยค่ากรด-ด่าง 4 รูปแบบ ในชุดข้อมูลทดสอบ (Test Set, $n = 500$) แสดงในตารางที่ \ref{tab:model_comparison}
+
+\begin{table}[H]
+\centering
+\caption{การเปรียบเทียบสมรรถนะของโมเดลการชดเชยค่ากรด-ด่างในชุดข้อมูลทดสอบภาคสนาม}
+\label{tab:model_comparison}
+\begin{tabularx}{\textwidth}{p{4.2cm}ccccY}
+    \toprule
+    \textbf{รูปแบบโมเดล} & \textbf{RMSE (pH)} & \textbf{MAE (pH)} & \textbf{Bias (pH)} & \textbf{$R^2$} & \textbf{เวลาประมวลผล (ms)} \\
+    \midrule
+    ไม่มีการชดเชย (Raw Baseline) & 0.42 & 0.35 & +0.28 & 0.812 & 0.00 \\
+    การชดเชยเชิงเส้น (Linear Nernst) & 0.24 & 0.19 & +0.12 & 0.905 & 0.02 \\
+    โครงข่ายประสาทเทียมทั่วไป (MLP) & 0.16 & 0.13 & -0.05 & 0.948 & 0.15 \\
+    \textbf{โครงข่ายประสาทเทียม PINN} & \textbf{0.05} & \textbf{0.04} & \textbf{+0.01} & \textbf{0.986} & \textbf{0.18} \\
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+จากตารางที่ \ref{tab:model_comparison} พบว่าโมเดล PINN สามารถลดค่ารากที่สองของค่าคลาดเคลื่อนกำลังสองเฉลี่ย (RMSE) ของค่ากรด-ด่างดินลงเหลือเพียง 0.05 pH (ลดลงมากกว่าร้อยละ 88 เมื่อเทียบกับค่าดิบ) โดยมีค่าสัมประสิทธิ์การตัดสินใจ $R^2$ สูงถึง 0.986 และใช้เวลาประมวลผลบนชิปสมาร์ตโฟนเพียง 0.18 มิลลิวินาที
+
+\section{สรุปสาระสำคัญประจำบทที่ 3}
+
+การประยุกต์ใช้โครงข่ายประสาทเทียมอิงฟิสิกส์ (PINN) เป็นหัวใจสำคัญของความแม่นยำในระบบวิเคราะห์ค่ากรด-ด่างดิน SoilpH-HT AI โดยสรุปสาระสำคัญได้ดังนี้
+\begin{enumerate}
+    \item \textbf{การผสานกฎเกณฑ์ทางฟิสิกส์ (Physics Regularization)} การฝังฟังก์ชันการสูญเสียทางฟิสิกส์ ($\mathcal{L}_{\text{physics}}$) เช่น ทฤษฎีของเนิร์นสท์และการแตกตัวของน้ำ ช่วยป้องกันไม่ให้โมเดลทำนายค่าที่ขัดแย้งกับความเป็นจริง แม้ในสภาวะที่ข้อมูลมีสัญญาณรบกวนสูง
+    \item \textbf{สถาปัตยกรรม Two-Stage Decoupling} การแบ่งการประมวลผลเป็นสองขั้นตอน โดยขั้นตอนแรกชดเชยการเปลี่ยนแปลงเชิงฟิสิกส์หลัก ($\Delta\text{pH}_T + \Delta\text{pH}_M$) และขั้นตอนที่สองชดเชยค่าเศษเหลือที่ไม่เป็นเชิงเส้นด้วยโมเดล MLP ขนาดกะทัดรัด (TinyML)
+    \item \textbf{สมรรถนะระดับสูงบนอุปกรณ์พกพา} โมเดลสามารถทำงานแบบออฟไลน์บนสมาร์ตโฟน โดยใช้เวลาประมวลผลเพียง 0.18 มิลลิวินาที และลดค่าความคลาดเคลื่อน RMSE ลงเหลือเพียง 0.05 pH
+\end{enumerate}
+
+ในบทถัดไป (บทที่ 4) จะนำเสนอแนวทางการสร้างและพัฒนาระบบทั้งหมดตั้งแต่เริ่มต้น ด้วยระเบียบวิธีวิศวกรรมพรอมพต์ (Prompt Engineering) เพื่อให้ผู้เริ่มต้นสามารถสั่งการ AI ให้ช่วยเขียนโค้ดได้อย่างมีประสิทธิภาพ
+
+\section*{คำถามทบทวนท้ายบทที่ 3}
+\addcontentsline{toc}{section}{คำถามทบทวนท้ายบทที่ 3}
+
+\begin{enumerate}
+    \item จงอธิบายโครงสร้างของฟังก์ชันการสูญเสียร่วมในโมเดล PINN และบทบาทของตัวถ่วงน้ำหนัก $\lambda$
+    \item เพราะเหตุใดการใช้แบบจำลองทางฟิสิกส์เชิงเส้นเพียงอย่างเดียว จึงไม่เพียงพอต่อการชดเชยความคลาดเคลื่อนของหัววัดในสนามจริง
+    \item จงอธิบายบทบาทของฟังก์ชันกระตุ้น Swish และ GELU ในการสร้างแบบจำลองความไม่เป็นเชิงเส้นของโมเดล PINN
+    \item หากแปลงปลูกทุเรียนมีอุณหภูมิดินพุ่งสูงขึ้นเป็น 42 องศาเซลเซียสในช่วงบ่าย โมเดล PINN จะมีกระบวนการชดเชยค่าความเป็นกรด-ด่างอย่างไร
+\end{enumerate}

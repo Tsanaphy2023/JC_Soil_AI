@@ -75,11 +75,11 @@ class AiModelDetailsSheet extends StatelessWidget {
                 children: [
                   const Icon(Icons.auto_awesome, color: Colors.cyanAccent, size: 24),
                   const SizedBox(width: 8),
-                  Expanded(
+                  const Expanded(
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: const Text(
+                      child: Text(
                         'JC Deep Learning Calibrator',
                         style: TextStyle(
                           color: Colors.white,
@@ -91,7 +91,7 @@ class AiModelDetailsSheet extends StatelessWidget {
                   ),
                   Switch(
                     value: isAiActive,
-                    activeColor: Colors.cyanAccent,
+                    activeThumbColor: Colors.cyanAccent,
                     onChanged: (val) {
                       onToggleAi(val);
                       Navigator.pop(context);

@@ -1,0 +1,19 @@
+{
+  "project_name": "02_smart_soil_ai_telemetry_1min",
+  "title": "Smart Soil AI & IoT Durian Telemetry Documentary",
+  "theme": "วิดีโอนำเสนอผลงานวิจัยเกษตรดิจิทัล 1 นาทีเต็ม",
+  "duration_seconds": 60.0,
+  "frames": 1800,
+  "fps": 30,
+  "resolution": "1280x720 (HD)",
+  "audio_track": "audio/ambient_soundtrack_1min.wav",
+  "scenes": [
+    "0:00 - 0:10: Durian Orchard Aerial Survey & Title Card",
+    "0:10 - 0:20: AI Video Diffusion - Soil Water Absorption",
+    "0:20 - 0:30: Multi-Depth Soil Sensor Telemetry (NPK, pH, Moisture)",
+    "0:30 - 0:40: Edge Deep Learning Calibrator Neural Network",
+    "0:40 - 0:50: Autonomous Closed-Loop Irrigation Zoning",
+    "0:50 - 1:00: Sustainable Agriculture & Research Credits"
+  ],
+  "created_at": "2026-09-19 17:33:00"
+}

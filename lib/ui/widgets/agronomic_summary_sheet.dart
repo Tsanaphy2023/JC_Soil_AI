@@ -368,8 +368,8 @@ class AgronomicSummarySheet extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       children: [
         // Section intro
-        Row(
-          children: const [
+        const Row(
+          children: [
             Icon(Icons.tips_and_updates, color: Colors.amberAccent, size: 18),
             SizedBox(width: 8),
             Expanded(
@@ -404,8 +404,8 @@ class AgronomicSummarySheet extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: const [
+              const Row(
+                children: [
                   Icon(Icons.summarize, color: Colors.greenAccent, size: 16),
                   SizedBox(width: 6),
                   Text(
@@ -550,8 +550,8 @@ class AgronomicSummarySheet extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       children: [
-        Row(
-          children: const [
+        const Row(
+          children: [
             Icon(Icons.palette_outlined, color: Colors.amberAccent, size: 18),
             SizedBox(width: 8),
             Expanded(
@@ -573,75 +573,76 @@ class AgronomicSummarySheet extends StatelessWidget {
         ),
         const SizedBox(height: 10),
 
-        // 1. pH Scale Tile
+        // 1. pH Scale Tile (ตารางที่ 2.3 มาตรฐาน 7 ระดับ)
         _buildColorScaleCard(
           paramName: '1. ความเป็นกรด-ด่างดิน (Soil pH)',
-          testMethod: 'วิธีทดสอบ: Universal Indicator (มาตรฐาน พด. LDD)',
+          testMethod: 'เกณฑ์มาตรฐานตารางที่ 2.3 (Universal Indicator 7 Tiers)',
           valueDisplay: '${reading.ph.toStringAsFixed(2)} pH',
           minLabel: '< 4.5',
-          maxLabel: '> 8.5',
+          maxLabel: '> 8.4',
           metric: SoilColorScale.evaluatePh(reading.ph),
           gradientColors: const [
-            Color(0xFFD32F2F), // <4.0
-            Color(0xFFFB8C00), // 5.0
-            Color(0xFFC0CA33), // 6.0
-            Color(0xFF43A047), // 7.0
-            Color(0xFF0288D1), // 8.0
-            Color(0xFF5E35B1), // >8.5
+            Color(0xFFE63946), // < 4.5 กรดจัดรุนแรง
+            Color(0xFFF4A261), // 4.5 - 5.2 กรดจัด
+            Color(0xFFE9C46A), // 5.3 - 6.0 กรดปานกลาง
+            Color(0xFFA7C957), // 6.1 - 6.8 กรดเล็กน้อย
+            Color(0xFF2A9D8F), // 6.9 - 7.5 เป็นกลาง
+            Color(0xFF457B9D), // 7.6 - 8.4 ด่างปานกลาง
+            Color(0xFF1D3557), // > 8.4 ด่างรุนแรง
           ],
         ),
         const SizedBox(height: 10),
 
-        // 2. Nitrogen Scale Tile
+        // 2. Nitrogen Scale Tile (ตารางที่ 2.3 มาตรฐาน 5 ระดับ)
         _buildColorScaleCard(
           paramName: '2. ไนโตรเจนที่เป็นประโยชน์ (Available N)',
-          testMethod: 'วิธีทดสอบ: Griess Reaction (Pink to Deep Magenta)',
+          testMethod: 'เกณฑ์มาตรฐานตารางที่ 2.3 (NO3-N Griess 5 Tiers)',
           valueDisplay: '${reading.nitrogen} mg/kg',
-          minLabel: '< 15',
-          maxLabel: '> 90',
+          minLabel: '< 10',
+          maxLabel: '> 80',
           metric: SoilColorScale.evaluateNitrogen(reading.nitrogen),
           gradientColors: const [
-            Color(0xFFFFCDD2),
-            Color(0xFFF06292),
-            Color(0xFFE91E63),
-            Color(0xFFC2185B),
-            Color(0xFF880E4F),
+            Color(0xFFFEFAE0), // < 10 ต่ำมาก
+            Color(0xFFF4A261), // 10 - 25 ต่ำ
+            Color(0xFFE76F51), // 26 - 50 ปานกลาง
+            Color(0xFFD62828), // 51 - 80 สูง
+            Color(0xFF7209B7), // > 80 สูงมาก
           ],
         ),
         const SizedBox(height: 10),
 
-        // 3. Phosphorus Scale Tile
+        // 3. Phosphorus Scale Tile (ตารางที่ 2.3 มาตรฐาน 5 ระดับ)
         _buildColorScaleCard(
           paramName: '3. ฟอสฟอรัสที่เป็นประโยชน์ (Available P)',
-          testMethod: 'วิธีทดสอบ: Bray II / Molybdenum Blue Scale',
+          testMethod: 'เกณฑ์มาตรฐานตารางที่ 2.3 (Bray II / Blue 5 Tiers)',
           valueDisplay: '${reading.phosphorus} mg/kg',
-          minLabel: '< 8',
-          maxLabel: '> 50',
+          minLabel: '< 5',
+          maxLabel: '> 60',
           metric: SoilColorScale.evaluatePhosphorus(reading.phosphorus),
           gradientColors: const [
-            Color(0xFFB3E5FC),
-            Color(0xFF4FC3F7),
-            Color(0xFF0288D1),
-            Color(0xFF1565C0),
-            Color(0xFF0D47A1),
+            Color(0xFFFAF0CA), // < 5 ต่ำมาก
+            Color(0xFFA2D2FF), // 5 - 15 ต่ำ
+            Color(0xFF3A86FF), // 16 - 30 ปานกลาง
+            Color(0xFF003049), // 31 - 60 สูง
+            Color(0xFF03045E), // > 60 สูงมาก
           ],
         ),
         const SizedBox(height: 10),
 
-        // 4. Potassium Scale Tile
+        // 4. Potassium Scale Tile (ตารางที่ 2.3 มาตรฐาน 5 ระดับ)
         _buildColorScaleCard(
-          paramName: '4. โพแทสเซียมที่แลกเปลี่ยนได้ (Available K)',
-          testMethod: 'วิธีทดสอบ: Cobaltinitrite Turbidity (Amber-Orange)',
+          paramName: '4. โพแทสเซียมที่แลกเปลี่ยนได้ (Exchangeable K)',
+          testMethod: 'เกณฑ์มาตรฐานตารางที่ 2.3 (Cobaltinitrite 5 Tiers)',
           valueDisplay: '${reading.potassium} mg/kg',
           minLabel: '< 40',
-          maxLabel: '> 160',
+          maxLabel: '> 250',
           metric: SoilColorScale.evaluatePotassium(reading.potassium),
           gradientColors: const [
-            Color(0xFFFFF9C4),
-            Color(0xFFFFD54F),
-            Color(0xFFFFB300),
-            Color(0xFFFB8C00),
-            Color(0xFFE65100),
+            Color(0xFFEDF2F4), // < 40 ต่ำมาก
+            Color(0xFFFFD166), // 40 - 80 ต่ำ
+            Color(0xFFF3722C), // 81 - 150 ปานกลาง
+            Color(0xFFD90429), // 151 - 250 สูง
+            Color(0xFF6A040F), // > 250 สูงมาก
           ],
         ),
         const SizedBox(height: 12),

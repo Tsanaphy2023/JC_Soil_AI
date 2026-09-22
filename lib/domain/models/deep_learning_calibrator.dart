@@ -76,19 +76,31 @@ class DeepLearningCalibrator {
   /// LeakyReLU Activation function
   static double _leakyRelu(double x) => x > 0 ? x : 0.1 * x;
 
-  /// Approximate GELU Activation function
+  /// Approximate GELU Activation function with numerical bounds
   static double _gelu(double x) {
+    if (x > 10.0) return x;
+    if (x < -10.0) return 0.0;
     return 0.5 * x * (1.0 + tanh(sqrt(2.0 / pi) * (x + 0.044715 * pow(x, 3))));
   }
 
+  /// Numerically stable tanh preventing exp() IEEE-754 overflow and NaN
   static double tanh(double x) {
+    if (x > 20.0) return 1.0;
+    if (x < -20.0) return -1.0;
     final e2x = exp(2 * x);
     return (e2x - 1) / (e2x + 1);
   }
 
   /// Run real-time edge deep learning inference to calibrate soil readings
   static CalibratedSoilResult calibrate(SoilReading raw) {
-    if (raw.moisture == 0 && raw.temperature == 0 && raw.conductivity == 0) {
+    // 0. Physical sensor disconnected or out-of-range bounds check
+    final bool isAllZero = raw.moisture == 0 && raw.temperature == 0 && raw.conductivity == 0;
+    final bool isOutRange = raw.moisture < 0 || raw.moisture > 100 ||
+        raw.temperature < -30.0 || raw.temperature > 85.0 ||
+        raw.conductivity < 0 || raw.conductivity > 30000 ||
+        raw.ph < 0 || raw.ph > 14;
+
+    if (isAllZero || isOutRange) {
       return CalibratedSoilResult(
         rawReading: raw,
         calibratedReading: raw,
@@ -96,17 +108,19 @@ class DeepLearningCalibrator {
         moistureDelta: 0.0,
         ecDelta: 0.0,
         phDelta: 0.0,
-        confidenceScore: 0.0,
-        compensationReason: 'No sensor signal detected',
+        confidenceScore: isAllZero ? 0.0 : 0.50,
+        compensationReason: isAllZero
+            ? 'No sensor signal detected'
+            : 'Sensor signal out of physical boundaries',
       );
     }
 
-    // 1. Feature Normalization (Z-Score approximation for agricultural soil)
-    final normT = (raw.temperature - 25.0) / 10.0;
-    final normM = (raw.moisture - 50.0) / 25.0;
-    final normEc = (raw.conductivity - 500.0) / 400.0;
-    final normPh = (raw.ph - 6.5) / 1.5;
-    final normGrad = (raw.temperature - 28.0) * 0.15; // Thermal probe gradient
+    // 1. Feature Normalization (Clamped Z-Score to prevent numerical instability)
+    final normT = ((raw.temperature - 25.0) / 10.0).clamp(-4.0, 4.0);
+    final normM = ((raw.moisture - 50.0) / 25.0).clamp(-3.0, 3.0);
+    final normEc = ((raw.conductivity - 500.0) / 400.0).clamp(-2.0, 10.0);
+    final normPh = ((raw.ph - 6.5) / 1.5).clamp(-3.0, 3.0);
+    final normGrad = ((raw.temperature - 28.0) * 0.15).clamp(-3.0, 3.0); // Thermal probe gradient
 
     final input = [normT, normM, normEc, normPh, normGrad];
 
@@ -145,13 +159,14 @@ class DeepLearningCalibrator {
     // but soil conductivity increases apparent VWC.
     final double tempDiff = raw.temperature - 25.0;
     final double dielectricTempCorrection = -0.045 * tempDiff;
-    final double salinityMoistureCrossEffect = -0.0018 * max(0, raw.conductivity - 600);
+    final double salinityMoistureCrossEffect = (-0.0018 * max(0, raw.conductivity - 600)).clamp(-15.0, 0.0);
     final double deltaMoisture = (out[1] * 1.8) + dielectricTempCorrection + salinityMoistureCrossEffect;
 
     // EC Standard Temperature Normalization to 25°C: EC_25 = EC_T / (1 + 0.0191 * (T - 25))
-    final double alpha = 0.0191;
-    final double ecTempFactor = 1.0 + alpha * tempDiff;
-    final double theoreticalEc25 = ecTempFactor > 0 ? (raw.conductivity / ecTempFactor) : raw.conductivity.toDouble();
+    // Protected against zero or negative denominator
+    const double alpha = 0.0191;
+    final double ecTempFactor = max(0.2, 1.0 + alpha * tempDiff);
+    final double theoreticalEc25 = raw.conductivity / ecTempFactor;
     final double deltaEc = (theoreticalEc25 - raw.conductivity) + (out[2] * 12.0);
 
     // Temperature probe conduction calibration (dissipating metal probe thermal inertia)

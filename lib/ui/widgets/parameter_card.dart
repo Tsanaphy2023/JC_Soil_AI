@@ -163,64 +163,76 @@ class ParameterCard extends StatelessWidget {
                     children: [
                       // Left Badge: AI Delta or Color Chip
                       if (isAiCalibrated && aiDelta != null && aiDelta!.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.35),
-                            borderRadius: BorderRadius.circular(3),
-                            border: Border.all(
-                              color: Colors.cyanAccent.withValues(alpha: 0.6),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.auto_awesome, color: Colors.cyanAccent, size: 8),
-                              const SizedBox(width: 2),
-                              Text(
-                                'Δ $aiDelta',
-                                style: const TextStyle(
-                                  color: Colors.cyanAccent,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(3),
+                              border: Border.all(
+                                color: Colors.cyanAccent.withValues(alpha: 0.6),
+                                width: 0.8,
                               ),
-                            ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.auto_awesome, color: Colors.cyanAccent, size: 8),
+                                const SizedBox(width: 2),
+                                Flexible(
+                                  child: Text(
+                                    'Δ $aiDelta',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.cyanAccent,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         )
                       else if (colorMetric != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(3),
-                            border: Border.all(
-                              color: colorMetric!.color,
-                              width: 1,
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(3),
+                              border: Border.all(
+                                color: colorMetric!.color,
+                                width: 1,
+                              ),
                             ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: colorMetric!.color,
-                                  shape: BoxShape.circle,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: colorMetric!.color,
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 3),
-                              Text(
-                                colorMetric!.labelThai.split(' ')[0], // e.g. "ปานกลาง", "เป็นกลาง", "ต่ำ"
-                                style: TextStyle(
-                                  color: colorMetric!.color,
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.bold,
+                                const SizedBox(width: 3),
+                                Flexible(
+                                  child: Text(
+                                    colorMetric!.labelThai.split(' ')[0], // e.g. "ปานกลาง", "เป็นกลาง", "ต่ำ"
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: colorMetric!.color,
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         )
                       else if (isAiCalibrated)
@@ -235,20 +247,26 @@ class ParameterCard extends StatelessWidget {
                       else
                         const SizedBox.shrink(),
 
+                      const SizedBox(width: 4),
+
                       // Right Badge: Status Hint
                       if (statusHint != null && statusHint!.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.25),
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                          child: Text(
-                            statusHint!,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w500,
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            child: Text(
+                              statusHint!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),

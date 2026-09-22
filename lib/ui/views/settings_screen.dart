@@ -397,10 +397,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [
-            const Color(0xFF162130),
-            const Color(0xFF0F1722),
+            Color(0xFF162130),
+            Color(0xFF0F1722),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -710,8 +710,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: const [
+                  const Row(
+                    children: [
                       Icon(Icons.warning_amber_rounded, color: Colors.amberAccent, size: 20),
                       SizedBox(width: 8),
                       Expanded(
@@ -850,8 +850,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Icon(Icons.settings_input_composite, color: Color(0xFF00FFFF), size: 18),
               SizedBox(width: 8),
               Expanded(
@@ -991,10 +991,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
           const SizedBox(height: 4),
-          Wrap(
+          const Wrap(
             alignment: WrapAlignment.spaceBetween,
             runSpacing: 4,
-            children: const [
+            children: [
               Text('Framing & Parity:', style: TextStyle(color: Colors.white70, fontSize: 13)),
               Text('8-N-1 (Half-Duplex RS485)', style: TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'monospace')),
             ],
@@ -1102,8 +1102,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Icon(Icons.terminal, color: Colors.cyanAccent, size: 18),
               SizedBox(width: 8),
               Expanded(
@@ -1196,8 +1196,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Icon(Icons.auto_awesome, color: Color(0xFF00FFAA), size: 18),
               SizedBox(width: 8),
               Expanded(

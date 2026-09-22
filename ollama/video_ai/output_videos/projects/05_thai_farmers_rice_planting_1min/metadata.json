@@ -1,0 +1,20 @@
+{
+  "project_name": "05_thai_farmers_rice_planting_1min",
+  "title": "The Art of Hand-Planting Rice (วิถีชาวนากับหัตถกรรมดำนาบนผืนนาไทย)",
+  "theme": "ภาพยนตร์สารคดีเสมือนจริง วิถีชีวิตชาวนาไทยกำลังดำนาปลูกข้าวในทุ่งน้ำยามเช้า",
+  "aesthetic": "Cinematic Photorealism / National Geographic Style",
+  "elements": [
+    "ผืนนาขังน้ำสะท้อนเงาท้องฟ้ายามรุ่งอรุณและทิวเขาเคล้าสายหมอก",
+    "ชาวนาสวมเสื้อม่อฮ่อมสีครามและหมวกงอบใบลานสาน ก้มปักดำกล้าข้าว",
+    "มุมกล้องมาโครเจาะลึก: มือชาวนาสัมผัสโคลนเลน ปักต้นกล้าข้าวสีเขียวมรกต",
+    "ระลอกคลื่นน้ำกระจายวงกลมสะท้อนประกายแดดสีทอง",
+    "ระบบวัดค่าระดับน้ำ อุณหภูมิดิน และศักย์ไฟฟ้า Eh (Digital Agri-Physics)"
+  ],
+  "duration_seconds": 60.0,
+  "frames": 1800,
+  "fps": 30,
+  "resolution": "1280x720 (HD)",
+  "audio_track": "audio/rice_field_acoustic_soundtrack.wav",
+  "soundtrack_style": "Contemporary Thai Acoustic Strings & Nature Soundscape",
+  "created_at": "2026-09-19 17:55:53"
+}

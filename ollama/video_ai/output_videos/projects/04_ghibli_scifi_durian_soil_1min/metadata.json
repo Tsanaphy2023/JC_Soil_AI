@@ -1,0 +1,22 @@
+{
+  "project_name": "04_ghibli_scifi_durian_soil_1min",
+  "title": "3D Ghibli Sci-Fi: The Secret of the Durian Orchard",
+  "theme": "แอนิเมชัน 3D สไตล์ Studio Ghibli ผสม Sci-Fi เด็กๆ และแมวตรวจวิเคราะห์ดิน",
+  "characters": [
+    "เด็กหญิง & เด็กชายน่ารัก",
+    "เจ้าเหมียวสีขาว (White Cat)",
+    "เจ้าเหมียวสีส้ม (Orange Tabby Cat)"
+  ],
+  "setting": [
+    "สวนทุเรียน (Durian Trees)",
+    "ต้นมังคุด (Mangosteen Trees)",
+    "อุปกรณ์โฮโลแกรมตรวจดิน"
+  ],
+  "duration_seconds": 60.0,
+  "frames": 1800,
+  "fps": 30,
+  "resolution": "1280x720 (HD)",
+  "audio_track": "audio/ghibli_piano_soundtrack.wav",
+  "soundtrack_style": "Joe Hisaishi Style Piano & Strings (Ghibli Nostalgia)",
+  "created_at": "2026-09-19 17:46:00"
+}

@@ -1,0 +1,13 @@
+{
+  "project_name": "10_forward_flowing_cinematic_thai_farmers_1min",
+  "title": "The Living Art of Thai Rice Farming (Pristine Crystal-Sharp & Forward Motion Documentary)",
+  "type": "unidirectional-forward-cinematic-documentary",
+  "resolution": "1280x720 HD",
+  "fps": 30,
+  "duration_seconds": 60.0,
+  "frames": 1800,
+  "video_bitrate": "8.5 Mbps",
+  "motion_engine": "Stable Video Diffusion (SVD-XT) + Motion Compensated Interpolation (MCI AOBMC) + 10 Pristine 8K Master Scenes (Zero Blur & Zero Reverse)",
+  "soundtrack": "Thai Folk Pentatonic Acoustic Guitar with Ambient Stream Sounds",
+  "created_at": "2026-09-19 20:35:46"
+}

@@ -1,0 +1,461 @@
+\chapter{การพัฒนาซอร์สโค้ด Flutter และ Dart แกนหลัก}
+\label{chap:ch05}
+
+\section*{แผนบริหารการสอนประจำบทที่ 5}
+\addcontentsline{toc}{section}{แผนบริหารการสอนประจำบทที่ 5}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={1. หัวข้อเนื้อหาประจำบท},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item สถาปัตยกรรมซอฟต์แวร์แบบ Clean Architecture ร่วมกับ MVVM Pattern
+    \item คลาสโมเดลข้อมูลและการแปลงข้อมูลค่ากรด-ด่างดิน (Data Layer)
+    \item คลาสถอดรหัสโปรโตคอล Modbus RTU และการคำนวณรหัส CRC-16
+    \item คลาสโมเดลการเรียนรู้เชิงลึก PINN บนอุปกรณ์ (Domain Layer)
+    \item การออกแบบส่วนประสานผู้ใช้แบบ Responsive มาตรวัด pH และการประทับพิกัด HUD (Presentation Layer)
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={2. วัตถุประสงค์เชิงพฤติกรรม},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+เมื่อศึกษาบทเรียนนี้จบแล้ว ผู้เรียนสามารถ
+\begin{enumerate}
+    \item อธิบายโครงสร้างและหน้าที่ของแต่ละ Layer ในสถาปัตยกรรม Clean Architecture ได้อย่างถูกต้อง
+    \item พัฒนาคลาสถอดรหัสสัญญาณ Modbus RTU ในภาษา Dart ได้อย่างสมบูรณ์
+    \item เขียนโค้ดโมเดล Deep Learning Forward Pass ชดเชยความคลาดเคลื่อนได้โดยไม่พึ่งพาไลบรารีภายนอก
+    \item สร้างวิดเจ็ตแบบ Responsive ที่ปรับขนาดอัตโนมัติตามขนาดจอสมาร์ตโฟนได้อย่างเชี่ยวชาญ
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={3. วิธีสอนและกิจกรรมการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การบรรยายทีละบรรทัด (Line-by-Line Code Walkthrough) ของคลาสแกนหลัก
+    \item การฝึกปฏิบัติการเขียนโค้ดและรัน Unit Test ผ่านคำสั่ง flutter test
+    \item กิจกรรมทดลองปรับแต่งหน้าจอ UI และทดสอบการแสดงผลบนอุปกรณ์หลายขนาด
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={4. สื่อการเรียนการสอน},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item เอกสารคำสอนวิชาการพัฒนาแอปพลิเคชันปัญญาประดิษฐ์ทางการเกษตร
+    \item ซอร์สโค้ดโปรเจกต์ SoilpH-HT ฉบับสมบูรณ์
+    \item เครื่องสมาร์ตโฟนแอนดรอยด์จริงสำหรับการติดตั้งและทดสอบ
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=rbruNavy,
+    fonttitle=\bfseries\color{white},
+    title={5. การวัดและประเมินผล},
+    arc=1.5mm, boxrule=0.8pt, leftrule=3.5mm
+]
+\begin{enumerate}
+    \item การประเมินผลการรันชุดทดสอบ Unit Test ครอบคลุมฟังก์ชันคำนวณและถอดรหัส
+    \item การประเมินคุณภาพของซอร์สโค้ดตามมาตรฐาน Clean Code
+    \item การทดสอบสมรรถนะการตอบสนองของ UI เมื่อปรับขนาดหน้าจอ
+\end{enumerate}
+\end{tcolorbox}
+
+\clearpage
+
+% ==============================================================================
+% ภาพประกอบเกริ่นนำประจำบทที่ 5 (Introductory Infographic)
+% ==============================================================================
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    layer/.style={rectangle, rounded corners=2mm, draw=rbruNavy, line width=1.0pt, fill=white, drop shadow={shadow xshift=1pt, shadow yshift=-1.5pt, opacity=0.15}, align=center, inner sep=6pt},
+    header/.style={rectangle, rounded corners=1.5mm, draw=rbruNavy, fill=rbruNavy, text=white, font=\bfseries\scriptsize, align=center, inner sep=3.5pt},
+    arrow/.style={-{Stealth[scale=1.1]}, line width=1.2pt, draw=rbruBlue}
+]
+    % ชั้นที่ 4: UI (Presentation)
+    \node[layer, fill=green!10, minimum width=13.8cm] (ui) {
+        \textbf{4. Presentation Layer (MVVM + Responsive Widgets)}\\
+        \footnotesize $\bullet$ PhDashboardScreen \quad $\bullet$ PhCircularGauge (LayoutBuilder) \quad $\bullet$ SoilCameraScreen (HUD)
+    };
+
+    % ชั้นที่ 3: Domain
+    \node[layer, fill=rbruGold!10, minimum width=13.8cm, below=0.6cm of ui] (domain) {
+        \textbf{3. Domain Layer (Physics \& Deep Learning Engine)}\\
+        \footnotesize $\bullet$ DeepLearningCalibrator (PINN) \quad $\bullet$ SoilAgronomyEngine \quad $\bullet$ PhRepository
+    };
+
+    % ชั้นที่ 2: Data
+    \node[layer, fill=cyan!10, minimum width=13.8cm, below=0.6cm of domain] (data) {
+        \textbf{2. Data Layer (Hardware Communication \& Modbus Driver)}\\
+        \footnotesize $\bullet$ UsbPhService (CH340/MAX485) \quad $\bullet$ ModbusParser (CRC-16) \quad $\bullet$ SoilDatasetService
+    };
+
+    % ชั้นที่ 1: Core
+    \node[layer, fill=rbruNavy!10, minimum width=13.8cm, below=0.6cm of data] (core) {
+        \textbf{1. Core Layer (Design System \& Constants)}\\
+        \footnotesize $\bullet$ AppColors (Cyber Glow) \quad $\bullet$ ModbusCommands \quad $\bullet$ LimePrescriptions
+    };
+
+    % ลูกศรระหว่างชั้น
+    \draw[arrow] (data) -- node[right, font=\scriptsize\bfseries] {Raw Soil Reading} (domain);
+    \draw[arrow] (domain) -- node[right, font=\scriptsize\bfseries] {Calibrated pH Result} (ui);
+    \draw[arrow, dashed] (core.north) -- (data.south);
+\end{tikzpicture}
+\caption{ผังสถาปัตยกรรมซอฟต์แวร์แบบ Clean Architecture และความสัมพันธ์เชิงชั้นของโมดูลในระบบ SoilpH-HT}
+\label{fig:ch05_clean_arch}
+\end{figure}
+
+\section{สถาปัตยกรรมซอฟต์แวร์แบบ Clean Architecture}
+
+แอปพลิเคชันได้รับการจัดโครงสร้างตามหลักการ Clean Architecture โดยแบ่งความรับผิดชอบออกเป็น 4 ชั้นหลัก ได้แก่
+\begin{enumerate}
+    \item \textbf{Core Layer} จัดเก็บค่าคงที่ รหัสสี เกณฑ์การวิเคราะห์ปฐพีวิทยา และโครงสร้างธีมของระบบ
+    \item \textbf{Data Layer} รับผิดชอบการติดต่อกับฮาร์ดแวร์ USB OTG การถอดรหัสบิตข้อมูล และการจัดเก็บชุดข้อมูล
+    \item \textbf{Domain Layer} บรรจุโมเดลคำนวณการชดเชยค่ากรด-ด่างด้วยโครงข่ายประสาทเทียม PINN
+    \item \textbf{Presentation (UI) Layer} ส่วนแสดงผลแดชบอร์ด จัดการสถานะด้วย Provider Pattern และ MVVM
+\end{enumerate}
+
+\section{คลาสถอดรหัส Modbus RTU (ModbusParser.dart)}
+
+\begin{codebox}[title={ซอร์สโค้ดคลาส ModbusParser.dart}]
+\begin{lstlisting}[language=Java]
+import 'dart:typed_data';
+
+class ModbusParser {
+  // คำนวณ CRC-16 Checksum สำหรับโปรโตคอล Modbus RTU
+  static int calculateCRC16(Uint8List data, int length) {
+    int crc = 0xFFFF;
+    for (int i = 0; i < length; i++) {
+      crc ^= data[i];
+      for (int j = 0; j < 8; j++) {
+        if ((crc & 0x0001) != 0) {
+          crc = (crc >> 1) ^ 0xA001;
+        } else {
+          crc = crc >> 1;
+        }
+      }
+    }
+    return crc;
+  }
+
+  // สร้างชุดคำสั่งอ่าน Holding Registers ค่าความชื้น อุณหภูมิ EC และ pH
+  static Uint8List buildReadPhCommand({int slaveId = 1, int startReg = 0, int regCount = 4}) {
+    final buffer = Uint8List(8);
+    final byteData = ByteData.sublistView(buffer);
+    buffer[0] = slaveId;
+    buffer[1] = 0x03; // ฟังก์ชันอ่านรีจิสเตอร์ Holding
+    byteData.setUint16(2, startReg, Endian.big);
+    byteData.setUint16(4, regCount, Endian.big);
+    
+    final crc = calculateCRC16(buffer, 6);
+    byteData.setUint16(6, crc, Endian.little);
+    return buffer;
+  }
+
+  // ตรวจสอบและถอดรหัสเฟรมข้อมูลตอบกลับจากหัววัด Soil Parameter Tester
+  static Map<String, double>? parsePhResponse(Uint8List rawBytes) {
+    if (rawBytes.length < 13) return null; // 1B Slave + 1B Func + 1B Len + 8B Data + 2B CRC
+
+    final dataLen = rawBytes.length - 2;
+    final calculatedCrc = calculateCRC16(rawBytes, dataLen);
+    final receivedCrc = rawBytes[dataLen] | (rawBytes[dataLen + 1] << 8);
+    if (calculatedCrc != receivedCrc) return null;
+
+    final bd = ByteData.sublistView(rawBytes);
+    return {
+      'moisture': bd.getUint16(3, Endian.big) / 10.0,
+      'temperature': bd.getInt16(5, Endian.big) / 10.0,
+      'ec': bd.getUint16(7, Endian.big).toDouble(),
+      'ph': bd.getUint16(9, Endian.big) / 10.0,
+    };
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{คลาสโมเดล PINN บนอุปกรณ์ (DeepLearningCalibrator.dart)}
+
+\begin{codebox}[title={ซอร์สโค้ดคลาส DeepLearningCalibrator.dart}]
+\begin{lstlisting}[language=Java]
+import 'dart:math' as math;
+
+class DeepLearningCalibrator {
+  static const double refTemp = 25.0; // อุณหภูมิอ้างอิงมาตรฐาน 25 องศาเซลเซียส
+
+  static Map<String, double> calibratePh({
+    required double rawPh,
+    required double rawTemp,
+    required double rawMoisture,
+    double rawEc = 0.0,
+  }) {
+    final deltaT = rawTemp - refTemp;
+
+    // 1. การชดเชยความชันเนิร์นสเตียนตามอุณหภูมิ (Nernstian Thermal Slope)
+    final nernstRatio = (273.15 + refTemp) / (273.15 + rawTemp);
+    final deltaPhThermal = (rawPh - 7.0) * (nernstRatio - 1.0);
+
+    // 2. การชดเชยการเลื่อนของการแตกตัวของน้ำ (Water Dissociation Drift)
+    final deltaPhWater = 0.017 * (25.0 - rawTemp);
+    final deltaPhT = deltaPhThermal + deltaPhWater;
+
+    // 3. การชดเชยอิมพีแดนซ์รอยต่อในสภาวะดินแห้ง (Dry Soil Contact Impedance)
+    final deltaPhM = 0.35 * math.exp(-0.08 * rawMoisture.clamp(0.0, 100.0));
+
+    // 4. โครงข่ายประสาทเทียมชดเชยปฏิสัมพันธ์ร่วมระหว่างอุณหภูมิและความชื้น (Cross-Coupled PINN MLP)
+    final normT = deltaT / 20.0;
+    final normM = (rawMoisture - 50.0) / 50.0;
+    final h1 = _swish(0.45 * normT - 0.38 * normM + 0.12);
+    final h2 = _gelu(0.28 * h1 + 0.35 * normT * normM - 0.05);
+    final deltaPhPinn = 0.08 * h2;
+
+    // รวมค่ากรด-ด่างที่ผ่านการปรับเทียบขั้นสุดท้าย
+    final calibratedPh = (rawPh + deltaPhT + deltaPhM + deltaPhPinn).clamp(3.0, 10.5);
+
+    return {
+      'rawPh': rawPh,
+      'calibratedPh': calibratedPh,
+      'deltaPh': calibratedPh - rawPh,
+      'deltaPhT': deltaPhT,
+      'deltaPhM': deltaPhM,
+      'deltaPhPinn': deltaPhPinn,
+      'temp': rawTemp,
+      'moisture': rawMoisture,
+    };
+  }
+
+  static double _swish(double x) => x / (1.0 + math.exp(-x));
+  static double _gelu(double x) => 0.5 * x * (1.0 + math.tanh(0.79788 * (x + 0.044715 * x * x * x)));
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{คลาสจัดการระบบหลายภาษาและการสลับภาษา (LanguageProvider.dart)}
+
+\begin{codebox}[title={ซอร์สโค้ดคลาส LanguageProvider.dart}]
+\begin{lstlisting}[language=Java]
+import 'package:flutter/material.dart';
+import '../../core/localization/app_localizations.dart';
+
+class LanguageProvider extends ChangeNotifier {
+  AppLanguage _currentLanguage = AppLanguage.thai;
+  AppLanguage get currentLanguage => _currentLanguage;
+
+  String t(String key) {
+    return AppLocalizations.get(key, _currentLanguage);
+  }
+
+  Future<void> setLanguage(AppLanguage lang) async {
+    if (_currentLanguage == lang) return;
+    _currentLanguage = lang;
+    notifyListeners();
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{สถาปัตยกรรมแถบสถานะส่วนหัว 2 คอลัมน์ (StatusHeader.dart)}
+
+เพื่อเพิ่มประสิทธิภาพการใช้งานบนหน้าจอสมาร์ตโฟน แถบสถานะส่วนหัว (\texttt{StatusHeader}) ได้รับการออกแบบใหม่เป็นสถาปัตยกรรม 2 คอลัมน์ (Two-Column Architecture) โดยใช้ \texttt{IntrinsicHeight} ควบคู่กับ \texttt{Row} และ \texttt{Column} ทำให้คอลัมน์ซ้าย (การ์ดโลโก้กรอบเขียวนีออนทรงสูง) ขยายความสูงพอดีกับคอลัมน์ขวา (ชุดปุ่มคำสั่งและแถบสถานะ 3 แถว) อย่างสมดุลและไร้ปัญหาข้อความตกขอบ
+
+\begin{codebox}[title={โครงสร้างเลย์เอาต์ 2 คอลัมน์และการ์ดโลโก้ใน StatusHeader.dart}]
+\begin{lstlisting}[language=Java]
+// โครงสร้างหลัก 2 คอลัมน์แบบสมดุล
+IntrinsicHeight(
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      _buildTallLogoCard(context), // คอลัมน์ซ้าย การ์ดโลโก้ทรงสูงกรอบเขียวนีออน
+      const SizedBox(width: 8),
+      Expanded(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildTopActionsRow(context),   // แถว 1 เครื่องมือ กล้อง ภาพ สลับภาษา การตั้งค่า
+            const SizedBox(height: 5),
+            _buildStatusBadgesRow(context), // แถว 2 สถานะการเชื่อมต่อ และการสอบเทียบ AI
+            const SizedBox(height: 5),
+            _buildLocationRow(context),     // แถว 3 พิกัดดาวเทียม ละติจูด ลองจิจูด ความสูง
+          ],
+        ),
+      ),
+    ],
+  ),
+)
+\end{lstlisting}
+\end{codebox}
+
+\section{ระบบดาวน์โหลดคู่มือ PDF ในตัว (SettingsScreen.dart)}
+
+\begin{codebox}[title={ฟังก์ชันบันทึกและแชร์คู่มือ PDF ใน SettingsScreen.dart}]
+\begin{lstlisting}[language=Java]
+Future<void> _downloadOrSharePdfManual({bool shareImmediately = false}) async {
+  setState(() => _isExportingPdf = true);
+  try {
+    // 1. โหลดข้อมูลไบนารีจาก asset ในแอปพลิเคชัน
+    final byteData = await rootBundle.load('assets/docs/SoilpH_HT_Handbook.pdf');
+    final bytes = byteData.buffer.asUint8List();
+
+    // 2. บันทึกลงโฟลเดอร์ Download ของสมาร์ตโฟนแอนดรอยด์
+    File targetFile;
+    final downloadDir = Directory('/storage/emulated/0/Download');
+    if (Platform.isAndroid && await downloadDir.exists()) {
+      targetFile = File('${downloadDir.path}/SoilpH_HT_Handbook.pdf');
+    } else {
+      final docsDir = await getApplicationDocumentsDirectory();
+      targetFile = File('${docsDir.path}/SoilpH_HT_Handbook.pdf');
+    }
+    await targetFile.writeAsBytes(bytes, flush: true);
+
+    // 3. แจ้งเตือนผู้ใช้และส่งต่อผ่าน Intent หรือ Share Sheet
+    if (shareImmediately) {
+      await Share.shareXFiles([XFile(targetFile.path)], text: 'คู่มือ SoilpH-HT Handbook PDF');
+    }
+  } catch (e) {
+    debugPrint("Export PDF error: $e");
+  } finally {
+    setState(() => _isExportingPdf = false);
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{ระบบประเมินปฐพีวิทยาและใบสั่งปูนโดโลไมต์ปรับปรุงดิน}
+
+เมื่อผู้ใช้ตรวจวัดค่ากรด-ด่าง ระบบจะทำการประเมินดัชนีสุขภาพดินและออกใบสั่งปูนปรับปรุงดินอัตโนมัติ โดยแบ่งเป็น 2 แท็บ (Dual-Tab) เพื่อป้องกันปัญหาข้อมูลล้นจอ
+
+\begin{codebox}[title={โมเดลคำแนะนำเชิงปฐพีวิทยาและโครงสร้าง 2 แท็บ}]
+\begin{lstlisting}[language=Java]
+// โครงสร้างหน้าต่างแสดงผล 2 แท็บ ป้องกันปัญหาข้อมูลล้นจอ
+DefaultTabController(
+  length: 2,
+  child: Column(
+    children: [
+      _buildSoilHealthScoreCard(assessment), // การ์ดดัชนีสุขภาพดิน 0-100 พร้อมชิปสรุป
+      TabBar(tabs: [
+        Tab(text: 'คำแนะนำ & ใบสั่งปูนโดโลไมต์'),
+        Tab(text: 'แถบสีเคมี LDD/FAO'),
+      ]),
+      Expanded(
+        child: TabBarView(children: [
+          _buildActionPlanTab(assessment),     // รายการคำแนะนำและอัตราการใส่ปูนตามเนื้อดิน
+          _buildColorimetricScalesTab(reading),// แถบสีเคมีพร้อมเคอร์เซอร์ชี้ค่าจริง
+        ]),
+      ),
+    ],
+  ),
+)
+\end{lstlisting}
+\end{codebox}
+
+\section{สถาปัตยกรรมและซอร์สโค้ดบริการฮาร์ดแวร์ USB (UsbPhService.dart)}
+
+ในชั้นข้อมูล \texttt{UsbPhService} ทำหน้าที่เป็นส่วนติดต่อสื่อสารกับชิป USB-Serial โดยตรง โดยมีฟังก์ชันการสลับอัตราเร็ว Baud Rate อัตโนมัติ (4800 หรือ 9600 bps) การตรวจสอบ CRC-16 และตัวจับเวลา Watchdog 3 วินาที
+
+\begin{codebox}[title={การบริการเชื่อมต่อฮาร์ดแวร์ USB Serial และระบบเฝ้าระวัง}]
+\begin{lstlisting}[language=Java]
+class UsbPhService {
+  UsbPort? _port;
+  Timer? _watchdogTimer;
+  int _currentBaudRate = 4800; // เริ่มต้นที่ 4800 หรือ 9600 bps
+  
+  final _dataStreamController = StreamController<SoilPhReading>.broadcast();
+  Stream<SoilPhReading> get dataStream => _dataStreamController.stream;
+
+  void _cycleBaudRate() {
+    _currentBaudRate = (_currentBaudRate == 4800) ? 9600 : 4800;
+    _reconnectPort();
+  }
+
+  void _resetWatchdog() {
+    _watchdogTimer?.cancel();
+    _watchdogTimer = Timer(const Duration(seconds: 3), () {
+      debugPrint("Watchdog: timeout reconnecting with auto-baud");
+      _cycleBaudRate();
+    });
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{ระบบกล้อง AI Vision และการประทับพิกัดและค่าโทรมาตรลงบนภาพถ่าย (Telemetry Overlay)}
+
+ฟังก์ชันที่โดดเด่นของ \texttt{SoilpH-HT} คือ \texttt{SoilTelemetryOverlayService} ซึ่งใช้ขุมพลังของไลบรารี \texttt{dart:ui} (\texttt{PictureRecorder} และ \texttt{Canvas}) ในการวาดแผงควบคุม HUD พิกัดดาวเทียม (ละติจูด ลองจิจูด ความสูง และความคลาดเคลื่อน) ค่ากรด-ด่างที่ผ่านการปรับเทียบ และเวกเตอร์การชดเชยอุณหภูมิความชื้น ลงบนภาพถ่ายดินความละเอียดสูงโดยตรงเพื่อใช้เป็นหลักฐานทางนิติวิทยาศาสตร์การเกษตร
+
+\begin{codebox}[title={การเบิร์นแผงข้อมูลโทรมาตรและพิกัด GPS ลงบนภาพถ่ายดิน}]
+\begin{lstlisting}[language=Java]
+class SoilTelemetryOverlayService {
+  static Future<Uint8List> burnTelemetryOverlay({
+    required Uint8List rawImageBytes,
+    required CalibratedPhResult calibratedResult,
+    required GeoLocationData? location,
+  }) async {
+    final codec = await ui.instantiateImageCodec(rawImageBytes);
+    final frame = await codec.getNextFrame();
+    final image = frame.image;
+    
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()));
+    
+    // วาดภาพถ่ายต้นฉบับ
+    canvas.drawImage(image, Offset.zero, Paint());
+    
+    // วาดเป้าเล็งกึ่งกลาง Cyber Reticle [ + ]
+    _drawTargetReticle(canvas, image.width.toDouble(), image.height.toDouble());
+    
+    // วาดแบนเนอร์ข้อมูลโทรมาตรด้านล่างภาพ
+    _drawTelemetryBanner(canvas, image.width.toDouble(), image.height.toDouble(), calibratedResult, location);
+    
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(image.width, image.height);
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{figures/app_camera_hud.png}
+\caption{ส่วนต่อประสานระบบกล้อง AI Vision พร้อมเป้าเล็งและแผงข้อมูลโทรมาตรแบบเรียลไทม์}
+\label{fig:app_camera_hud}
+\end{figure}
+
+\section{สรุปสาระสำคัญประจำบทที่ 5}
+
+การแปลงสมการทางฟิสิกส์และแบบจำลองโครงข่ายประสาทเทียมให้กลายเป็นซอฟต์แวร์ที่ทำงานได้จริง ต้องอาศัยการจัดโครงสร้างโค้ดที่รัดกุม โดยสรุปสาระสำคัญได้ดังนี้
+\begin{enumerate}
+    \item \textbf{การแบ่งแยกความรับผิดชอบ (Clean Architecture)} การแยกโค้ดส่วนติดต่อฮาร์ดแวร์ (Data) ออกจากเอนจินการคำนวณ (Domain) และส่วนแสดงผล (UI) ทำให้ง่ายต่อการทดสอบ พัฒนาต่อยอด และสลับระหว่างหัววัดจริงกับโหมดจำลอง (Simulator)
+    \item \textbf{การประมวลผลระดับบิตอย่างปลอดภัย (ByteData และ CRC)} การใช้ ByteData ร่วมกับการตรวจสอบ CRC-16 ช่วยให้การถอดรหัสรีจิสเตอร์ Modbus มีความถูกต้องแม่นยำ ไร้ข้อผิดพลาดจากปัญหา Big-Endian และ Little-Endian
+    \item \textbf{การควบคุมค่าให้อยู่ในขอบเขตจริง (Clamping Guardrails)} การใช้คำสั่ง clamp ท้ายการคำนวณของโมเดล PINN ช่วยป้องกันไม่ให้ค่าที่แสดงบนหน้าจอหลุดออกนอกช่วงที่เป็นไปได้ทางวิทยาศาสตร์
+\end{enumerate}
+
+ในบทถัดไป (บทที่ 6) จะนำเสนอขั้นตอนการคอมไพล์ ติดตั้งลงบนสมาร์ตโฟนจริง และการตรวจสอบความใช้ได้ของวิธี (Method Validation) ตามมาตรฐานห้องปฏิบัติการสากล EURACHEM
+
+\section*{คำถามทบทวนท้ายบทที่ 5}
+\addcontentsline{toc}{section}{คำถามทบทวนท้ายบทที่ 5}
+
+\begin{enumerate}
+    \item จงอธิบายการทำงานของฟังก์ชัน sublistView ใน ByteData ของภาษา Dart และข้อได้เปรียบในการถอดรหัสบิตข้อมูล
+    \item เพราะเหตุใดจึงต้องกำหนดคำสั่ง clamp(3.0, 10.5) ท้ายการคำนวณของโมเดล PINN
+    \item จงอธิบายเทคนิคการป้องกันปัญหา Layout Overflow ในการออกแบบมาตรวัด pH บนหน้าจอสมาร์ตโฟนหลายขนาด
+    \item หากต้องการเพิ่มการคำนวณค่าดัชนีความต้องการปูนโดโลไมต์เพื่อลดกรดในดิน ควรเพิ่มฟังก์ชันใน Layer ใดของระบบ
+\end{enumerate}

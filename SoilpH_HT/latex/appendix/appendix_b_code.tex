@@ -1,0 +1,209 @@
+\chapter{ซอร์สโค้ดฉบับสมบูรณ์ของระบบ SoilpH-HT AI}
+\label{app:code}
+
+ภาคผนวกนี้รวบรวมซอร์สโค้ดภาษา Dart ฉบับสมบูรณ์ของโมดูลแกนหลักในระบบ \textbf{SoilpH-HT AI} ซึ่งได้รับการออกแบบและคอมไพล์เพื่อใช้งานบนอุปกรณ์สมาร์ตโฟนจริงผ่านพอร์ต USB Type-C OTG
+
+\section{โมดูลบริการสื่อสารผ่านพอร์ตฮาร์ดแวร์จริง (usb\_ph\_service.dart)}
+
+\begin{codebox}[title={ไฟล์ lib/data/services/usb\_ph\_service.dart (คัดย่อส่วนสำคัญ)}]
+\begin{lstlisting}[language=Java]
+import 'dart:async';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
+import 'package:usb_serial/usb_serial.dart';
+import '../models/modbus_parser.dart';
+import '../models/soil_ph_reading.dart';
+
+enum SensorConnectionStatus { disconnected, connecting, connected, error }
+
+class UsbPhService extends ChangeNotifier {
+  UsbPort? _port;
+  StreamSubscription<Uint8List>? _transactionSub;
+  Timer? _pollingTimer;
+  Timer? _watchdogTimer;
+
+  int _baudRate = 4800; // ค่าเริ่มต้นมาตรฐาน Modbus
+  int _txCount = 0;
+  int _rxByteCount = 0;
+  String _lastRxHex = '---';
+
+  Future<bool> connectToDevice(UsbDevice device) async {
+    _port = await device.create();
+    if (_port == null) return false;
+
+    final openSuccess = await _port!.open();
+    if (!openSuccess) return false;
+
+    await _port!.setDTR(true);
+    await _port!.setRTS(false); // ปลด RE เป็น Low เพื่อเปิดรับสัญญาณ
+    await _port!.setPortParameters(
+      _baudRate,
+      UsbPort.DATABITS_8,
+      UsbPort.STOPBITS_1,
+      UsbPort.PARITY_NONE,
+    );
+    await _port!.setFlowControl(UsbPort.FLOW_CONTROL_OFF);
+
+    _transactionSub = _port!.inputStream!.listen(_onDataReceived);
+    _startPolling();
+    return true;
+  }
+
+  void _startPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(milliseconds: 1500), (_) {
+      if (_port == null) return;
+      final requestFrame = ModbusParser.buildReadRequest(
+        slaveId: 0x01,
+        startRegister: 0x0000,
+        registerCount: 4, // อ่านความชื้น อุณหภูมิ EC และ pH
+      );
+      _port!.write(requestFrame);
+      _txCount++;
+      _resetWatchdog();
+      notifyListeners();
+    });
+  }
+
+  void _onDataReceived(Uint8List chunk) {
+    _rxByteCount += chunk.length;
+    _lastRxHex = chunk.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ');
+    
+    final reading = ModbusParser.parsePhResponse(chunk);
+    if (reading != null) {
+      _watchdogTimer?.cancel();
+      notifyListeners();
+    }
+  }
+
+  void _resetWatchdog() {
+    _watchdogTimer?.cancel();
+    _watchdogTimer = Timer(const Duration(seconds: 3), () {
+      _baudRate = (_baudRate == 4800) ? 9600 : 4800;
+    });
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{โมดูลถอดรหัสโปรโตคอลและตรวจสอบความถูกต้อง (modbus\_parser.dart)}
+
+\begin{codebox}[title={ไฟล์ lib/data/models/modbus\_parser.dart}]
+\begin{lstlisting}[language=Java]
+import 'dart:typed_data';
+import 'soil_ph_reading.dart';
+
+class ModbusParser {
+  ModbusParser._();
+
+  /// คำนวณรหัสตรวจสอบความถูกต้อง CRC-16 Modbus (พหุนาม 0xA001)
+  static int calculateCrc16(List<int> data) {
+    int crc = 0xFFFF;
+    for (int byte in data) {
+      crc ^= byte & 0xFF;
+      for (int i = 0; i < 8; i++) {
+        if ((crc & 0x0001) != 0) {
+          crc = (crc >> 1) ^ 0xA001;
+        } else {
+          crc >>= 1;
+        }
+      }
+    }
+    return crc & 0xFFFF;
+  }
+
+  /// สร้างเฟรมคำสั่งอ่าน Holding Registers
+  static Uint8List buildReadRequest({int slaveId = 1, int startRegister = 0, int registerCount = 4}) {
+    final buffer = Uint8List(8);
+    final bd = ByteData.sublistView(buffer);
+    buffer[0] = slaveId;
+    buffer[1] = 0x03;
+    bd.setUint16(2, startRegister, Endian.big);
+    bd.setUint16(4, registerCount, Endian.big);
+    final crc = calculateCrc16(buffer.sublist(0, 6));
+    bd.setUint16(6, crc, Endian.little);
+    return buffer;
+  }
+
+  /// ถอดรหัสเฟรมตอบกลับ Modbus RTU สำหรับ pH อุณหภูมิ และความชื้น
+  static SoilPhReading? parsePhResponse(Uint8List frame) {
+    if (frame.length < 13) return null;
+    final payload = frame.sublist(0, frame.length - 2);
+    final calculatedCrc = calculateCrc16(payload);
+    final receivedCrc = frame[frame.length - 2] | (frame[frame.length - 1] << 8);
+    if (calculatedCrc != receivedCrc) return null;
+
+    final bd = ByteData.sublistView(frame);
+    final moisture = bd.getUint16(3, Endian.big) / 10.0;
+    final temperature = bd.getInt16(5, Endian.big) / 10.0;
+    final ec = bd.getUint16(7, Endian.big).toDouble();
+    final rawPh = bd.getUint16(9, Endian.big) / 10.0;
+
+    return SoilPhReading(
+      ph: rawPh,
+      temperature: temperature,
+      moisture: moisture,
+      ec: ec,
+      timestamp: DateTime.now(),
+    );
+  }
+}
+\end{lstlisting}
+\end{codebox}
+
+\section{โมดูลเอนจินการคำนวณและชดเชยค่าอิงฟิสิกส์ (deep\_learning\_calibrator.dart)}
+
+\begin{codebox}[title={ไฟล์ lib/domain/calibration/deep\_learning\_calibrator.dart}]
+\begin{lstlisting}[language=Java]
+import 'dart:math' as math;
+
+class DeepLearningCalibrator {
+  DeepLearningCalibrator._();
+
+  static const double tRef = 25.0; // อุณหภูมิอ้างอิงมาตรฐาน 25 องศาเซลเซียส
+
+  /// การปรับเทียบความคลาดเคลื่อนสองขั้นตอน (Two-Stage Decoupling)
+  static Map<String, double> calibratePh({
+    required double rawPh,
+    required double rawTemp,
+    required double rawMoisture,
+    double rawEc = 0.0,
+  }) {
+    final deltaT = rawTemp - tRef;
+
+    // ขั้นตอนที่ 1 ฟิสิกส์หลักการแรก (First-Principles Physics)
+    final nernstRatio = (273.15 + tRef) / (273.15 + rawTemp);
+    final deltaPhThermal = (rawPh - 7.0) * (nernstRatio - 1.0);
+    final deltaPhWater = 0.017 * (25.0 - rawTemp);
+    final deltaPhT = deltaPhThermal + deltaPhWater;
+
+    // ชดเชยอิมพีแดนซ์รอยต่อในดินแห้ง
+    final deltaPhM = 0.35 * math.exp(-0.08 * rawMoisture.clamp(0.0, 100.0));
+
+    // ขั้นตอนที่ 2 โครงข่ายประสาทเทียม PINN ชดเชยปฏิสัมพันธ์ร่วมไม่เป็นเชิงเส้น
+    final normT = deltaT / 20.0;
+    final normM = (rawMoisture - 50.0) / 50.0;
+    final h1 = _swish(0.45 * normT - 0.38 * normM + 0.12);
+    final h2 = _gelu(0.28 * h1 + 0.35 * normT * normM - 0.05);
+    final deltaPhPinn = 0.08 * h2;
+
+    // ป้องกันค่าหลุดขอบเขตด้วยการ Clamp
+    final calibratedPh = (rawPh + deltaPhT + deltaPhM + deltaPhPinn).clamp(3.0, 10.5);
+
+    return {
+      'rawPh': rawPh,
+      'calibratedPh': calibratedPh,
+      'deltaPh': calibratedPh - rawPh,
+      'deltaPhT': deltaPhT,
+      'deltaPhM': deltaPhM,
+      'deltaPhPinn': deltaPhPinn,
+      'temperature': rawTemp,
+      'moisture': rawMoisture,
+    };
+  }
+
+  static double _swish(double x) => x / (1.0 + math.exp(-x));
+  static double _gelu(double x) => 0.5 * x * (1.0 + math.tanh(0.79788 * (x + 0.044715 * x * x * x)));
+}
+\end{lstlisting}
+\end{codebox}

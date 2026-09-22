@@ -1,0 +1,20 @@
+{
+  "project_name": "08_ultra_realistic_thai_farmers_rice_documentary_1min",
+  "title": "The Art of Hand-Planting Rice: Ultra-Realistic 8K National Geographic Documentary",
+  "type": "ultra-photorealistic-cinematic-documentary",
+  "resolution": "1280x720 HD",
+  "fps": 30,
+  "duration_seconds": 60.0,
+  "frames": 1800,
+  "motion_engine": "Cinematic Virtual Camera Sub-pixel Parallax & Smooth Dissolves (Zero-Stutter, Zero-Blur)",
+  "source_image_model": "Google AI Imagen 8K Photorealistic",
+  "soundtrack": "Thai Folk Pentatonic Acoustic Guitar with Ambient Stream Sounds",
+  "acts": [
+    "องก์ที่ 1: รุ่งอรุณเหนือนาขั้นบันได",
+    "องก์ที่ 2: มัดกล้าข้าวมรกต",
+    "องก์ที่ 3: ก้าวย่างและหัตถกรรมดำนา",
+    "องก์ที่ 4: สัมผัสแห่งผืนดินและสายน้ำ",
+    "องก์ที่ 5: มรดกหยาดเหงื่อและรอยยิ้ม"
+  ],
+  "created_at": "2026-09-19 18:23:24"
+}

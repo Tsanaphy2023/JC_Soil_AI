@@ -6,7 +6,7 @@ import 'core/localization/language_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'data/repositories/soil_sensor_repository.dart';
 import 'ui/viewmodels/soil_sensor_viewmodel.dart';
-import 'ui/views/home_dashboard_screen.dart';
+import 'ui/views/animated_splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +33,7 @@ void main() {
 }
 
 class SoilParameterApp extends StatelessWidget {
-  const SoilParameterApp({Key? key}) : super(key: key);
+  const SoilParameterApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class SoilParameterApp extends StatelessWidget {
         title: 'SOIL AI ANALYZER',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
-        home: const HomeDashboardScreen(),
+        home: const AnimatedSplashScreen(),
       ),
     );
   }

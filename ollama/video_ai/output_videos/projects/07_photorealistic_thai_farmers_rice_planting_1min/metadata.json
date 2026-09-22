@@ -1,0 +1,20 @@
+{
+  "project_name": "07_photorealistic_thai_farmers_rice_planting_1min",
+  "title": "The Art of Hand-Planting Rice: 100% Genuine AI Video Diffusion Documentary",
+  "type": "photorealistic-ai-diffusion-documentary",
+  "model": "ali-vilab/text-to-video-ms-1.7b",
+  "architecture": "5-Act Sequential Diffusion Chaining with Optical Flow Slow-Motion and Crossfades",
+  "duration_seconds": 60.0,
+  "frames": 1800,
+  "fps": 30,
+  "resolution": "1280x720",
+  "soundtrack": "Thai Folk Pentatonic Acoustic Guitar with Ambient Water Ripples",
+  "acts": [
+    "องก์ที่ 1: รุ่งอรุณทุ่งนาขังน้ำ",
+    "องก์ที่ 2: มัดกล้าข้าวมรกต",
+    "องก์ที่ 3: ก้าวย่างสู่ผืนดินเลน",
+    "องก์ที่ 4: หัตถกรรมปักดำนา",
+    "องก์ที่ 5: มรดกหยาดเหงื่อชาวนาไทย"
+  ],
+  "created_at": "2026-09-19 18:13:52"
+}

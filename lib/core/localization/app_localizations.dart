@@ -573,6 +573,33 @@ class AppLocalizations {
       AppLanguage.english: 'When tapped, select "Save to Drive" to store directly in your Google Drive folder.',
       AppLanguage.chinese: '点击后选择"保存至云端硬盘"，即可直接保存至您的Google Drive文件夹。',
     },
+
+    // Animated Splash Screen
+    'splashConnecting': {
+      AppLanguage.thai: 'กำลังเชื่อมต่อและเตรียมระบบเซนเซอร์...',
+      AppLanguage.english: 'Initializing sensor hardware and telemetry...',
+      AppLanguage.chinese: '正在初始化传感器硬件与遥测...',
+    },
+    'splashLoadingAi': {
+      AppLanguage.thai: 'กำลังโหลดโมเดลปัญญาประดิษฐ์ JC-SoilNet PINN...',
+      AppLanguage.english: 'Loading JC-SoilNet PINN AI calibrator...',
+      AppLanguage.chinese: '正在加载JC-SoilNet PINN人工智能校准器...',
+    },
+    'splashReady': {
+      AppLanguage.thai: 'เตรียมพร้อมวิเคราะห์คุณภาพดิน 8 พารามิเตอร์...',
+      AppLanguage.english: 'Ready for 8-in-1 real-time soil analytics...',
+      AppLanguage.chinese: '准备就绪：8合1实时土壤分析...',
+    },
+    'splashSubtitle': {
+      AppLanguage.thai: '8-in-1 Soil Telemetry & Analyzer',
+      AppLanguage.english: '8-in-1 Soil Telemetry & Analyzer',
+      AppLanguage.chinese: '8合1土壤遥测与智能分析仪',
+    },
+    'splashLab': {
+      AppLanguage.thai: 'RBRU Digital Agriphysics Research Lab',
+      AppLanguage.english: 'RBRU Digital Agriphysics Research Lab',
+      AppLanguage.chinese: 'RBRU数字农业物理实验室',
+    },
   };
 
   String t(String key) {

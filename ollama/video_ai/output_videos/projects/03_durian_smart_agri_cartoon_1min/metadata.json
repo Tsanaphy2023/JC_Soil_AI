@@ -1,0 +1,15 @@
+{
+  "project_name": "03_durian_smart_agri_cartoon_1min",
+  "title": "Durian Smart Agriculture Cartoon Animation",
+  "theme": "แอนิเมชันการ์ตูนเกษตรดิจิทัลแฝงความรู้จัดการสวนทุเรียน 1 นาที",
+  "characters": [
+    "น้องหนามน้อย (Durian-chan)",
+    "พี่ SoilBot (AI Robot Probe)"
+  ],
+  "duration_seconds": 60.0,
+  "frames": 1800,
+  "fps": 30,
+  "resolution": "1280x720 (HD)",
+  "audio_track": "audio/durian_cartoon_soundtrack.wav",
+  "created_at": "2026-09-19 17:40:00"
+}

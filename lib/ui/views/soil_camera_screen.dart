@@ -384,8 +384,8 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: const [
+                          const Row(
+                            children: [
                               Text(
                                 '🌱 JC SOIL AI ANALYZER  |  SciRBRU AgriPhysics',
                                 style: TextStyle(
