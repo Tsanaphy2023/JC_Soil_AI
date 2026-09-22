@@ -1,6 +1,6 @@
 % ==============================================================================
 % หน้าปกหนังสือวิชาการ ออกแบบเสมือนหน้าจอแอปพลิเคชันสมาร์ทโฟนระดับเรือธง (Flagship Smartphone UI)
-% ผสานสถาปัตยกรรม Cyber-Glassmorphism, Dynamic Island, Live Camera HUD และ AI Dashboard
+% ชื่อหนังสือขนาดใหญ่พิเศษ 2.5 เท่า คมชัด โดดเด่น ทรงพลังระดับ Masterclass
 % 100% สอดคล้องกับระเบียบวิชาการ ปลอดเครื่องหมายโคลอน (Zero Colon) ในภาษาไทย
 % ==============================================================================
 \thispagestyle{empty}
@@ -22,24 +22,24 @@
         ($(current page.south west) + (0.7cm, 0.7cm)$) rectangle ($(current page.north east) + (-0.7cm, -0.7cm)$);
 
     % รัศมีแสงเรืองรองนุ่มนวลด้านหลังอินเทอร์เฟซ (Soft Ambient Glow Behind UI)
-    \fill[cyan!25, opacity=0.12] ($(current page.center) + (0, 1.8cm)$) circle (6.5cm);
-    \fill[green!20, opacity=0.08] ($(current page.center) + (2.5cm, -2.8cm)$) circle (4.5cm);
+    \fill[cyan!25, opacity=0.15] ($(current page.center) + (0, 3.2cm)$) circle (7.0cm);
+    \fill[green!20, opacity=0.08] ($(current page.center) + (2.5cm, -3.2cm)$) circle (4.5cm);
 
     % --------------------------------------------------------------------------
     % 2. แถบสถานะสมาร์ทโฟน (Status Bar: Time, 5G, Dynamic Island, Battery)
     % --------------------------------------------------------------------------
     % เวลาและเครือข่ายฝั่งซ้าย
-    \node[anchor=north west, align=left] at ($(current page.north west) + (1.6cm, -1.2cm)$) {
+    \node[anchor=north west, align=left] at ($(current page.north west) + (1.6cm, -1.15cm)$) {
         {\fontsize{11}{13}\selectfont\bfseries\color{white} 13:40}\quad
         {\fontsize{9}{11}\selectfont\bfseries\color{cyan!80!white} 5G RBRU-AGRI}
     };
 
     % ไดนามิกไอแลนด์ตรงกลาง (Dynamic Island Pill Cutout)
-    \node[anchor=north, align=center] at ($(current page.north) + (0, -1.05cm)$) {
+    \node[anchor=north, align=center] at ($(current page.north) + (0, -1.0cm)$) {
         \begin{tikzpicture}
             % กรอบแคปซูลสีดำสนิทพร้อมเส้นขอบนีออนเรืองแสง
-            \fill[black, rounded corners=3.8mm] (-2.3, -0.40) rectangle (2.3, 0.40);
-            \draw[color=cyan!65!white, line width=0.8pt, rounded corners=3.8mm, opacity=0.8] (-2.3, -0.40) rectangle (2.3, 0.40);
+            \fill[black, rounded corners=3.8mm] (-2.3, -0.38) rectangle (2.3, 0.38);
+            \draw[color=cyan!65!white, line width=0.8pt, rounded corners=3.8mm, opacity=0.8] (-2.3, -0.38) rectangle (2.3, 0.38);
             
             % เลนส์กล้องหน้าและเซนเซอร์
             \fill[blue!40!black] (-1.7, 0) circle (0.16cm);
@@ -54,93 +54,94 @@
     };
 
     % สถานะแบตเตอรี่ Wi-Fi และ GPS ฝั่งขวา
-    \node[anchor=north east, align=right] at ($(current page.north east) + (-1.6cm, -1.2cm)$) {
+    \node[anchor=north east, align=right] at ($(current page.north east) + (-1.6cm, -1.15cm)$) {
         {\fontsize{9}{11}\selectfont\color{white!90} GPS $\cdot$ Wi-Fi 6}\quad
         {\fontsize{10}{12}\selectfont\bfseries\color{green!85!white} [\,100\%\,\begin{tikzpicture}[baseline=-0.5ex, scale=0.65]\fill[color=yellow!90!orange] (0,0.2) -- (-0.08,0.02) -- (0.02,0.02) -- (-0.05,-0.2) -- (0.09,-0.01) -- (-0.01,-0.01) -- cycle;\end{tikzpicture}\,]}
     };
 
     % --------------------------------------------------------------------------
-    % 3. แถบหัวแอปพลิเคชัน (App Top Bar: Series Badge & App Branding)
+    % 3. แถบหัวแอปพลิเคชัน (App Top Bar: Series Badge)
     % --------------------------------------------------------------------------
-    \node[anchor=north, align=center] at ($(current page.north) + (0, -2.35cm)$) {
+    \node[anchor=north, align=center] at ($(current page.north) + (0, -2.15cm)$) {
         \begin{tikzpicture}
             % ป้ายชื่อชุดตำราวิชาการ RBRU Monograph
-            \node[fill=rbruGold!20, draw=rbruGold!80, line width=0.8pt, rounded corners=3mm, text=rbruGold, inner sep=3.8pt] (badge) {
-                {\fontsize{8.5}{11}\selectfont\bfseries RBRU DIGITAL AGRIPHYSICS MONOGRAPH SERIES (VOL. 2)}
+            \node[fill=rbruGold!20, draw=rbruGold!85, line width=0.9pt, rounded corners=3mm, text=rbruGold, inner sep=4pt] (badge) {
+                {\fontsize{9}{12}\selectfont\bfseries RBRU DIGITAL AGRIPHYSICS MONOGRAPH SERIES (VOL. 2)}
             };
         \end{tikzpicture}
     };
 
     % --------------------------------------------------------------------------
-    % 4. ส่วนแสดงชื่อหนังสือวิชาการหลัก (Main Title Card: Modern App Typography)
+    % 4. ส่วนแสดงชื่อหนังสือวิชาการหลัก (Main Title: ขนาดใหญ่ขึ้น 2.5 เท่า เด่นชัดสูงสุด)
     % --------------------------------------------------------------------------
-    \node[anchor=north, align=center] at ($(current page.north) + (0, -3.25cm)$) {
-        {\fontsize{13}{17}\selectfont\bfseries\color{rbruGold} นวัตกรรมปัญญาประดิษฐ์และคอมพิวเตอร์วิทัศน์เกษตร}\\[5pt]
-        {\fontsize{17.5}{23}\selectfont\bfseries\color{white} คู่มือการพัฒนาแอปพลิเคชันวิเคราะห์ดิน}\\[4pt]
-        {\fontsize{15.5}{21}\selectfont\bfseries\color{cyan!90!white} ด้วยคอมพิวเตอร์วิทัศน์และการเรียนรู้เชิงลึก}\\[4pt]
-        {\fontsize{13.5}{18}\selectfont\bfseries\color{green!80!white} ฟิวชันภาพถ่ายร่วมกับเซนเซอร์ภาคสนาม}\\[7pt]
-        {\color{rbruGold}\rule{0.55\textwidth}{1.2pt}}\\[6pt]
-        {\fontsize{9.5}{13}\selectfont\color{white!85} Smartphone Soil Vision Colorimetry, Interactive ROI Touch Geometry,}\\[2pt]
-        {\fontsize{9.5}{13}\selectfont\color{white!85} and Multimodal Deep Neural Network Sensor Fusion}
+    \node[anchor=north, align=center] at ($(current page.north) + (0, -2.95cm)$) {
+        {\fontsize{14}{18}\selectfont\bfseries\color{rbruGold} นวัตกรรมปัญญาประดิษฐ์และคอมพิวเตอร์วิทัศน์เกษตร}\\[8pt]
+        {\fontsize{42}{48}\selectfont\bfseries\color{white} คู่มือการพัฒนาแอปพลิเคชัน}\\[6pt]
+        {\fontsize{40}{46}\selectfont\bfseries\color{cyan!90!white} วิเคราะห์คุณสมบัติดิน}\\[6pt]
+        {\fontsize{36}{42}\selectfont\bfseries\color{white} ด้วยคอมพิวเตอร์วิทัศน์}\\[6pt]
+        {\fontsize{32}{38}\selectfont\bfseries\color{green!85!white} และการเรียนรู้เชิงลึกฟิวชันเซนเซอร์}\\[10pt]
+        {\color{rbruGold}\rule{0.68\textwidth}{1.5pt}}\\[7pt]
+        {\fontsize{10.5}{14}\selectfont\color{white!85} Smartphone Soil Vision Colorimetry, Interactive ROI Touch Geometry,}\\[2pt]
+        {\fontsize{10.5}{14}\selectfont\color{white!85} and Multimodal Deep Neural Network Sensor Fusion}
     };
 
     % --------------------------------------------------------------------------
     % 5. ช่องมองภาพกล้องสดและเรดาร์วิทัศน์ (Live Camera Viewfinder HUD Canvas)
     % --------------------------------------------------------------------------
-    \node[anchor=center] at ($(current page.center) + (0, 0.55cm)$) {
+    \node[anchor=center] at ($(current page.center) + (0, -1.8cm)$) {
         \begin{tikzpicture}
             % กรอบช่องมองภาพกล้อง (Camera Viewport Frame)
-            \fill[black!65!rbruNavy, rounded corners=6mm] (-5.8, -3.45) rectangle (5.8, 3.45);
-            \draw[cyan!65!white, line width=1.1pt, rounded corners=6mm, opacity=0.85] (-5.8, -3.45) rectangle (5.8, 3.45);
+            \fill[black!65!rbruNavy, rounded corners=5.5mm] (-5.8, -2.25) rectangle (5.8, 2.25);
+            \draw[cyan!65!white, line width=1.1pt, rounded corners=5.5mm, opacity=0.85] (-5.8, -2.25) rectangle (5.8, 2.25);
 
             % มุมกรอบช่วยเล็ง 4 มุม (HUD Camera Corner Brackets)
-            \draw[color=cyan!90!white, line width=2.5pt] (-5.5, 2.9) -- (-5.5, 3.2) -- (-5.0, 3.2);
-            \draw[color=cyan!90!white, line width=2.5pt] (5.5, 2.9) -- (5.5, 3.2) -- (5.0, 3.2);
-            \draw[color=cyan!90!white, line width=2.5pt] (-5.5, -2.9) -- (-5.5, -3.2) -- (-5.0, -3.2);
-            \draw[color=cyan!90!white, line width=2.5pt] (5.5, -2.9) -- (5.5, -3.2) -- (5.0, -3.2);
+            \draw[color=cyan!90!white, line width=2.2pt] (-5.5, 1.75) -- (-5.5, 2.05) -- (-5.1, 2.05);
+            \draw[color=cyan!90!white, line width=2.2pt] (5.5, 1.75) -- (5.5, 2.05) -- (5.1, 2.05);
+            \draw[color=cyan!90!white, line width=2.2pt] (-5.5, -1.75) -- (-5.5, -2.05) -- (-5.1, -2.05);
+            \draw[color=cyan!90!white, line width=2.2pt] (5.5, -1.75) -- (5.5, -2.05) -- (5.1, -2.05);
 
             % ตราสัญลักษณ์กลางเล่มแบบวงกลมเรืองแสงผสานในวิวไฟน์เดอร์
             \begin{scope}
-                \clip (0, 0.05) circle (2.20cm);
-                \node[inner sep=0pt] at (0, 0.05) {
-                    \includegraphics[width=4.6cm, height=4.6cm, keepaspectratio]{figures/logo.jpg}
+                \clip (0, 0.0) circle (1.65cm);
+                \node[inner sep=0pt] at (0, 0.0) {
+                    \includegraphics[width=3.5cm, height=3.5cm, keepaspectratio]{figures/logo.jpg}
                 };
             \end{scope}
 
             % วงแหวนเรขาคณิตช่องมองภาพและเรดาร์วิเคราะห์ (Circular Reticle & Crosshairs)
-            \draw[color=cyan!75, line width=1.5pt, opacity=0.85] (0, 0.05) circle (2.30cm);
-            \draw[color=rbruGold!80, line width=0.9pt, dashed, opacity=0.7] (0, 0.05) circle (2.55cm);
-            \draw[color=cyan!50, line width=0.8pt] (-3.1, 0.05) -- (-2.40, 0.05);
-            \draw[color=cyan!50, line width=0.8pt] (2.40, 0.05) -- (3.1, 0.05);
-            \draw[color=cyan!50, line width=0.8pt] (0, 3.0) -- (0, 2.45);
-            \draw[color=cyan!50, line width=0.8pt] (0, -2.25) -- (0, -2.85);
+            \draw[color=cyan!75, line width=1.3pt, opacity=0.85] (0, 0.0) circle (1.75cm);
+            \draw[color=rbruGold!80, line width=0.8pt, dashed, opacity=0.7] (0, 0.0) circle (1.95cm);
+            \draw[color=cyan!50, line width=0.8pt] (-2.6, 0.0) -- (-2.05, 0.0);
+            \draw[color=cyan!50, line width=0.8pt] (2.05, 0.0) -- (2.6, 0.0);
+            \draw[color=cyan!50, line width=0.8pt] (0, 2.15) -- (0, 1.85);
+            \draw[color=cyan!50, line width=0.8pt] (0, -1.85) -- (0, -2.15);
 
             % เส้นกรอบการเลือกพื้นที่แบบโพลีกอนอิสระ (Interactive Polygon ROI Overlay)
-            \draw[color=green!90!white, line width=1.8pt, opacity=0.95] 
-                (-2.0, 1.3) -- (1.4, 1.7) -- (2.2, -0.6) -- (0.7, -1.8) -- (-1.7, -1.1) -- cycle;
+            \draw[color=green!90!white, line width=1.6pt, opacity=0.95] 
+                (-1.5, 0.9) -- (1.1, 1.2) -- (1.6, -0.4) -- (0.5, -1.3) -- (-1.3, -0.8) -- cycle;
             \fill[green!80!cyan, opacity=0.15]
-                (-2.0, 1.3) -- (1.4, 1.7) -- (2.2, -0.6) -- (0.7, -1.8) -- (-1.7, -1.1) -- cycle;
+                (-1.5, 0.9) -- (1.1, 1.2) -- (1.6, -0.4) -- (0.5, -1.3) -- (-1.3, -0.8) -- cycle;
 
             % จุดยอดพิกัดสัมผัส (Touch ROI Vertices)
-            \fill[white] (-2.0, 1.3) circle (2.5pt);
-            \fill[white] (1.4, 1.7) circle (2.5pt);
-            \fill[white] (2.2, -0.6) circle (2.5pt);
-            \fill[white] (0.7, -1.8) circle (2.5pt);
-            \fill[white] (-1.7, -1.1) circle (2.5pt);
+            \fill[white] (-1.5, 0.9) circle (2.2pt);
+            \fill[white] (1.1, 1.2) circle (2.2pt);
+            \fill[white] (1.6, -0.4) circle (2.2pt);
+            \fill[white] (0.5, -1.3) circle (2.2pt);
+            \fill[white] (-1.3, -0.8) circle (2.2pt);
 
             % ป้ายกำกับบน HUD มุมมองกล้อง
-            \node[anchor=north west, fill=black!75, rounded corners=2mm, inner sep=3pt] at (-5.3, 3.0) {
+            \node[anchor=north west, fill=black!75, rounded corners=2mm, inner sep=2.5pt] at (-5.3, 1.95) {
                 {\fontsize{7.5}{9}\selectfont\color{red!90!white} $\bullet$\,REC}\quad
                 {\fontsize{7.5}{9}\selectfont\color{white} 60 FPS}\quad
                 {\fontsize{7.5}{9}\selectfont\color{cyan!90!white} WB 5000K CRI $\ge$ 95}
             };
-            \node[anchor=north east, fill=black!75, rounded corners=2mm, inner sep=3pt] at (5.3, 3.0) {
+            \node[anchor=north east, fill=black!75, rounded corners=2mm, inner sep=2.5pt] at (5.3, 1.95) {
                 {\fontsize{7.5}{9}\selectfont\color{rbruGold} CIE $L^*a^*b^*$ (56.4, 21.8, 38.2)}
             };
-            \node[anchor=south west, fill=black!75, rounded corners=2mm, inner sep=3pt] at (-5.3, -3.0) {
-                {\fontsize{7.5}{9}\selectfont\color{green!90!white} โหมดเรขาคณิต (Polygon ROI ปิดรูปทรง)}
+            \node[anchor=south west, fill=black!75, rounded corners=2mm, inner sep=2.5pt] at (-5.3, -1.95) {
+                {\fontsize{7.5}{9}\selectfont\color{green!90!white} โหมดเรขาคณิต (Polygon ROI)}
             };
-            \node[anchor=south east, fill=black!75, rounded corners=2mm, inner sep=3pt] at (5.3, -3.0) {
+            \node[anchor=south east, fill=black!75, rounded corners=2mm, inner sep=2.5pt] at (5.3, -1.95) {
                 {\fontsize{7.5}{9}\selectfont\color{cyan!90!white} ชดเชยแสง (White Balance D65)}
             };
         \end{tikzpicture}
@@ -149,58 +150,58 @@
     % --------------------------------------------------------------------------
     % 6. วิดเจ็ตแดชบอร์ดผลการวิเคราะห์ AI (Multimodal AI Telemetry Dashboard Card)
     % --------------------------------------------------------------------------
-    \node[anchor=center] at ($(current page.center) + (0, -4.3cm)$) {
+    \node[anchor=center] at ($(current page.center) + (0, -5.25cm)$) {
         \begin{tikzpicture}
             % กรอบ Glassmorphism Card
-            \fill[rbruNavy!88!black, rounded corners=5mm] (-5.8, -1.35) rectangle (5.8, 1.35);
-            \draw[white!25, line width=1.0pt, rounded corners=5mm] (-5.8, -1.35) rectangle (5.8, 1.35);
+            \fill[rbruNavy!88!black, rounded corners=4.5mm] (-5.8, -1.25) rectangle (5.8, 1.25);
+            \draw[white!25, line width=0.9pt, rounded corners=4.5mm] (-5.8, -1.25) rectangle (5.8, 1.25);
 
             % การ์ดย่อยที่ 1: อินทรียวัตถุในดิน (SOM)
-            \node[fill=black!45, draw=cyan!60, rounded corners=3mm, inner sep=4pt, minimum width=2.65cm, minimum height=1.25cm] (c1) at (-4.2, 0.42) {
+            \node[fill=black!45, draw=cyan!60, rounded corners=3mm, inner sep=3.5pt, minimum width=2.65cm, minimum height=1.15cm] (c1) at (-4.2, 0.35) {
                 \begin{tabular}{c}
-                    {\fontsize{7.5}{9}\selectfont\color{cyan!90!white} อินทรียวัตถุ (SOM)}\\
-                    {\fontsize{12.5}{15}\selectfont\bfseries\color{white} 4.85\%}\\
-                    {\fontsize{7}{8}\selectfont\color{green!85!white} ระดับ สูงมาก}
+                    {\fontsize{7}{8.5}\selectfont\color{cyan!90!white} อินทรียวัตถุ (SOM)}\\
+                    {\fontsize{11.5}{13.5}\selectfont\bfseries\color{white} 4.85\%}\\
+                    {\fontsize{6.5}{7.5}\selectfont\color{green!85!white} ระดับ สูงมาก}
                 \end{tabular}
             };
 
             % การ์ดย่อยที่ 2: ความเป็นกรดด่างเชิงแสง (Optical pH)
-            \node[fill=black!45, draw=rbruGold!70, rounded corners=3mm, inner sep=4pt, minimum width=2.65cm, minimum height=1.25cm] (c2) at (-1.4, 0.42) {
+            \node[fill=black!45, draw=rbruGold!70, rounded corners=3mm, inner sep=3.5pt, minimum width=2.65cm, minimum height=1.15cm] (c2) at (-1.4, 0.35) {
                 \begin{tabular}{c}
-                    {\fontsize{7.5}{9}\selectfont\color{rbruGold} ความเป็นกรดด่าง}\\
-                    {\fontsize{12.5}{15}\selectfont\bfseries\color{white} pH 6.52}\\
-                    {\fontsize{7}{8}\selectfont\color{green!85!white} ระดับ เหมาะสม}
+                    {\fontsize{7}{8.5}\selectfont\color{rbruGold} ความเป็นกรดด่าง}\\
+                    {\fontsize{11.5}{13.5}\selectfont\bfseries\color{white} pH 6.52}\\
+                    {\fontsize{6.5}{7.5}\selectfont\color{green!85!white} ระดับ เหมาะสม}
                 \end{tabular}
             };
 
             % การ์ดย่อยที่ 3: ความสอดคล้อง (Consistency Delta pH)
-            \node[fill=black!45, draw=green!70, rounded corners=3mm, inner sep=4pt, minimum width=2.65cm, minimum height=1.25cm] (c3) at (1.4, 0.42) {
+            \node[fill=black!45, draw=green!70, rounded corners=3mm, inner sep=3.5pt, minimum width=2.65cm, minimum height=1.15cm] (c3) at (1.4, 0.35) {
                 \begin{tabular}{c}
-                    {\fontsize{7.5}{9}\selectfont\color{green!85!white} ตรวจสอบความสอดคล้อง}\\
-                    {\fontsize{12.5}{15}\selectfont\bfseries\color{white} $\Delta\text{pH } 0.12$}\\
-                    {\fontsize{7}{8}\selectfont\color{cyan!90!white} สอดคล้อง 98.6\%}
+                    {\fontsize{7}{8.5}\selectfont\color{green!85!white} ตรวจสอบความสอดคล้อง}\\
+                    {\fontsize{11.5}{13.5}\selectfont\bfseries\color{white} $\Delta\text{pH } 0.12$}\\
+                    {\fontsize{6.5}{7.5}\selectfont\color{cyan!90!white} สอดคล้อง 98.6\%}
                 \end{tabular}
             };
 
             % การ์ดย่อยที่ 4: ธาตุอาหารทำนาย N-P-K
-            \node[fill=black!45, draw=orange!70, rounded corners=3mm, inner sep=4pt, minimum width=2.65cm, minimum height=1.25cm] (c4) at (4.2, 0.42) {
+            \node[fill=black!45, draw=orange!70, rounded corners=3mm, inner sep=3.5pt, minimum width=2.65cm, minimum height=1.15cm] (c4) at (4.2, 0.35) {
                 \begin{tabular}{c}
-                    {\fontsize{7.5}{9}\selectfont\color{orange!85!white} ธาตุอาหารรวม N-P-K}\\
-                    {\fontsize{11}{13}\selectfont\bfseries\color{white} 48 / 24 / 186}\\
-                    {\fontsize{7}{8}\selectfont\color{orange!90!white} มิลลิกรัมต่อกิโลกรัม}
+                    {\fontsize{7}{8.5}\selectfont\color{orange!85!white} ธาตุอาหารรวม N-P-K}\\
+                    {\fontsize{10.5}{12.5}\selectfont\bfseries\color{white} 48 / 24 / 186}\\
+                    {\fontsize{6.5}{7.5}\selectfont\color{orange!90!white} มิลลิกรัมต่อกิโลกรัม}
                 \end{tabular}
             };
 
-            % แถบล่างในวิดเจ็ต แสดงตัวแปรเซนเซอร์กายภาพ 7 มิติ (จัดระยะและขนาดให้คมชัดสบายตา)
-            \node[anchor=center] at (0, -0.80) {
-                {\fontsize{7.5}{9}\selectfont\color{white!80} เซนเซอร์ 7-in-1} \quad
-                {\fontsize{7.5}{9}\selectfont\color{cyan!90!white} ชื้น 34.8\%} \quad
-                {\fontsize{7.5}{9}\selectfont\color{white!40} $\cdot$} \quad
-                {\fontsize{7.5}{9}\selectfont\color{cyan!90!white} อุณหภูมิ 28.5 $^\circ\text{C}$} \quad
-                {\fontsize{7.5}{9}\selectfont\color{white!40} $\cdot$} \quad
-                {\fontsize{7.5}{9}\selectfont\color{cyan!90!white} EC 385 $\mu\text{S/cm}$} \quad
-                {\fontsize{7.5}{9}\selectfont\color{white!40} $\cdot$} \quad
-                {\fontsize{7.5}{9}\selectfont\color{green!90!white} BLE เชื่อมต่อแล้ว}
+            % แถบล่างในวิดเจ็ต แสดงตัวแปรเซนเซอร์กายภาพ 7 มิติ
+            \node[anchor=center] at (0, -0.72) {
+                {\fontsize{7.2}{8.5}\selectfont\color{white!80} เซนเซอร์ 7-in-1} \quad
+                {\fontsize{7.2}{8.5}\selectfont\color{cyan!90!white} ชื้น 34.8\%} \quad
+                {\fontsize{7.2}{8.5}\selectfont\color{white!40} $\cdot$} \quad
+                {\fontsize{7.2}{8.5}\selectfont\color{cyan!90!white} อุณหภูมิ 28.5 $^\circ\text{C}$} \quad
+                {\fontsize{7.2}{8.5}\selectfont\color{white!40} $\cdot$} \quad
+                {\fontsize{7.2}{8.5}\selectfont\color{cyan!90!white} EC 385 $\mu\text{S/cm}$} \quad
+                {\fontsize{7.2}{8.5}\selectfont\color{white!40} $\cdot$} \quad
+                {\fontsize{7.2}{8.5}\selectfont\color{green!90!white} BLE เชื่อมต่อแล้ว}
             };
         \end{tikzpicture}
     };
@@ -208,32 +209,32 @@
     % --------------------------------------------------------------------------
     % 7. แถบปุ่มควบคุมการทำงาน (Mobile App Bottom Navigation Bar)
     % --------------------------------------------------------------------------
-    \node[anchor=center] at ($(current page.center) + (0, -6.45cm)$) {
+    \node[anchor=center] at ($(current page.center) + (0, -7.0cm)$) {
         \begin{tikzpicture}
             % กรอบแถบนำทางด้านล่าง
-            \fill[black!75, rounded corners=3.5mm] (-5.6, -0.42) rectangle (5.6, 0.42);
-            \draw[white!20, line width=0.7pt, rounded corners=3.5mm] (-5.6, -0.42) rectangle (5.6, 0.42);
+            \fill[black!75, rounded corners=3.5mm] (-5.6, -0.38) rectangle (5.6, 0.38);
+            \draw[white!20, line width=0.7pt, rounded corners=3.5mm] (-5.6, -0.38) rectangle (5.6, 0.38);
 
             % ปุ่มแท็บ 4 ปุ่ม
-            \node at (-4.2, 0) {{\fontsize{8}{10}\selectfont\bfseries\color{cyan!90!white} [\,กล้องสตรีมสด\,]}};
-            \node at (-1.4, 0) {{\fontsize{8}{10}\selectfont\color{white!80} [\,สัมผัส ROI\,]}};
-            \node at (1.4, 0) {{\fontsize{8}{10}\selectfont\color{white!80} [\,ฟิวชัน 16 มิติ\,]}};
-            \node at (4.2, 0) {{\fontsize{8}{10}\selectfont\color{white!80} [\,สอบเทียบมาตรฐาน\,]}};
+            \node at (-4.2, 0) {{\fontsize{7.8}{9.5}\selectfont\bfseries\color{cyan!90!white} [\,กล้องสตรีมสด\,]}};
+            \node at (-1.4, 0) {{\fontsize{7.8}{9.5}\selectfont\color{white!80} [\,สัมผัส ROI\,]}};
+            \node at (1.4, 0) {{\fontsize{7.8}{9.5}\selectfont\color{white!80} [\,ฟิวชัน 16 มิติ\,]}};
+            \node at (4.2, 0) {{\fontsize{7.8}{9.5}\selectfont\color{white!80} [\,สอบเทียบมาตรฐาน\,]}};
         \end{tikzpicture}
     };
 
     % --------------------------------------------------------------------------
     % 8. ข้อมูลผู้เขียน สังกัด และแถบควบคุมโฮม (Author Metadata & Home Gesture Bar)
     % --------------------------------------------------------------------------
-    \node[anchor=south, align=center] at ($(current page.south) + (0, 1.7cm)$) {
-        {\fontsize{15}{19}\selectfont\bfseries\color{white} ผู้ช่วยศาสตราจารย์ ดร.ชีวะ ทัศนา}\\[3pt]
-        {\fontsize{11}{14}\selectfont\color{rbruGold} สาขาวิชาฟิสิกส์ คณะวิทยาศาสตร์และเทคโนโลยี มหาวิทยาลัยราชภัฏรำไพพรรณี}\\[2pt]
-        {\fontsize{9}{12}\selectfont\color{white!70} ศูนย์ความเป็นเลิศด้านฟิสิกส์เกษตรและเทคโนโลยีปัญญาประดิษฐ์ฝังตัว}
+    \node[anchor=south, align=center] at ($(current page.south) + (0, 1.45cm)$) {
+        {\fontsize{14}{18}\selectfont\bfseries\color{white} ผู้ช่วยศาสตราจารย์ ดร.ชีวะ ทัศนา}\\[2.5pt]
+        {\fontsize{10.5}{13.5}\selectfont\color{rbruGold} สาขาวิชาฟิสิกส์ คณะวิทยาศาสตร์และเทคโนโลยี มหาวิทยาลัยราชภัฏรำไพพรรณี}\\[2pt]
+        {\fontsize{8.5}{11}\selectfont\color{white!70} ศูนย์ความเป็นเลิศด้านฟิสิกส์เกษตรและเทคโนโลยีปัญญาประดิษฐ์ฝังตัว}
     };
 
     % แถบสัมผัสโฮมล่างสุดของสมาร์ทโฟน (Home Gesture Indicator Bar)
-    \draw[color=white!60, line width=3.2pt, line cap=round] 
-        ($(current page.south) + (-2.2cm, 1.15cm)$) -- ($(current page.south) + (2.2cm, 1.15cm)$);
+    \draw[color=white!60, line width=3.0pt, line cap=round] 
+        ($(current page.south) + (-2.2cm, 0.95cm)$) -- ($(current page.south) + (2.2cm, 0.95cm)$);
 
 \end{tikzpicture}
 \clearpage
