@@ -118,13 +118,26 @@ class _SoilDatasetGalleryScreenState extends State<SoilDatasetGalleryScreen> {
                                           color: phColor,
                                         ),
                                       ),
-                                      Text(
-                                        '${record.temperature.toStringAsFixed(1)}°C',
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: PhColors.neonAmber,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            '${record.temperature.toStringAsFixed(1)}°C',
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              color: PhColors.neonAmber,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${record.moisture.toStringAsFixed(1)}%',
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              color: PhColors.neonCyan,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -257,7 +270,7 @@ class _PhotoDetailScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'ค่า pH ชดเชย: ${record.phCalibrated.toStringAsFixed(2)}',
+                      'ค่า pH ชดเชย ${record.phCalibrated.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
@@ -265,20 +278,20 @@ class _PhotoDetailScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'ค่า pH ดิบ: ${record.phRaw.toStringAsFixed(2)}',
+                      'ค่า pH ดิบ ${record.phRaw.toStringAsFixed(2)}',
                       style: const TextStyle(fontSize: 12, color: Colors.white60),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'อุณหภูมิดิน: ${record.temperature.toStringAsFixed(1)}°C  •  ความชื้น: ${record.moisture.toStringAsFixed(1)}%  •  EC: ${record.conductivity} µS/cm',
+                  'อุณหภูมิดิน ${record.temperature.toStringAsFixed(1)}°C  •  ความชื้น ${record.moisture.toStringAsFixed(1)}%  •  EC ${record.conductivity} µS/cm',
                   style: const TextStyle(fontSize: 12, color: Colors.white70),
                 ),
                 if (record.location != null) ...[
                   const SizedBox(height: 6),
                   Text(
-                    'พิกัด GPS: ${record.location!.summary}',
+                    'พิกัด GPS ${record.location!.summary}',
                     style: const TextStyle(fontSize: 11, color: PhColors.neonCyan),
                   ),
                 ],

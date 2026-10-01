@@ -124,6 +124,8 @@ class InteractiveRoiSelector extends StatefulWidget {
   final double? livePh;
   final MultiColorMetric? liveColorMetric;
   final String? liveStatusLabel;
+  final double? temperature;
+  final double? moisture;
 
   const InteractiveRoiSelector({
     super.key,
@@ -134,6 +136,8 @@ class InteractiveRoiSelector extends StatefulWidget {
     this.livePh,
     this.liveColorMetric,
     this.liveStatusLabel,
+    this.temperature,
+    this.moisture,
   });
 
   @override
@@ -240,10 +244,80 @@ class _InteractiveRoiSelectorState extends State<InteractiveRoiSelector> {
           ),
         ),
 
+        // 1.1 ป้ายข้อมูลสภาพแวดล้อมและ pH ลอยเหนือเป้าเล็ง ROI (Floating Target Telemetry Tag)
+        Positioned(
+          left: (_center.dx - 100).clamp(10.0, MediaQuery.of(context).size.width - 210),
+          top: (_center.dy - (widget.currentShape == RoiShape.circle ? _radius : _rectHeight / 2) - 40).clamp(65.0, MediaQuery.of(context).size.height - 180),
+          child: IgnorePointer(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xE60A0F1D),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: widget.activeColor.withValues(alpha: 0.85), width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: widget.activeColor,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    widget.livePh != null ? 'pH ${widget.livePh!.toStringAsFixed(2)}' : 'ROI',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: widget.activeColor,
+                    ),
+                  ),
+                  if (widget.temperature != null || widget.moisture != null) ...[
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                      width: 1,
+                      height: 11,
+                      color: Colors.white24,
+                    ),
+                    if (widget.temperature != null) ...[
+                      const Icon(Icons.thermostat_rounded, size: 12, color: Color(0xFFFFB300)),
+                      const SizedBox(width: 2),
+                      Text(
+                        '${widget.temperature!.toStringAsFixed(1)}°C',
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFFFB300)),
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    if (widget.moisture != null) ...[
+                      const Icon(Icons.water_drop_rounded, size: 11, color: Color(0xFF00E5FF)),
+                      const SizedBox(width: 2),
+                      Text(
+                        '${widget.moisture!.toStringAsFixed(1)}%',
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF00E5FF)),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+
         // 2. แถบเมนูปรับขนาด รูปร่างของ detection พร้อมแถบเฉดสีตามเกณฑ์คู่มือทางวิชาการ
         Positioned(
           left: 12,
-          top: 105,
+          top: 118,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -563,7 +637,7 @@ class _InteractiveRoiSelectorState extends State<InteractiveRoiSelector> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'กำลังวิเคราะห์สด: pH ${widget.livePh!.toStringAsFixed(2)}',
+                          'กำลังวิเคราะห์สด pH ${widget.livePh!.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
@@ -581,9 +655,33 @@ class _InteractiveRoiSelectorState extends State<InteractiveRoiSelector> {
                           ),
                         if (widget.liveColorMetric != null)
                           Text(
-                            'CIE L*a*b*: (${widget.liveColorMetric!.labL.toStringAsFixed(1)}, ${widget.liveColorMetric!.labA.toStringAsFixed(1)}, ${widget.liveColorMetric!.labB.toStringAsFixed(1)})',
+                            'CIE L*a*b* (${widget.liveColorMetric!.labL.toStringAsFixed(1)}, ${widget.liveColorMetric!.labA.toStringAsFixed(1)}, ${widget.liveColorMetric!.labB.toStringAsFixed(1)})',
                             style: const TextStyle(fontSize: 8.5, color: Colors.white60),
                           ),
+                        if (widget.temperature != null || widget.moisture != null) ...[
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              if (widget.temperature != null) ...[
+                                const Icon(Icons.thermostat_rounded, size: 11, color: Color(0xFFFFB300)),
+                                const SizedBox(width: 2),
+                                Text(
+                                  '${widget.temperature!.toStringAsFixed(1)} °C',
+                                  style: const TextStyle(fontSize: 8.5, color: Color(0xFFFFB300), fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(width: 6),
+                              ],
+                              if (widget.moisture != null) ...[
+                                const Icon(Icons.water_drop_rounded, size: 10, color: Color(0xFF00E5FF)),
+                                const SizedBox(width: 2),
+                                Text(
+                                  '${widget.moisture!.toStringAsFixed(1)} %RH',
+                                  style: const TextStyle(fontSize: 8.5, color: Color(0xFF00E5FF), fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),

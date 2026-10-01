@@ -14,6 +14,8 @@ void main() {
             onShapeChanged: (shape) => currentShape = shape,
             onRoiUpdated: (roi) {},
             livePh: 6.48,
+            temperature: 28.5,
+            moisture: 65.0,
           ),
         ),
       ),
@@ -31,8 +33,12 @@ void main() {
     // Verify Academic palette icon button
     expect(find.byIcon(Icons.palette_rounded), findsOneWidget);
 
-    // Verify live indicator badge "pH 6.48" appears on toolbar
-    expect(find.text('pH 6.48'), findsOneWidget);
+    // Verify live indicator badge and telemetry icons
+    expect(find.text('pH 6.48'), findsWidgets);
+    expect(find.text('28.5°C'), findsOneWidget);
+    expect(find.text('65.0%'), findsOneWidget);
+    expect(find.byIcon(Icons.thermostat_rounded), findsWidgets);
+    expect(find.byIcon(Icons.water_drop_rounded), findsWidgets);
 
     // Tap palette icon to open Academic Guide Legend Card
     await tester.tap(find.byIcon(Icons.palette_rounded));
@@ -41,7 +47,7 @@ void main() {
     // Verify Academic Legend Card is shown
     expect(find.text('เกณฑ์เฉดสีคู่มือวิชาการ'), findsOneWidget);
     expect(find.text('ตารางที่ 2.3 คู่มือฟิสิกส์เกษตร & กรมพัฒนาที่ดิน'), findsOneWidget);
-    expect(find.textContaining('กำลังวิเคราะห์สด: pH 6.48'), findsOneWidget);
+    expect(find.textContaining('กำลังวิเคราะห์สด pH 6.48'), findsOneWidget);
     expect(find.text('วิเคราะห์ตรง'), findsOneWidget);
   });
 }

@@ -369,6 +369,8 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
               livePh: comparison?.visionPh ?? result.phCalibrated,
               liveColorMetric: _liveColorMetric,
               liveStatusLabel: comparison?.agreementStatus ?? PhColors.getLabelForPh(result.phCalibrated),
+              temperature: result.rawReading.temperature,
+              moisture: result.rawReading.moisture,
               onShapeChanged: (shape) {
                 setState(() => _currentRoiShape = shape);
               },
@@ -465,6 +467,89 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
             ),
           ),
 
+          // 3.1 แถบข้อมูลอุณหภูมิและความชื้นสิ่งแวดล้อมด้านบน (Top Environmental Telemetry HUD Strip)
+          Positioned(
+            top: 66,
+            left: 60,
+            right: 12,
+            child: SafeArea(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // อุณหภูมิดิน (Soil Temperature Chip)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xE60A0F1D),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: PhColors.neonAmber.withValues(alpha: 0.8), width: 1.2),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 2)),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.thermostat_rounded, size: 16, color: PhColors.neonAmber),
+                        const SizedBox(width: 4),
+                        const Text(
+                          'อุณหภูมิดิน',
+                          style: TextStyle(fontSize: 10.5, color: Colors.white70, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${result.rawReading.temperature.toStringAsFixed(1)} °C',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: PhColors.neonAmber,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  // ความชื้นในดิน (Soil Moisture Chip)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xE60A0F1D),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: PhColors.neonCyan.withValues(alpha: 0.8), width: 1.2),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 2)),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.water_drop_rounded, size: 15, color: PhColors.neonCyan),
+                        const SizedBox(width: 4),
+                        const Text(
+                          'ความชื้น',
+                          style: TextStyle(fontSize: 10.5, color: Colors.white70, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${result.rawReading.moisture.toStringAsFixed(1)} %',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: PhColors.neonCyan,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           // 4. แผงวิเคราะห์และเปรียบเทียบค่าแบบเรียลไทม์ (Live Sensor vs. Vision HUD Panel)
           Positioned(
             left: 14,
@@ -497,25 +582,25 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                       children: [
                         // หัวข้อและสถานะความสอดคล้อง
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.compare_arrows_rounded, color: PhColors.neonCyan, size: 18),
-                                const SizedBox(width: 6),
-                                const Text(
-                                  'เปรียบเทียบเซนเซอร์และภาพถ่าย Live',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                            const Icon(Icons.compare_arrows_rounded, color: PhColors.neonCyan, size: 18),
+                            const SizedBox(width: 6),
+                            const Expanded(
+                              child: Text(
+                                'เปรียบเทียบเซนเซอร์และภาพถ่าย Live',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
                                 ),
-                              ],
+                              ),
                             ),
-                            if (comparison != null)
+                            if (comparison != null) ...[
+                              const SizedBox(width: 6),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                                 decoration: BoxDecoration(
                                   color: comparison.statusColor.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(8),
@@ -530,6 +615,7 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                                   ),
                                 ),
                               ),
+                            ],
                           ],
                         ),
 
@@ -560,9 +646,49 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                                         color: PhColors.getColorForPh(result.phCalibrated),
                                       ),
                                     ),
-                                    Text(
-                                      'T ${result.rawReading.temperature.toStringAsFixed(1)}°C | H ${result.rawReading.moisture.toStringAsFixed(1)}%',
-                                      style: const TextStyle(fontSize: 9, color: Colors.white54),
+                                    const SizedBox(height: 3),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: PhColors.neonAmber.withValues(alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(color: PhColors.neonAmber.withValues(alpha: 0.4), width: 0.8),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(Icons.thermostat_rounded, size: 11, color: PhColors.neonAmber),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                '${result.rawReading.temperature.toStringAsFixed(1)}°C',
+                                                style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: PhColors.neonAmber),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: PhColors.neonCyan.withValues(alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(color: PhColors.neonCyan.withValues(alpha: 0.4), width: 0.8),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(Icons.water_drop_rounded, size: 10, color: PhColors.neonCyan),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                '${result.rawReading.moisture.toStringAsFixed(1)}%',
+                                                style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: PhColors.neonCyan),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -627,6 +753,36 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                           ],
                         ),
 
+                        // แถบสรุปค่าตรวจวัดสิ่งแวดล้อมภาคสนาม
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.04),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.white12),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.sensors_rounded, size: 14, color: PhColors.neonGreen),
+                              const SizedBox(width: 5),
+                              Expanded(
+                                child: Text(
+                                  'สภาวะดิน อุณหภูมิ ${result.rawReading.temperature.toStringAsFixed(1)} °C | ความชื้น ${result.rawReading.moisture.toStringAsFixed(1)} %',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'EC ${result.rawReading.conductivity} µS',
+                                style: const TextStyle(fontSize: 9.5, color: PhColors.neonAmber, fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        ),
+
                         if (comparison != null) ...[
                           const SizedBox(height: 8),
                           // แถบประเมินระดับความสอดคล้อง
@@ -637,18 +793,20 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                               Expanded(
                                 child: Text(
                                   comparison.agreementStatus,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 9.5,
                                     fontWeight: FontWeight.w600,
                                     color: comparison.statusColor,
                                   ),
                                 ),
                               ),
-                              
-                                Text(
-                                  'GPS ${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}',
-                                  style: const TextStyle(fontSize: 9, color: Colors.white38),
-                                ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'GPS ${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}',
+                                style: const TextStyle(fontSize: 8.5, color: Colors.white38),
+                              ),
                             ],
                           ),
                         ],
