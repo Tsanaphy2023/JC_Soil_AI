@@ -470,82 +470,52 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
           // 3.1 แถบข้อมูลอุณหภูมิและความชื้นสิ่งแวดล้อมด้านบน (Top Environmental Telemetry HUD Strip)
           Positioned(
             top: 66,
-            left: 60,
+            left: 56,
             right: 12,
             child: SafeArea(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // อุณหภูมิดิน (Soil Temperature Chip)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xE60A0F1D),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: PhColors.neonAmber.withValues(alpha: 0.8), width: 1.2),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 2)),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.thermostat_rounded, size: 16, color: PhColors.neonAmber),
-                        const SizedBox(width: 4),
-                        const Text(
-                          'อุณหภูมิดิน',
-                          style: TextStyle(fontSize: 10.5, color: Colors.white70, fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${result.rawReading.temperature.toStringAsFixed(1)} °C',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: PhColors.neonAmber,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ],
-                    ),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xE60A0F1D),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: PhColors.neonCyan.withValues(alpha: 0.6), width: 1.2),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 2)),
+                    ],
                   ),
-
-                  const SizedBox(width: 8),
-
-                  // ความชื้นในดิน (Soil Moisture Chip)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xE60A0F1D),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: PhColors.neonCyan.withValues(alpha: 0.8), width: 1.2),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 2)),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.water_drop_rounded, size: 15, color: PhColors.neonCyan),
-                        const SizedBox(width: 4),
-                        const Text(
-                          'ความชื้น',
-                          style: TextStyle(fontSize: 10.5, color: Colors.white70, fontWeight: FontWeight.w500),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.thermostat_rounded, size: 15, color: PhColors.neonAmber),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${result.rawReading.temperature.toStringAsFixed(1)} °C',
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
+                          color: PhColors.neonAmber,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${result.rawReading.moisture.toStringAsFixed(1)} %',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: PhColors.neonCyan,
-                            letterSpacing: 0.4,
-                          ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        width: 1,
+                        height: 12,
+                        color: Colors.white24,
+                      ),
+                      const Icon(Icons.water_drop_rounded, size: 14, color: PhColors.neonCyan),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${result.rawReading.moisture.toStringAsFixed(1)} %RH',
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
+                          color: PhColors.neonCyan,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -712,19 +682,27 @@ class _SoilCameraScreenState extends State<SoilCameraScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        const Text('ภาพถ่าย Live (Vision)', style: TextStyle(fontSize: 10, color: Colors.white60)),
-                                        if (_liveColorMetric != null)
+                                        const Expanded(
+                                          child: Text(
+                                            'ภาพถ่าย Live (Vision)',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(fontSize: 10, color: Colors.white60),
+                                          ),
+                                        ),
+                                        if (_liveColorMetric != null) ...[
+                                          const SizedBox(width: 4),
                                           Container(
-                                            width: 12,
-                                            height: 12,
+                                            width: 10,
+                                            height: 10,
                                             decoration: BoxDecoration(
                                               color: _liveColorMetric!.toColor,
                                               shape: BoxShape.circle,
                                               border: Border.all(color: Colors.white, width: 1),
                                             ),
                                           ),
+                                        ],
                                       ],
                                     ),
                                     const SizedBox(height: 2),
